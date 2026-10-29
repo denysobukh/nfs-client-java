@@ -144,6 +144,53 @@ Upload a signed deployment for review in the Central Portal:
 ./gradlew publishToMavenCentral
 ```
 
+GitHub Releases and Deployments
+---
+
+CI runs `clean build` on pushes to `master` and pull requests, using JDK 25
+and targeting Java 17. Tests requiring an NFS server remain skipped unless
+server configuration is supplied.
+
+To prepare a GitHub Release, update the Gradle version and Maven coordinates,
+commit the changes, and push a matching tag:
+
+```sh
+git tag -a v1.1.1 -m "NFS Client 1.1.1"
+git push origin v1.1.1
+```
+
+The Release workflow builds and tests the tagged revision, checks that the tag
+matches the generated POM version, and creates a **draft** release. It attaches
+the library, sources, Javadoc, POM, distribution ZIP/TAR, and SHA-256 checksums.
+Review the draft under [Releases](https://github.com/denysobukh/nfs-client-java/releases)
+and publish it when ready. Re-running the workflow can replace draft assets;
+it will refuse to modify an already published release.
+
+Maven Central uploads run on your Mac with the local GPG/YubiKey configuration.
+From a clean checkout of the pushed release tag, validate first:
+
+```sh
+git checkout v1.1.1
+python3 scripts/deploy-maven-central.py v1.1.1 --check
+```
+
+Then upload the signed artifacts and record the result in GitHub's
+`maven-central` deployment environment:
+
+```sh
+python3 scripts/deploy-maven-central.py v1.1.1
+```
+
+The helper requires Python 3, an authenticated GitHub CLI, JDK 25, Central Portal
+token credentials in your local Gradle configuration, and access to your GPG
+signing key. It builds before creating the deployment and records upload
+success or failure. A successful GitHub deployment means the artifacts were
+uploaded for review; finish publishing in the
+[Central Portal](https://central.sonatype.com/publishing/deployments), then publish
+the GitHub release draft. No Maven Central token or private key is stored in
+GitHub by these workflows. Before retrying a failed upload, check the Portal
+for a deployment that may already have been received.
+
 Testing
 ---
   

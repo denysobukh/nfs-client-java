@@ -1,0 +1,6 @@
+changelog:
+  categories:
+    - title: Security fixes
+      labels: [security]
+    - title: Changes
+      labels: ['*']

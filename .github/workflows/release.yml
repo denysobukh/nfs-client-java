@@ -1,0 +1,71 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: gradle
+      - name: Build and test release artifacts
+        run: ./gradlew --no-daemon clean build plainJavadocJar generatePomFileForMavenPublication
+      - name: Validate tag and collect release assets
+        shell: python
+        run: |
+          import hashlib
+          import os
+          import shutil
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+
+          pom = Path('build/publications/maven/pom-default.xml')
+          root = ET.parse(pom).getroot()
+          ns = {'m': 'http://maven.apache.org/POM/4.0.0'}
+          version = root.find('m:version', ns).text
+          if os.environ['RELEASE_TAG'] != f'v{version}':
+              raise SystemExit(f'Tag must match the POM version: v{version}')
+          assets = Path('release-assets')
+          assets.mkdir()
+          paths = [Path(f'build/libs/nfs-client-{version}{suffix}.jar')
+                   for suffix in ['', '-sources', '-javadoc']]
+          paths += [Path(f'build/distributions/nfs-client-{version}.{ext}')
+                    for ext in ['zip', 'tar']]
+          for source in paths:
+              shutil.copy2(source, assets / source.name)
+          shutil.copy2(pom, assets / f'nfs-client-{version}.pom')
+          checksums = [f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.name}'
+                       for p in sorted(assets.iterdir())]
+          (assets / 'SHA256SUMS').write_text('\n'.join(checksums) + '\n')
+      - name: Create or update draft GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if gh release view "$RELEASE_TAG" --json isDraft > /tmp/release.json 2>/dev/null; then
+            python -c 'import json; assert json.load(open("/tmp/release.json"))["isDraft"], "Refusing to change a published release"'
+            gh release upload "$RELEASE_TAG" release-assets/* --clobber
+          else
+            gh release create "$RELEASE_TAG" release-assets/* \
+              --verify-tag --draft --generate-notes --title "NFS Client $RELEASE_TAG"
+          fi
