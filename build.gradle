@@ -16,40 +16,31 @@ plugins {
     id 'idea'
     id 'eclipse'
     id 'java-library'
-    id 'net.saliman.cobertura' version '4.0.0'
     id 'distribution'
     id 'signing'
-    id 'maven-publish'
+    id 'com.vanniktech.maven.publish' version '0.37.0'
     id 'org.ajoberstar.git-publish' version '3.0.1' // javadocs -> gh-pages // 4.x requires Java 11
-    id 'nebula.release' version '16.0.0'
 }
 
-group 'com.emc.ecs'
-description = 'NFS Client for Java - provides read/write access to data on NFS servers. The current implementation supports only NFS version 3.'
+group = 'io.github.denysobukh'
+version = '1.1.1'
+description = 'Maintained fork of the EMC NFS client with security fixes.'
 
 // name of the github project repository
-ext.githubProjectName = 'nfs-client-java'
+ext.githubProjectName = 'nfs-client'
 // URL to github project
-ext.githubProjectUrl = "https://github.com/EMCECS/${githubProjectName}"
+ext.githubProjectUrl = "https://github.com/denysobukh/${githubProjectName}"
 // git remote scm address
-ext.githubScmUrl = "scm:git@github.com:EMCECS/${githubProjectName}.git"
+ext.githubScmUrl = "scm:git:https://github.com/denysobukh/${githubProjectName}.git"
+ext.githubDeveloperScmUrl = "scm:git:ssh://git@github.com/denysobukh/${githubProjectName}.git"
 // git remote https address
-ext.githubRemoteUrl = "https://github.com/EMCECS/${githubProjectName}.git"
+ext.githubRemoteUrl = "https://github.com/denysobukh/${githubProjectName}.git"
 // license info
 ext.licenseName = 'Apache License, Version 2.0'
-ext.licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+ext.licenseUrl = 'https://www.apache.org/licenses/LICENSE-2.0'
 
-// NOTE: PGP signing key should be configured with the following properties (in ~/.gradle/gradle.properties or on CLI):
-// signingSecretKeyRingFile
-// signingKeyId
-// signingPass
-ext."signing.secretKeyRingFile" = findProperty('signing.secretKeyRingFile') ?: findProperty('signingSecretKeyRingFile')
-ext."signing.keyId" = findProperty('signing.keyId') ?: findProperty('signingKeyId')
-ext."signing.password" = findProperty('signing.password') ?: findProperty('signingPass')
-
-// NOTE: Maven Central credentials should be configured with the following properties:
-// sonatypeUser
-// sonatypePass
+// Maven Central Portal token credentials: mavenCentralUsername and mavenCentralPassword.
+// Configure GPG through signing.gnupg.* properties; keep credentials outside this repository.
 
 // NOTE: git repo credentials should be configured with the following properties:
 // gitUsername
@@ -65,7 +56,8 @@ repositories {
 }
 
 dependencies {
-    implementation "io.netty:netty:3.10.6.Final"
+    implementation "io.netty:netty-transport:4.2.16.Final"
+    implementation "io.netty:netty-codec-base:4.2.16.Final"
     implementation "org.apache.commons:commons-lang3:3.12.0"
     implementation "org.slf4j:slf4j-api:1.7.36"
 
@@ -78,11 +70,21 @@ allprojects {
     configurations {
         tools // specifies tool artifacts for the distribution (placed in the tools/ directory)
     }
+    plugins.withId('java') {
+        java {
+            toolchain {
+                languageVersion = JavaLanguageVersion.of(25)
+            }
+            sourceCompatibility = JavaVersion.VERSION_17
+            targetCompatibility = JavaVersion.VERSION_17
+        }
+        tasks.withType(JavaCompile).configureEach {
+            options.release = 17
+        }
+    }
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    withJavadocJar()
     withSourcesJar()
 }
 
@@ -100,7 +102,7 @@ jar {
         }
     }
     into("META-INF/maven/$project.group/$project.name") {
-        from { generatePomFileForMainLibraryPublication }
+        from { generatePomFileForMavenPublication }
         rename "pom-default.xml", "pom.xml"
     }
 }
@@ -130,76 +132,66 @@ distributions {
     }
 }
 
-publishing {
-    publications {
-        mainLibrary(MavenPublication) {
-            from components.java
-            pom {
-                name = project.name
-                description = project.description
-                url = githubProjectUrl
+mavenPublishing {
+    publishToMavenCentral()
+    signAllPublications()
+    coordinates('io.github.denysobukh', 'nfs-client', '1.1.1')
 
-                scm {
-                    url = githubProjectUrl
-                    connection = githubScmUrl
-                    developerConnection = githubScmUrl
-                }
+    pom {
+        name = 'NFS Client'
+        description = project.description
+        url = githubProjectUrl
 
-                licenses {
-                    license {
-                        name = licenseName
-                        url = licenseUrl
-                        distribution = 'repo'
-                    }
-                }
+        scm {
+            url = githubProjectUrl
+            connection = githubScmUrl
+            developerConnection = githubDeveloperScmUrl
+        }
 
-                developers {
-                    developer {
-                        id = 'EMCECS'
-                        name = 'Dell EMC ECS'
-                    }
-                }
+        licenses {
+            license {
+                name = licenseName
+                url = licenseUrl
+                distribution = 'repo'
             }
         }
-    }
 
-    repositories {
-        maven {
-            url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
-            credentials {
-                username findProperty('sonatypeUser')
-                password findProperty('sonatypePass')
+        developers {
+            developer {
+                id = 'denysobukh'
+                name = 'Denys Obukhov'
+                url = 'https://github.com/denysobukh'
             }
         }
     }
 }
 
 signing {
-    sign publishing.publications.mainLibrary
+    useGpgCmd()
 }
 
 ext.aggregatedDocsDir = "$buildDir/aggregatedDocs"
-task aggregateDocs {
+tasks.register('aggregateDocs') {
     doLast {
         if (project.hasProperty('release.stage') && project.ext['release.stage'] == 'final') {
             copy {
-                from docsDir
+                from layout.buildDirectory.dir('docs/javadoc')
                 into "${aggregatedDocsDir}/latest"
             }
             subprojects.each { p ->
                 copy {
-                    from p.docsDir
+                    from p.layout.buildDirectory.dir('docs/javadoc')
                     into "${aggregatedDocsDir}/latest/${p.name}"
                 }
             }
         }
         copy {
-            from docsDir
+            from layout.buildDirectory.dir('docs/javadoc')
             into "${aggregatedDocsDir}/${project.version}"
         }
         subprojects.each { p ->
             copy {
-                from p.docsDir
+                from p.layout.buildDirectory.dir('docs/javadoc')
                 into "${aggregatedDocsDir}/${project.version}/${p.name}"
             }
         }
@@ -218,7 +210,6 @@ gitPublish {
 }
 tasks.gitPublishPush.dependsOn aggregateDocs
 
-tasks.release.dependsOn test, publish, gitPublishPush, distZip
 
 clean {
     delete aggregatedDocsDir

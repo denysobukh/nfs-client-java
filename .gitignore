@@ -3,6 +3,8 @@ bin
 *.class
 # Package Files #
 *.jar
+# Keep the Gradle wrapper executable JAR in version control.
+!/gradle/wrapper/gradle-wrapper.jar
 *.war
 *.ear
 # Local files

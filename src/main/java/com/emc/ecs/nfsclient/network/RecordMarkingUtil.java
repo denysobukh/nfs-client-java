@@ -17,9 +17,9 @@ package com.emc.ecs.nfsclient.network;
 import com.emc.ecs.nfsclient.rpc.Xdr;
 
 import org.apache.commons.lang3.NotImplementedException;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,7 +130,6 @@ public class RecordMarkingUtil {
         boolean lastFragment = false;
 
         input.setOffset(0);
-        int inputOff = input.getOffset();
 
         while (!lastFragment) {
 
@@ -139,8 +138,7 @@ public class RecordMarkingUtil {
             fragSize = maskFragmentSize(fragSize);
 
             toReturn.putBytes(input.getBuffer(), input.getOffset(), (int) fragSize);
-            inputOff += fragSize;
-            input.setOffset(inputOff);
+            input.setOffset(input.getOffset() + (int) fragSize);
         }
 
         // get xid
@@ -171,8 +169,8 @@ public class RecordMarkingUtil {
         outBuffers.add(0, recSizeBuf);
 
         ByteBuffer[] outArray = outBuffers.toArray(new ByteBuffer[outBuffers.size()]);
-        ChannelBuffer channelBuffer = ChannelBuffers.wrappedBuffer(outArray);
-        channel.write(channelBuffer);
+        ByteBuf channelBuffer = Unpooled.wrappedBuffer(outArray);
+        channel.writeAndFlush(channelBuffer).addListener(io.netty.channel.ChannelFutureListener.CLOSE_ON_FAILURE);
     }
 
     /**

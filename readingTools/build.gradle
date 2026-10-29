@@ -15,11 +15,11 @@
 plugins {
     id 'java'
     id 'application'
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'com.gradleup.shadow' version '9.3.2'
 }
 
 description = 'nfsclient readingTools jar - provides utility commands to test reading performance.'
-mainClassName = 'com.emc.ecs.nfsclient.nfs.io.FileReadingTest'
+application.mainClass = 'com.emc.ecs.nfsclient.nfs.io.FileReadingTest'
 
 defaultTasks 'shadowJar'
 
@@ -40,7 +40,7 @@ dependencies {
 
 shadowJar {
     destinationDirectory = file("${buildDir}/shadow")
-    classifier ''
+    archiveClassifier = ''
     manifest {
         attributes 'Implementation-Version': project.version
     }

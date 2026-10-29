@@ -17,14 +17,13 @@ package com.emc.ecs.nfsclient.network;
 import com.emc.ecs.nfsclient.rpc.RpcException;
 import com.emc.ecs.nfsclient.rpc.Xdr;
 
-import org.jboss.netty.channel.ChannelFactory;
-import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.MultiThreadIoEventLoopGroup;
+import io.netty.channel.nio.NioIoHandler;
 
 import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 /**
@@ -66,14 +65,8 @@ public class NetMgr {
     /**
      * Netty helper instance.
      */
-    private ChannelFactory _factory = new NioClientSocketChannelFactory(newThreadPool(), newThreadPool());
-
-    /**
-     * @return a thread pool instance using the proper factory to create daemon threads
-     */
-    private static final ExecutorService newThreadPool() {
-        return Executors.newCachedThreadPool(getThreadFactory());
-    }
+    private final EventLoopGroup _factory = new MultiThreadIoEventLoopGroup(0,
+            getThreadFactory(), NioIoHandler.newFactory());
 
     /**
      * @return a thread factory that creates daemon threads
@@ -151,7 +144,7 @@ public class NetMgr {
             connection.shutdown();
         }
 
-        _factory.releaseExternalResources();
+        _factory.shutdownGracefully().syncUninterruptibly();
     }
 
     /**
@@ -159,7 +152,7 @@ public class NetMgr {
      * 
      * @return The factory.
      */
-    public ChannelFactory getFactory() {
+    public EventLoopGroup getFactory() {
         return _factory;
     }
 }
