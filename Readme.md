@@ -48,6 +48,18 @@ The transport tests cover fragmented and coalesced RPC records, TCP
 request/response handling, disconnects, and connection failures. NFS server
 integration tests require an external server.
 
+Dependency vulnerability alerts
+---
+
+[Dependabot alerts](https://github.com/denysobukh/nfs-client-java/security/dependabot)
+and Dependabot security updates are enabled for this repository. The Dependency
+submission workflow submits resolved Gradle dependencies, including transitive
+dependencies, to GitHub's dependency graph on pushes to `master` and weekly.
+It can also be run manually from Actions. GitHub checks that inventory against
+its advisory database and raises alerts for affected dependencies. Dependabot
+can open security update pull requests when it can determine a supported fix;
+updates are not merged automatically.
+
 Installation
 ---
 
