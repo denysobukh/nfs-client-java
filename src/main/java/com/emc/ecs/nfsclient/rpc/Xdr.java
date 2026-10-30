@@ -170,8 +170,7 @@ public class Xdr {
      * @return long
      */
     public long getUnsignedInt() {
-        return ((_buffer[_offset++] & 0xff) << 24 | (_buffer[_offset++] & 0xff) << 16 | (_buffer[_offset++] & 0xff) << 8
-                | (_buffer[_offset++] & 0xff));
+        return Integer.toUnsignedLong(getInt());
     }
 
     /**

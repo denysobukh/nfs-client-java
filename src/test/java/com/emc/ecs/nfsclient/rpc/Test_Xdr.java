@@ -27,6 +27,35 @@ import org.junit.Test;
 public class Test_Xdr extends Assert {
 
     @Test
+    public void testGetUnsignedIntBoundaries() {
+        long[] values = {0L, 1L, 0x7fffffffL, 0x80000000L, 0x89abcdefL, 0xffffffffL};
+        ByteBuffer wire = ByteBuffer.allocate(values.length * Integer.BYTES);
+        for (long value : values) {
+            wire.putInt((int) value);
+        }
+
+        Xdr xdr = new Xdr(wire.array());
+        for (int i = 0; i < values.length; ++i) {
+            assertEquals("Unsigned value at index " + i, values[i], xdr.getUnsignedInt());
+            assertEquals((i + 1) * Integer.BYTES, xdr.getOffset());
+        }
+    }
+
+    @Test
+    public void testUnsignedIntRoundTripWithSignedInt() {
+        Xdr xdr = new Xdr(3 * Integer.BYTES);
+        xdr.putUnsignedInt(0xffffffffL);
+        xdr.putInt(-1);
+        xdr.putUnsignedInt(0x80000000L);
+
+        xdr.setOffset(0);
+        assertEquals(0xffffffffL, xdr.getUnsignedInt());
+        assertEquals(-1, xdr.getInt());
+        assertEquals(0x80000000L, xdr.getUnsignedInt());
+        assertEquals(3 * Integer.BYTES, xdr.getOffset());
+    }
+
+    @Test
     public void testSkip() {
         Xdr xdr = new Xdr(200);
         assertEquals(0, xdr.getOffset());
