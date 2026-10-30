@@ -20,7 +20,6 @@ plugins {
     id 'signing'
     id 'org.cyclonedx.bom' version '3.5.1'
     id 'com.vanniktech.maven.publish' version '0.37.0'
-    id 'org.ajoberstar.git-publish' version '3.0.1' // javadocs -> gh-pages // 4.x requires Java 11
 }
 
 group = 'io.github.denysobukh'
@@ -28,26 +27,18 @@ version = '1.1.2'
 description = 'Maintained fork of the EMC NFS client with security fixes.'
 
 // name of the github project repository
-ext.githubProjectName = 'nfs-client'
+ext.githubProjectName = 'nfs-client-java'
 // URL to github project
 ext.githubProjectUrl = "https://github.com/denysobukh/${githubProjectName}"
 // git remote scm address
 ext.githubScmUrl = "scm:git:https://github.com/denysobukh/${githubProjectName}.git"
 ext.githubDeveloperScmUrl = "scm:git:ssh://git@github.com/denysobukh/${githubProjectName}.git"
-// git remote https address
-ext.githubRemoteUrl = "https://github.com/denysobukh/${githubProjectName}.git"
 // license info
 ext.licenseName = 'Apache License, Version 2.0'
 ext.licenseUrl = 'https://www.apache.org/licenses/LICENSE-2.0'
 
 // Maven Central Portal token credentials: mavenCentralUsername and mavenCentralPassword.
 // Configure GPG through signing.gnupg.* properties; keep credentials outside this repository.
-
-// NOTE: git repo credentials should be configured with the following properties:
-// gitUsername
-// gitPassword
-System.setProperty('org.ajoberstar.grgit.auth.username', findProperty('gitUsername') ?: '')
-System.setProperty('org.ajoberstar.grgit.auth.password', findProperty('gitPassword') ?: '')
 
 defaultTasks 'distZip'
 
@@ -215,47 +206,23 @@ signing {
     useGpgCmd()
 }
 
-ext.aggregatedDocsDir = "$buildDir/aggregatedDocs"
-tasks.register('aggregateDocs') {
-    doLast {
-        if (project.hasProperty('release.stage') && project.ext['release.stage'] == 'final') {
-            copy {
-                from layout.buildDirectory.dir('docs/javadoc')
-                into "${aggregatedDocsDir}/latest"
-            }
-            subprojects.each { p ->
-                copy {
-                    from p.layout.buildDirectory.dir('docs/javadoc')
-                    into "${aggregatedDocsDir}/latest/${p.name}"
-                }
-            }
+// Build the static site deployed by the GitHub Pages workflow.
+tasks.register('aggregateDocs', Sync) {
+    description = 'Stage Javadocs for GitHub Pages.'
+    group = 'documentation'
+    into layout.buildDirectory.dir('aggregatedDocs')
+    into('latest/javadoc') {
+        from tasks.named('javadoc')
+    }
+    into("${project.version}/javadoc") {
+        from tasks.named('javadoc')
+    }
+    subprojects.each { p ->
+        into("latest/${p.name}/javadoc") {
+            from { p.tasks.named('javadoc').get() }
         }
-        copy {
-            from layout.buildDirectory.dir('docs/javadoc')
-            into "${aggregatedDocsDir}/${project.version}"
-        }
-        subprojects.each { p ->
-            copy {
-                from p.layout.buildDirectory.dir('docs/javadoc')
-                into "${aggregatedDocsDir}/${project.version}/${p.name}"
-            }
+        into("${project.version}/${p.name}/javadoc") {
+            from { p.tasks.named('javadoc').get() }
         }
     }
-}
-tasks.aggregateDocs.dependsOn javadoc
-aggregateDocs.dependsOn { subprojects.collect { it.tasks['javadoc'] } }
-
-gitPublish {
-    repoUri = githubRemoteUrl
-    branch = 'gh-pages'
-    contents {
-        from aggregatedDocsDir
-    }
-    preserve { include '**/*' }
-}
-tasks.gitPublishPush.dependsOn aggregateDocs
-
-
-clean {
-    delete aggregatedDocsDir
 }
