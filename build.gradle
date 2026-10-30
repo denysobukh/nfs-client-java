@@ -18,6 +18,7 @@ plugins {
     id 'java-library'
     id 'distribution'
     id 'signing'
+    id 'org.cyclonedx.bom' version '3.5.1'
     id 'com.vanniktech.maven.publish' version '0.37.0'
     id 'org.ajoberstar.git-publish' version '3.0.1' // javadocs -> gh-pages // 4.x requires Java 11
 }
@@ -67,6 +68,10 @@ dependencies {
 }
 
 allprojects {
+    tasks.named('cyclonedxDirectBom') {
+        includeConfigs = ['runtimeClasspath', 'testRuntimeClasspath', 'demoRuntimeClasspath']
+        xmlOutput.convention((org.gradle.api.file.RegularFile) null)
+    }
     configurations {
         tools // specifies tool artifacts for the distribution (placed in the tools/ directory)
     }
@@ -86,6 +91,10 @@ allprojects {
 
 java {
     withSourcesJar()
+}
+
+tasks.named('cyclonedxBom') {
+    xmlOutput.convention((org.gradle.api.file.RegularFile) null)
 }
 
 tasks.withType(JavaCompile) {

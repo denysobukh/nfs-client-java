@@ -1,3 +1,5 @@
+[![Dependency Security](https://github.com/denysobukh/nfs-client-java/actions/workflows/security.yml/badge.svg?branch=master)](https://github.com/denysobukh/nfs-client-java/actions/workflows/security.yml)
+
 NFS Client for Java
 ===
 
@@ -50,6 +52,21 @@ integration tests require an external server.
 
 Dependency vulnerability alerts
 ---
+
+The [Dependency Security workflow](https://github.com/denysobukh/nfs-client-java/actions/workflows/security.yml)
+generates an aggregate CycloneDX SBOM from resolved runtime and test dependencies
+for the library, tool modules, and demo, then scans it with Trivy. It runs on
+pushes to `master`, pull requests, manually, and every Monday at 07:43 UTC using
+the current vulnerability database. Any **HIGH or CRITICAL** finding fails the
+workflow, including vulnerabilities without a fix. The SBOM is available as a
+workflow artifact; scan findings appear in the Actions log.
+
+To generate and scan the same inventory locally (requires Trivy):
+
+```sh
+./gradlew --no-daemon cyclonedxBom
+trivy sbom --severity HIGH,CRITICAL --exit-code 1 build/reports/cyclonedx/bom.json
+```
 
 [Dependabot alerts](https://github.com/denysobukh/nfs-client-java/security/dependabot)
 and Dependabot security updates are enabled for this repository. The Dependency
