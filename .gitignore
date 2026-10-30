@@ -28,3 +28,4 @@ packages/
 *.bak
 id_rsa
 /build/
+examples/

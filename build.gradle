@@ -24,7 +24,7 @@ plugins {
 }
 
 group = 'io.github.denysobukh'
-version = '1.1.1'
+version = '1.1.2'
 description = 'Maintained fork of the EMC NFS client with security fixes.'
 
 // name of the github project repository
@@ -95,6 +95,42 @@ java {
 
 tasks.named('cyclonedxBom') {
     xmlOutput.convention((org.gradle.api.file.RegularFile) null)
+}
+
+// Small executable example that exercises this checkout against a real NFSv3 server.
+sourceSets {
+    demo {
+        java.srcDir 'examples/nfs-demo/src/main/java'
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+configurations {
+    demoImplementation.extendsFrom implementation
+    demoRuntimeOnly.extendsFrom runtimeOnly
+}
+dependencies {
+    demoRuntimeOnly 'org.slf4j:slf4j-simple:1.7.36'
+}
+tasks.register('nfsDemo', JavaExec) {
+    description = 'Run basic NFS operations against the Docker demo server.'
+    group = 'verification'
+    classpath = sourceSets.demo.runtimeClasspath
+    mainClass = 'example.NfsDemo'
+    args providers.gradleProperty('nfsServer').getOrElse('127.0.0.1'),
+            providers.gradleProperty('nfsExport').getOrElse('/export')
+}
+tasks.register('stageNfsDemo', Sync) {
+    description = 'Stage the demo classes and dependencies for its Docker image.'
+    dependsOn tasks.named('demoClasses')
+    into layout.buildDirectory.dir('nfs-demo')
+    into('classes') {
+        from sourceSets.main.output
+        from sourceSets.demo.output
+    }
+    into('lib') {
+        from configurations.demoRuntimeClasspath
+    }
 }
 
 tasks.withType(JavaCompile) {

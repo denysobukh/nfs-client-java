@@ -1,0 +1,25 @@
+name: nfs-client-demo
+services:
+  nfs:
+    build: ./server
+    cap_add:
+      # Ganesha VFS uses open_by_handle_at; no privileged container is needed.
+      - DAC_READ_SEARCH
+    volumes:
+      - nfs-data:/export
+    healthcheck:
+      test: ["CMD-SHELL", "rpcinfo -T tcp localhost 100003 3 && rpcinfo -T tcp localhost 100005 3 && showmount -e localhost | grep -q /export"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+  client:
+    profiles: ["client"]
+    build:
+      context: ../..
+      dockerfile: examples/nfs-demo/client.Dockerfile
+    depends_on:
+      nfs:
+        condition: service_healthy
+volumes:
+  nfs-data:

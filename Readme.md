@@ -232,6 +232,10 @@ do this, you can still run the tests, but most of them will be skipped.
 How to use the bare client
 ---
 
+For a local NFS server and a minimal client app, run
+`bash examples/nfs-demo/run.sh`. The [Docker NFS demo](examples/nfs-demo/README.md)
+checks basic file operations against NFS-Ganesha and prints a pass/fail report.
+
 The Nfs client instances provide both direct and lightly wrapped access to all NFS functionality.
 Working examples for how to instantiate an Nfs3 client and how to exercise most 
 NFS functionality are available in the JUnit tests.
