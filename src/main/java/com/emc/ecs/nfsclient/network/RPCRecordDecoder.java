@@ -32,7 +32,8 @@ public class RPCRecordDecoder extends ByteToMessageDecoder {
             long marker = buffer.getUnsignedInt(buffer.readerIndex() + scannedBytes);
             long end = (long) scannedBytes + 4 + RecordMarkingUtil.maskFragmentSize(marker);
             if (end > Integer.MAX_VALUE) {
-                throw new TooLongFrameException("RPC record exceeds maximum buffer size");
+                throw new TooLongFrameException("RPC record exceeds maximum buffer size: remote="
+                        + ctx.channel().remoteAddress() + ", recordBytes=" + end + ", limit=" + Integer.MAX_VALUE);
             }
             if (buffer.readableBytes() < end) {
                 return;

@@ -2,6 +2,7 @@ package com.emc.ecs.nfsclient.network;
 
 import com.emc.ecs.nfsclient.rpc.Xdr;
 import com.emc.ecs.nfsclient.rpc.RpcException;
+import com.emc.ecs.nfsclient.LogCapture;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
@@ -104,9 +105,71 @@ public class Test_NettyTransport {
                 fail("Expected failed connection");
             } catch (RpcException expected) {
                 assertEquals(Connection.State.DISCONNECTED, connection.getConnectionState());
+                assertNotNull(expected.getCause());
+                assertTrue(expected.getCause() instanceof java.net.ConnectException);
+                assertTrue(expected.getMessage().contains("remote=/127.0.0.1:" + port));
+                assertTrue(expected.getMessage().contains("connectTimeoutMs=10000"));
             }
         } finally {
             connection.close();
+        }
+    }
+
+    @Test(timeout = 15000)
+    public void rpcTimeoutIdentifiesRequestAndEndpoint() throws Exception {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        CountDownLatch releasePeer = new CountDownLatch(1);
+        try (ServerSocket server = new ServerSocket(0)) {
+            server.setSoTimeout(5000);
+            Future<?> peer = executor.submit(() -> {
+                try (Socket socket = server.accept()) {
+                    socket.setSoTimeout(5000);
+                    DataInputStream in = new DataInputStream(socket.getInputStream());
+                    in.readInt();
+                    in.readInt();
+                    releasePeer.await(5, TimeUnit.SECONDS);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            Connection connection = new Connection("127.0.0.1", server.getLocalPort(), false);
+            try {
+                connection.connect();
+                Xdr request = new Xdr(4);
+                request.setXid(321);
+                request.putInt(321);
+                RpcException error = assertThrows(RpcException.class, () -> connection.sendAndWait(1, request));
+                assertTrue(error.getMessage().contains("RPC response timeout"));
+                assertTrue(error.getMessage().contains("remote=/127.0.0.1:" + server.getLocalPort()));
+                assertTrue(error.getMessage().contains("local="));
+                assertTrue(error.getMessage().contains("xid=321"));
+                assertTrue(error.getMessage().contains("timeoutSeconds=1"));
+                assertNull(error.getCause());
+                releasePeer.countDown();
+                peer.get(5, TimeUnit.SECONDS);
+            } finally {
+                connection.close();
+            }
+        } finally {
+            releasePeer.countDown();
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    public void channelFailureIsLoggedAndPreservesOriginalThrowable() throws Exception {
+        Connection connection = new Connection("127.0.0.1", 2049, false);
+        EmbeddedChannel channel = new EmbeddedChannel(new ClientIOHandler(connection));
+        Throwable cause = new IllegalStateException("malformed RPC record");
+        try (LogCapture logs = new LogCapture()) {
+            channel.pipeline().fireExceptionCaught(cause);
+            RpcException error = assertThrows(RpcException.class, () -> connection.sendAndWait(1, new Xdr(4)));
+            assertSame(cause, error.getCause());
+            assertTrue(logs.output().contains("TCP channel failed"));
+            assertTrue(logs.output().contains("malformed RPC record"));
+            assertTrue(logs.output().contains("2049"));
+        } finally {
+            channel.finishAndReleaseAll();
         }
     }
 }

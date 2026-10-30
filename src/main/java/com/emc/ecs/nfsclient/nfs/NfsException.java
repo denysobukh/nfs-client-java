@@ -56,7 +56,12 @@ public class NfsException extends IOException {
      * @param e
      */
     public NfsException(NfsStatus status, String message, RpcException e) {
-        super(message, e);
+        this(status, message, (Throwable) e);
+    }
+
+    /** Construct an NFS exception with the original failure and protocol status. */
+    public NfsException(NfsStatus status, String message, Throwable cause) {
+        super(message, cause);
         _status = status;
     }
 

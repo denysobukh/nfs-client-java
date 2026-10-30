@@ -17,12 +17,16 @@ package com.emc.ecs.nfsclient.rpc;
 import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * implement AUTH_UNIX for RPC, as specified by RFC 1831
  * (https://tools.ietf.org/html/rfc1831).
  */
 public class CredentialUnix extends CredentialBase {
+
+    private static final Logger LOG = LoggerFactory.getLogger(CredentialUnix.class);
 
     /**
      * Discriminant for a caller identifying itself as it is identified on a
@@ -128,7 +132,7 @@ public class CredentialUnix extends CredentialBase {
         try {
             return java.net.InetAddress.getLocalHost().getHostName();
         } catch (UnknownHostException e) {
-            // do nothing
+            LOG.debug("Cannot determine local hostname for AUTH_SYS; using localhost", e);
         }
 
         // the hostname does not affect the correctness of RPC call, so

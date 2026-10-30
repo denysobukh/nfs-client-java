@@ -131,7 +131,7 @@ public class RpcWrapper<S extends NfsRequestBase, T extends NfsResponseBase> {
                 callRpcChecked(request, responseHandler);
                 return;
             } catch (RpcException e) {
-                handleRpcException(e, i);
+                handleRpcException(e, i, request);
             }
         }
     }
@@ -156,7 +156,7 @@ public class RpcWrapper<S extends NfsRequestBase, T extends NfsResponseBase> {
                 callRpcChecked(request, responseHandler, ip);
                 return;
             } catch (RpcException e) {
-                handleRpcException(e, i);
+                handleRpcException(e, i, request);
             }
         }
     }
@@ -204,7 +204,12 @@ public class RpcWrapper<S extends NfsRequestBase, T extends NfsResponseBase> {
     public void callRpcNaked(S request, T response, String ipAddress) throws RpcException {
         Xdr xdr = new Xdr(_maximumRequestSize);
         request.marshalling(xdr);
-        response.unmarshalling(callRpc(ipAddress, xdr, request.isUsePrivilegedPort()));
+        try {
+            response.unmarshalling(callRpc(ipAddress, xdr, request.isUsePrivilegedPort()));
+        } catch (RpcException e) {
+            throw new RpcException(e.getStatus(), String.format("RPC failed: server=%s, remote=%s:%d, request=%s,"
+                    + " status=%s: %s", _server, ipAddress, _port, request, e.getStatus(), e.getMessage()), e);
+        }
     }
 
     /**
@@ -240,10 +245,10 @@ public class RpcWrapper<S extends NfsRequestBase, T extends NfsResponseBase> {
     public String chooseIP(byte[] key) throws IOException {
         if (_ips == null || _ips.length == 0) {
             if (_server != null) {
-                LOG.warn("ip list is not initialized, fallback to server");
+                LOG.debug("No discovered IP addresses; using configured server: server={}, port={}", _server, _port);
                 return _server;
             }
-            throw new IOException("ip list is not initialized");
+            throw new IOException("Cannot select RPC endpoint: no server or discovered IP addresses, port=" + _port);
         }
 
         return _ips[Math.abs(Arrays.hashCode(key)) % _ips.length];
@@ -265,15 +270,26 @@ public class RpcWrapper<S extends NfsRequestBase, T extends NfsResponseBase> {
      */
     private void callRpcChecked(S request, RpcResponseHandler<? extends T> responseHandler, String ipAddress)
             throws IOException {
-        LOG.debug("server {}, port {}, request {}", _server, _port, request);
+        LOG.debug("Sending NFS request: server={}, remote={}:{}, request={}", _server, ipAddress, _port, request);
 
         callRpcNaked(request, responseHandler.getNewResponse(), ipAddress);
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("server {}, port {}, response {}", _server, _port, responseHandler.getResponse());
+            LOG.debug("Received NFS response: server={}, remote={}:{}, request={}, response={}",
+                    _server, ipAddress, _port, request, responseHandler.getResponse());
         }
 
-        responseHandler.checkResponse(request);
+        try {
+            responseHandler.checkResponse(request);
+        } catch (NfsException e) {
+            throw new NfsException(e.getStatus(), String.format("NFS operation failed: server=%s, remote=%s:%d: %s",
+                    _server, ipAddress, _port, e.getMessage()), e);
+        } catch (java.io.FileNotFoundException e) {
+            java.io.FileNotFoundException failure = new java.io.FileNotFoundException(
+                    String.format("NFS file not found: server=%s, remote=%s:%d: %s", _server, ipAddress, _port, e.getMessage()));
+            failure.initCause(e);
+            throw failure;
+        }
     }
 
     /**
@@ -285,7 +301,7 @@ public class RpcWrapper<S extends NfsRequestBase, T extends NfsResponseBase> {
      *            The number of attempts so far.
      * @throws IOException
      */
-    private void handleRpcException(RpcException e, int attemptNumber) throws IOException {
+    private void handleRpcException(RpcException e, int attemptNumber, S request) throws IOException {
         String messageStart;
 
         if (!(e.getStatus().equals(RpcStatus.NETWORK_ERROR))) {
@@ -293,14 +309,16 @@ public class RpcWrapper<S extends NfsRequestBase, T extends NfsResponseBase> {
         } else {
             // check whether to retry
             if (attemptNumber + 1 < _maximumRetries) {
+                int waitTime = _retryWait * (attemptNumber + 1);
+                LOG.warn("NFS RPC failed; retrying after {} ms: server={}, port={}, attempt={}/{}, request={},"
+                                + " status={}: {}", waitTime, _server, _port, attemptNumber + 1,
+                        _maximumRetries, request, e.getStatus(), e.getMessage(), e);
                 try {
-                    int waitTime = _retryWait * (attemptNumber + 1);
                     Thread.sleep(waitTime);
                 } catch (InterruptedException ie) {
                     // restore the interrupt status
                     Thread.currentThread().interrupt();
                 }
-                LOG.warn("network error happens, server {}, attemptNumber {}", new Object[] { _server, attemptNumber });
                 return;
             }
 
@@ -308,7 +326,9 @@ public class RpcWrapper<S extends NfsRequestBase, T extends NfsResponseBase> {
         }
 
         throw new NfsException(NfsStatus.NFS3ERR_IO,
-                String.format("%s error, server: %s, RPC error: %s", messageStart, _server, e.getMessage()), e);
+                String.format("NFS %s failure: server=%s, port=%d, attempt=%d/%d, request=%s, status=%s: %s",
+                        messageStart, _server, _port, attemptNumber + 1, _maximumRetries, request,
+                        e.getStatus(), e.getMessage()), e);
     }
 
     /**
@@ -320,17 +340,14 @@ public class RpcWrapper<S extends NfsRequestBase, T extends NfsResponseBase> {
         Set<String> ips = new TreeSet<String>();
         for (int i = 0; i < 32; ++i) {
             InetSocketAddress sa = new InetSocketAddress(_server, _port);
+            if (sa.isUnresolved()) {
+                throw new IllegalArgumentException("Cannot resolve RPC server hostname: server=" + _server
+                        + ", port=" + _port + "; check DNS and the configured server name");
+            }
             ips.add(sa.getAddress().getHostAddress());
         }
 
-        if (LOG.isDebugEnabled()) {
-            StringBuffer sb = new StringBuffer();
-            for (String ip : ips) {
-                sb.append(ip);
-                sb.append(" ");
-            }
-            LOG.debug(sb.toString());
-        }
+        LOG.debug("Discovered RPC addresses: server={}, port={}, addresses={}", _server, _port, ips);
 
         return (String[]) ips.toArray(new String[0]);
     }

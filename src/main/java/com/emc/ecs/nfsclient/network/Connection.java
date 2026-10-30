@@ -122,6 +122,8 @@ public class Connection {
      */
     private volatile State _state = State.DISCONNECTED;
 
+    private volatile Throwable _failureCause;
+
     /**
      * @param remoteHost A unique name for the host to which the connection is being made.
      * @param port The remote host port being used for the connection.
@@ -204,13 +206,11 @@ public class Connection {
             _channelFuture.awaitUninterruptibly();
             if (_channelFuture.isSuccess() == false) {
 
-                String msg = String.format("waiting for connection to be established, but failed %s",
-                        getRemoteAddress());
-                LOG.error(msg);
-
-                // return RpcException, the exact reason should already be
-                // logged in IOHandler::exceptionCaught()
-                throw new RpcException(RpcStatus.NETWORK_ERROR, msg);
+                Throwable cause = _failureCause != null ? _failureCause : _channelFuture.cause();
+                String msg = String.format("TCP connection failed: remote=%s, xid=%d, connectTimeoutMs=%d,"
+                                + " privilegedPort=%s: %s", getRemoteAddress(), xdrRequest.getXid(),
+                        CONNECT_TIMEOUT, _usePrivilegedPort, cause);
+                throw new RpcException(RpcStatus.NETWORK_ERROR, msg, cause);
             }
         }
 
@@ -221,13 +221,15 @@ public class Connection {
         if (_channel.isWritable() == false) {
             String msg;
             if (_channel.isActive()) {
-                msg = String.format("too many pending requests for the connection: %s", getRemoteAddress());
+                msg = String.format("RPC send queue is full: remote=%s, local=%s, xid=%d, pendingRequests=%d",
+                        getRemoteAddress(), _channel.localAddress(), xdrRequest.getXid(), _futureMap.size());
             } else {
-                msg = String.format("the connection is broken: %s", getRemoteAddress());
+                msg = String.format("Cannot send RPC on a closed connection: remote=%s, xid=%d",
+                        getRemoteAddress(), xdrRequest.getXid());
             }
 
             // too many pending request are in the queue, return error
-            throw new RpcException(RpcStatus.NETWORK_ERROR, msg);
+            throw new RpcException(RpcStatus.NETWORK_ERROR, msg, _failureCause);
         }
 
         // put the request into a map for timeout management
@@ -247,13 +249,14 @@ public class Connection {
 
         if (timeoutFuture.isSuccess() == false) {
 
-            LOG.warn("cause:", timeoutFuture.cause());
-
             if (timeoutFuture.isDone()) {
-                String msg = String.format("tcp IO error on the connection: %s", getRemoteAddress());
-                throw new RpcException(RpcStatus.NETWORK_ERROR, msg);
+                String msg = String.format("TCP I/O failed while waiting for RPC response: remote=%s, local=%s,"
+                                + " xid=%d: %s", getRemoteAddress(), _channel.localAddress(), xid, timeoutFuture.cause());
+                throw new RpcException(RpcStatus.NETWORK_ERROR, msg, timeoutFuture.cause());
             } else {
-                String msg = String.format("rpc request timeout on the connection: %s", getRemoteAddress());
+                String msg = String.format("RPC response timeout: remote=%s, local=%s, xid=%d, timeoutSeconds=%d,"
+                                + " pendingRequests=%d", getRemoteAddress(), _channel.localAddress(), xid,
+                        timeout, _futureMap.size());
                 throw new RpcException(RpcStatus.NETWORK_ERROR, msg);
             }
         }
@@ -272,6 +275,8 @@ public class Connection {
         }
 
         _state = State.CONNECTING;
+        LOG.debug("Connecting TCP: remote={}, connectTimeoutMs={}, privilegedPort={}",
+                getRemoteAddress(), CONNECT_TIMEOUT, _usePrivilegedPort);
         try {
             final ChannelFuture connected;
             if (_usePrivilegedPort) {
@@ -284,18 +289,18 @@ public class Connection {
             connected.addListener((ChannelFuture future) -> {
                 if (future.isSuccess()) {
                     _state = State.CONNECTED;
+                    LOG.debug("TCP connected: remote={}, local={}", getRemoteAddress(), future.channel().localAddress());
                     _channelFuture.trySuccess(null);
                 } else {
                     _state = State.DISCONNECTED;
                     _channelFuture.tryFailure(future.cause());
-                    future.channel().close();
-                    close();
+                    close(future.cause());
                 }
             });
         } catch (RpcException | RuntimeException e) {
             _state = State.DISCONNECTED;
             _channelFuture.tryFailure(e);
-            close();
+            close(e);
             throw e;
         }
 
@@ -314,8 +319,19 @@ public class Connection {
      * This is called when the connection should be closed.
      */
     protected void close() {
+        close(null);
+    }
+
+    protected void close(Throwable cause) {
+        if (cause != null) {
+            _failureCause = cause;
+        }
+        Throwable failure = _failureCause != null ? _failureCause
+                : new java.io.IOException("TCP connection closed: remote=" + getRemoteAddress());
+        LOG.debug("Closing TCP connection: remote={}, pendingRequests={}, cause={}",
+                getRemoteAddress(), _futureMap.size(), failure.toString());
         _state = State.DISCONNECTED;
-        _channelFuture.tryFailure(new java.io.IOException("Connection closed"));
+        _channelFuture.tryFailure(failure);
 
         shutdown();
 
@@ -323,7 +339,9 @@ public class Connection {
         NetMgr.getInstance().dropConnection(InetSocketAddress.createUnresolved(_remoteHost, _port));
 
         // notify all the pending requests in the timeout map
-        notifyAllPendingSenders("Channel closed, connection closing.");
+        for (Promise<Void> future : _futureMap.values()) {
+            future.tryFailure(failure);
+        }
     }
 
     /**
@@ -338,6 +356,9 @@ public class Connection {
         if (future != null) {
             _responseMap.put(xid, response);
             future.trySuccess(null);
+        } else {
+            LOG.debug("Ignoring RPC response without a pending request (possibly timed out): remote={}, xid={}",
+                    getRemoteAddress(), xid);
         }
     }
 
@@ -368,26 +389,35 @@ public class Connection {
      * @throws RpcException If an exception occurs, or if no binding succeeds.
      */
     private Channel bindToPrivilegedPort() throws RpcException {
-        System.out.println("Attempting to use privileged port.");
+        LOG.info("Binding a privileged client source port (<1024): remote={}; local OS permission is required",
+                getRemoteAddress());
+        Throwable lastFailure = null;
         for (int port = 1023; port > 0; --port) {
             try {
                 ChannelFuture bindFuture = _clientBootstrap.bind(new InetSocketAddress(port)).awaitUninterruptibly();
                 if (bindFuture.isSuccess()) {
+                    LOG.debug("Bound privileged client source port: remote={}, local={}",
+                            getRemoteAddress(), bindFuture.channel().localAddress());
                     return bindFuture.channel();
                 }
+                lastFailure = bindFuture.cause();
                 bindFuture.channel().close();
                 if (!(bindFuture.cause() instanceof java.net.BindException)) {
                     throw new RpcException(RpcStatus.LOCAL_BINDING_ERROR,
-                            "Cannot bind privileged port", new java.io.IOException(bindFuture.cause()));
+                            "Cannot bind privileged client source port " + port + " for remote=" + getRemoteAddress()
+                                    + "; check local OS permission to bind ports below 1024: " + lastFailure, lastFailure);
                 }
-            } catch (Exception e) {
-                String msg = String.format("rpc request bind error for address: %s", 
-                        getRemoteAddress());
-                throw new RpcException(RpcStatus.NETWORK_ERROR, msg, e);
+            } catch (RuntimeException e) {
+                throw new RpcException(RpcStatus.LOCAL_BINDING_ERROR,
+                        "Privileged client source port binding failed: remote=" + getRemoteAddress()
+                                + ", localPort=" + port + ": " + e, e);
             }
         }
 
-        throw new RpcException(RpcStatus.LOCAL_BINDING_ERROR, String.format("Cannot bind a port < 1024: %s", getRemoteAddress()));
+        throw new RpcException(RpcStatus.LOCAL_BINDING_ERROR,
+                "Cannot bind any privileged client source port (1-1023): remote=" + getRemoteAddress()
+                        + "; check local OS permission and whether ports are already in use."
+                        + " AUTH_SYS UID 0 does not grant local port-binding permission: " + lastFailure, lastFailure);
     }
 
 }

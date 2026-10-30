@@ -50,7 +50,8 @@ public class FileReadingTest {
                     testReading(export, fileName);
                 }
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+                System.err.println("NFS reading test failed: export=" + export + ", file=" + fileName
+                        + ", useStream=" + useStream);
                 e.printStackTrace();
             }
         }
@@ -84,13 +85,15 @@ public class FileReadingTest {
             }
             System.out.println("Successful read, end of file returned correctly!");
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.err.println("NFS stream read failed: export=" + export + ", file=" + fileName);
+            e.printStackTrace(System.err);
         } finally {
             if (inputStream != null) {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
-                    // e.printStackTrace();
+                    System.err.println("NFS input stream close failed: export=" + export + ", file=" + fileName);
+                    e.printStackTrace(System.err);
                 }
             }
         }
@@ -114,7 +117,8 @@ public class FileReadingTest {
             }
             System.out.println("Successful read, end of file returned correctly!");
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.err.println("NFS file read failed: export=" + export + ", file=" + fileName);
+            e.printStackTrace(System.err);
         }
     }
 

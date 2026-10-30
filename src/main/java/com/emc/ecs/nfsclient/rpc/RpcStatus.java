@@ -55,6 +55,12 @@ public class RpcStatus {
 
     @Override
     public String toString() {
+        if (this == LOCAL_BINDING_ERROR) {
+            return "LOCAL_BINDING_ERROR(" + _value + ")";
+        }
+        if (this == NETWORK_ERROR) {
+            return "NETWORK_ERROR(" + _value + ")";
+        }
         return "RpcStatus:" + _value;
     }
 }

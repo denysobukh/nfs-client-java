@@ -20,8 +20,6 @@ import org.apache.commons.lang3.NotImplementedException;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -62,11 +60,6 @@ public class RecordMarkingUtil {
     private static final int MTU_SIZE = 1024 * 1024;
 
     /**
-     * The usual logger.
-     */
-    private static final Logger LOG = LoggerFactory.getLogger(RecordMarkingUtil.class);
-
-    /**
      * Insert record marking into rpcRequest and then send to tcp stream.
      * 
      * @param channel The Channel to use for sending.
@@ -92,9 +85,9 @@ public class RecordMarkingUtil {
 
             if (bytesToWrite + buffer.remaining() > MTU_SIZE) {
                 if (outBuffers.isEmpty()) {
-                    LOG.error("too big single byte buffer {}", buffer.remaining());
                     throw new IllegalArgumentException(
-                            String.format("too big single byte buffer %d", buffer.remaining()));
+                            String.format("RPC payload buffer exceeds fragment limit: remote=%s, bytes=%d, limit=%d",
+                                    channel.remoteAddress(), buffer.remaining(), MTU_SIZE));
                 } else {
 
                     sendBuffers(channel, bytesToWrite, outBuffers, isLast);

@@ -85,7 +85,7 @@ public abstract class NfsResponseBase extends RpcResponse {
         sb.append(" xid:");
         sb.append(String.valueOf(_xid));
         sb.append(" state:");
-        sb.append(String.valueOf(_state));
+        sb.append(NfsStatus.fromValue(_state));
         return sb.toString();
     }
 

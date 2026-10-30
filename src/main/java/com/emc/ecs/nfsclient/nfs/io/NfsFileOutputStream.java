@@ -197,7 +197,9 @@ public class NfsFileOutputStream extends OutputStream {
             try {
                 flush();
             } catch (Throwable t) {
-                LOG.debug(t.getMessage(), t);
+                LOG.warn("Failed to flush NFS output stream during close: file={}, currentOffset={},"
+                                + " commitOffset={}, bufferedBytes={}; data may not have reached stable storage: {}",
+                        _nfsFile.getAbsolutePath(), _currentOffset, _offset, _bufferOffset, t.toString(), t);
             }
             _closed = true;
             super.close();

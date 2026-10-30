@@ -98,12 +98,13 @@ public class RpcResponse {
     private void checkRpcReply() throws RpcException {
 
         if (_replyStatus != ReplyStatus.MSG_ACCEPTED.getValue()) {
-            String msg = String.format("RPC call is REJECTED, rejectStat=%d", _rejectStatus);
+            String msg = String.format("RPC reply rejected: xid=%d, status=%s", _xid,
+                    RejectStatus.fromValue(_rejectStatus));
             throw new RpcException(RejectStatus.fromValue(_rejectStatus), msg);
         } else {
             if (_acceptStatus != AcceptStatus.SUCCESS.getValue()) {
-                String msg = String.format("RPC call is ACCEPTED, but the status is not success, acceptStat=%d",
-                        _acceptStatus);
+                String msg = String.format("RPC reply unsuccessful: xid=%d, status=%s", _xid,
+                        AcceptStatus.fromValue(_acceptStatus));
                 throw new RpcException(AcceptStatus.fromValue(_acceptStatus), msg);
             }
         }

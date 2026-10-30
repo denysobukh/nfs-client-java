@@ -27,13 +27,13 @@ public class ReplyStatus extends RpcStatus {
      * Accepted - reply status specified by RFC 1831
      * (https://tools.ietf.org/html/rfc1831).
      */
-    public static final ReplyStatus MSG_ACCEPTED = new ReplyStatus(0);
+    public static final ReplyStatus MSG_ACCEPTED = new ReplyStatus(0, "MSG_ACCEPTED");
 
     /**
      * Denied - reply status specified by RFC 1831
      * (https://tools.ietf.org/html/rfc1831).
      */
-    public static final ReplyStatus MSG_DENIED = new ReplyStatus(1);
+    public static final ReplyStatus MSG_DENIED = new ReplyStatus(1, "MSG_DENIED");
 
     /**
      * Preset values.
@@ -74,12 +74,19 @@ public class ReplyStatus extends RpcStatus {
      * 
      * @param value
      */
+    private final String _name;
+
     private ReplyStatus(int value) {
+        this(value, "UNKNOWN_REPLYSTATUS");
+    }
+
+    private ReplyStatus(int value, String name) {
         super(value);
+        _name = name;
     }
 
     @Override
     public String toString() {
-        return "ReplyStatus:" + getValue();
+        return _name + "(" + getValue() + ")";
     }
 }

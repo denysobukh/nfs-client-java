@@ -65,7 +65,8 @@ public class LinkTracker<N extends Nfs<?>, F extends NfsFile<N, F>> {
      */
     synchronized final F addLink(String path) throws IOException {
         if (++linksTraversed > MAXSYMLINKS) {
-            throw new IllegalArgumentException("Too many links to follow (> " + MAXSYMLINKS + ").");
+            throw new IllegalArgumentException("Too many symbolic links to follow: path=" + path
+                    + ", traversed=" + linksTraversed + ", limit=" + MAXSYMLINKS);
         }
 
         F resolvedPath = _resolvedPaths.get(path);
@@ -73,7 +74,7 @@ public class LinkTracker<N extends Nfs<?>, F extends NfsFile<N, F>> {
         if (resolvedPath == null) {
             for (String unresolvedPath : _unresolvedPaths) {
                 if (path.equals(unresolvedPath) || path.startsWith(unresolvedPath + "/")) {
-                    throw new IOException("Links form a loop: " + path);
+                    throw new IOException("Symbolic link loop: path=" + path + ", previouslyVisited=" + unresolvedPath);
                 }
             }
             _unresolvedPaths.add(path);

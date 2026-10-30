@@ -62,6 +62,7 @@ import com.emc.ecs.nfsclient.rpc.CredentialUnix;
 import com.emc.ecs.nfsclient.rpc.RejectStatus;
 import com.emc.ecs.nfsclient.rpc.RpcException;
 import com.emc.ecs.nfsclient.rpc.RpcResponseHandler;
+import com.emc.ecs.nfsclient.rpc.RpcResponse;
 import com.emc.ecs.nfsclient.rpc.RpcStatus;
 import com.emc.ecs.nfsclient.rpc.RpcRequest;
 import com.emc.ecs.nfsclient.rpc.RpcWrapper;
@@ -306,6 +307,7 @@ public class Nfs3 implements Nfs<Nfs3File> {
         }
 
         try {
+            LOG.debug("Discovering NFSv{} services: server={}, export={}", VERSION, _server, _exportedPath);
             _port = getNfsPortFromServer();
             _rpcWrapper.setPort(_port);
             _rootFileHandle = lookupRootHandle();
@@ -320,7 +322,7 @@ public class Nfs3 implements Nfs<Nfs3File> {
      */
     byte[] lookupRootHandle()
             throws IOException {
-        int portOfMountService = Portmapper.queryPortFromPortMap(MOUNTPROG, VERSION, _server);
+        int portOfMountService = getMountPortFromServer();
 
         MountResponse response = null;
         MountRequest request = new MountRequest(VERSION, _exportedPath, _credential);
@@ -330,19 +332,34 @@ public class Nfs3 implements Nfs<Nfs3File> {
                 Xdr mountXdr = new Xdr(MOUNT_MAX_REQUEST_SIZE);
                 request.marshalling(mountXdr);
                 response = new MountResponse(VERSION);
-                if (usePrivilegedPort) {
-                    LOG.debug("Mounting with privileged port - attempt with unprivileged failed with an authentication error.");
-                }
+                LOG.info("Mounting NFSv{} export: server={}, mountPort={}, export={}, attempt={}/{}, privilegedPort={}",
+                        VERSION, _server, portOfMountService, _exportedPath, i + 1, MOUNT_MAX_RETRIES, usePrivilegedPort);
                 response.unmarshalling(NetMgr.getInstance().sendAndWait(_server, portOfMountService, usePrivilegedPort, mountXdr, MOUNT_RPC_TIMEOUT));
                 int status = response.getMountStatus();
                 if (status != MountStatus.MNT3_OK.getValue()) {
-                    String msg = String.format(
-                            "mount failure, server: %s, export: %s, nfs version: %s, returned state: %s", _server,
-                            _exportedPath, VERSION, status);
+                    String guidance = "";
+                    if (status == MountStatus.MNT3ERR_ACCES.getValue() || status == MountStatus.MNT3ERR_PERM.getValue()) {
+                        guidance = " Permission denied: check the server export's client allowlist, UID/GID permissions,"
+                                + " and whether it requires a privileged client source port (<1024)."
+                                + " Binding such a port requires local OS permission; AUTH_SYS UID 0 does not grant it.";
+                    } else if (status == MountStatus.MNT3ERR_NOENT.getValue()
+                            || status == MountStatus.MNT3ERR_NOTDIR.getValue()) {
+                        guidance = " Check that the exported path exists and is an exported directory on the server.";
+                    } else if (status == MountStatus.MNT3ERR_NOTSUPP.getValue()) {
+                        guidance = " Check that the server enables NFSv3 and the mount v3 service.";
+                    }
+                    String msg = String.format("MOUNT failed: server=%s, mountPort=%d, export=%s, nfsVersion=%d,"
+                                    + " attempt=%d/%d, privilegedPort=%s, status=%s.%s", _server,
+                            portOfMountService, _exportedPath, VERSION, i + 1, MOUNT_MAX_RETRIES,
+                            usePrivilegedPort, MountStatus.fromValue(status), guidance);
+                    LOG.warn("{}", msg);
                     throw new MountException(MountStatus.fromValue(status), msg);
                 }
+                LOG.debug("Mounted NFS export: server={}, mountPort={}, export={}, xid={}",
+                        _server, portOfMountService, _exportedPath, mountXdr.getXid());
+                break;
             } catch (RpcException e) {
-                usePrivilegedPort = handleRpcException(e, i);
+                usePrivilegedPort = handleRpcException(e, i, portOfMountService, usePrivilegedPort);
             }
         }
 
@@ -352,15 +369,18 @@ public class Nfs3 implements Nfs<Nfs3File> {
             try {
                 Xdr unmountXdr = new Xdr(MOUNT_MAX_REQUEST_SIZE);
                 unmountRequest.marshalling(unmountXdr);
-                // RFC defines the response of a unmount request as void
+                // UMNT has no application body, but its RPC reply still has a status to validate.
                 // If we mounted with a privileged port, use one to unmount.
-                NetMgr.getInstance().sendAndWait(_server, portOfMountService, usePrivilegedPort, unmountXdr, MOUNT_RPC_TIMEOUT);
+                new RpcResponse().unmarshalling(NetMgr.getInstance().sendAndWait(
+                        _server, portOfMountService, usePrivilegedPort, unmountXdr, MOUNT_RPC_TIMEOUT));
+                LOG.debug("Removed mount registration: server={}, mountPort={}, export={}",
+                        _server, portOfMountService, _exportedPath);
+                break;
             } catch (RpcException e) {
-                if (i+1 < MOUNT_MAX_RETRIES) {
-                    LOG.warn(String.format(
-                            "unmount failure, server: %s, export: %s, nfs version: %s", _server,
-                            _exportedPath, VERSION), e);
-                }
+                LOG.warn("UNMOUNT registration cleanup failed: server={}, mountPort={}, export={},"
+                                + " attempt={}/{}, privilegedPort={}, status={}, mount remains usable: {}",
+                        _server, portOfMountService, _exportedPath, i + 1, MOUNT_MAX_RETRIES,
+                        usePrivilegedPort, e.getStatus(), e.getMessage(), e);
             }
         }
 
@@ -387,21 +407,26 @@ public class Nfs3 implements Nfs<Nfs3File> {
      * <li><code>false</code> otherwise.</li></ul>
      * @throws IOException
      */
-    private boolean handleRpcException(RpcException e, int attemptNumber)
+    private boolean handleRpcException(RpcException e, int attemptNumber, int mountPort, boolean usePrivilegedPort)
             throws IOException {
         boolean tryPrivilegedPort = e.getStatus().equals(RejectStatus.AUTH_ERROR);
         boolean networkError = e.getStatus().equals(RpcStatus.NETWORK_ERROR);
         boolean retry = (tryPrivilegedPort || networkError) &&
                         ((attemptNumber + 1) < MOUNT_MAX_RETRIES);
         if (!retry) {
-            String messageStart = networkError ? "network" : "rpc";
-            String msg = String.format("%s error, server: %s, export: %s, RPC error: %s", messageStart, _server, _exportedPath,
-                        e.getMessage());
+            String msg = String.format("MOUNT RPC failed: server=%s, mountPort=%d, export=%s, nfsVersion=%d,"
+                            + " attempt=%d/%d, privilegedPort=%s, status=%s: %s", _server, mountPort,
+                    _exportedPath, VERSION, attemptNumber + 1, MOUNT_MAX_RETRIES, usePrivilegedPort,
+                    e.getStatus(), e.getMessage());
+            LOG.warn("{}", msg, e);
             throw new MountException(MountStatus.MNT3ERR_IO, msg, e);
         }
-        System.out.println("retry " + (attemptNumber + 1));
+        LOG.warn("MOUNT RPC failed; retrying: server={}, mountPort={}, export={}, attempt={}/{}, status={},"
+                        + " nextPrivilegedPort={}: {}", _server, mountPort, _exportedPath,
+                attemptNumber + 1, MOUNT_MAX_RETRIES, e.getStatus(), tryPrivilegedPort, e.getMessage(), e);
         if (tryPrivilegedPort) {
-            LOG.info("Next try will be with a privileged port.");
+            LOG.info("Retrying MOUNT using a privileged client source port (<1024); local OS permission is required:"
+                    + " server={}, export={}", _server, _exportedPath);
         }
         return tryPrivilegedPort;
     }
@@ -410,8 +435,12 @@ public class Nfs3 implements Nfs<Nfs3File> {
      * @return The NFS Server RPC port number.
      * @throws IOException
      */
-    private int getNfsPortFromServer() throws IOException {
+    int getNfsPortFromServer() throws IOException {
         return Portmapper.queryPortFromPortMap(RPC_PROGRAM, VERSION, _server);
+    }
+
+    int getMountPortFromServer() throws IOException {
+        return Portmapper.queryPortFromPortMap(MOUNTPROG, VERSION, _server);
     }
 
     /* (non-Javadoc)
@@ -776,7 +805,10 @@ public class Nfs3 implements Nfs<Nfs3File> {
             public void checkResponse(RpcRequest request) throws IOException {
                 super.checkResponse(request);
                 if (!((NfsWriteRequest)request).isSync() && verifier != null && getResponse().getVerf() != verifier) {
-                    throw new NfsException(NfsStatus.NFS3ERR_SERVERFAULT, "server restart detected");
+                    throw new NfsException(NfsStatus.NFS3ERR_SERVERFAULT,
+                            "WRITE verifier changed (possible server restart): server=" + _server
+                                    + ", port=" + _port + ", expectedVerifier=" + verifier
+                                    + ", actualVerifier=" + getResponse().getVerf() + ", request=" + request);
                 }
             }
 
@@ -1423,7 +1455,10 @@ public class Nfs3 implements Nfs<Nfs3File> {
           public void checkResponse(RpcRequest request) throws IOException {
               super.checkResponse(request);
               if (verifier != null && getResponse().getVerf() != verifier) {
-                  throw new NfsException(NfsStatus.NFS3ERR_SERVERFAULT, "server restart detected");
+                  throw new NfsException(NfsStatus.NFS3ERR_SERVERFAULT,
+                          "COMMIT verifier changed (possible server restart): server=" + _server
+                                  + ", port=" + _port + ", path=" + path + ", expectedVerifier=" + verifier
+                                  + ", actualVerifier=" + getResponse().getVerf() + ", request=" + request);
               }
           }
 

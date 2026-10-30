@@ -28,64 +28,64 @@ public class NfsStatus {
     /**
      * Indicates the call completed successfully.
      */
-    public static final NfsStatus NFS3_OK = new NfsStatus(0);
+    public static final NfsStatus NFS3_OK = new NfsStatus(0, "NFS3_OK");
 
     /**
      * Not owner. The operation was not allowed because the caller is either not
      * a privileged user (root) or not the owner of the target of the operation.
      */
-    public static final NfsStatus NFS3ERR_PERM = new NfsStatus(1);
+    public static final NfsStatus NFS3ERR_PERM = new NfsStatus(1, "NFS3ERR_PERM");
 
     /**
      * No such file or directory. The file or directory name specified does not
      * exist.
      */
-    public static final NfsStatus NFS3ERR_NOENT = new NfsStatus(2);
+    public static final NfsStatus NFS3ERR_NOENT = new NfsStatus(2, "NFS3ERR_NOENT");
 
     /**
      * I/O error. A hard error (for example, a disk error) occurred while
      * processing the requested operation.
      */
-    public static final NfsStatus NFS3ERR_IO = new NfsStatus(5);
+    public static final NfsStatus NFS3ERR_IO = new NfsStatus(5, "NFS3ERR_IO");
 
     /**
      * I/O error. No such device or address.
      */
-    public static final NfsStatus NFS3ERR_NXIO = new NfsStatus(6);
+    public static final NfsStatus NFS3ERR_NXIO = new NfsStatus(6, "NFS3ERR_NXIO");
 
     /**
      * Permission denied. The caller does not have the correct permission to
      * perform the requested operation. Contrast this with NFS3ERR_PERM, which
      * restricts itself to owner or privileged user permission failures.
      */
-    public static final NfsStatus NFS3ERR_ACCES = new NfsStatus(13);
+    public static final NfsStatus NFS3ERR_ACCES = new NfsStatus(13, "NFS3ERR_ACCES");
 
     /**
      * File exists. The file specified already exists.
      */
-    public static final NfsStatus NFS3ERR_EXIST = new NfsStatus(17);
+    public static final NfsStatus NFS3ERR_EXIST = new NfsStatus(17, "NFS3ERR_EXIST");
 
     /**
      * Attempt to do a cross-device hard link.
      */
-    public static final NfsStatus NFS3ERR_XDEV = new NfsStatus(18);
+    public static final NfsStatus NFS3ERR_XDEV = new NfsStatus(18, "NFS3ERR_XDEV");
 
     /**
      * No such device.
      */
-    public static final NfsStatus NFS3ERR_NODEV = new NfsStatus(19);
+    public static final NfsStatus NFS3ERR_NODEV = new NfsStatus(19, "NFS3ERR_NODEV");
 
     /**
      * Not a directory. The caller specified a non-directory in a directory
      * operation.
      */
-    public static final NfsStatus NFS3ERR_NOTDIR = new NfsStatus(20);
+    public static final NfsStatus NFS3ERR_NOTDIR = new NfsStatus(20, "NFS3ERR_NOTDIR");
 
     /**
      * Is a directory. The caller specified a directory in a non-directory
      * operation.
      */
-    public static final NfsStatus NFS3ERR_ISDIR = new NfsStatus(21);
+    public static final NfsStatus NFS3ERR_ISDIR = new NfsStatus(21, "NFS3ERR_ISDIR");
 
     /**
      * Invalid argument or unsupported argument for an operation. Two examples
@@ -93,85 +93,85 @@ public class NfsStatus {
      * attempting to SETATTR a time field on a server that does not support this
      * operation.
      */
-    public static final NfsStatus NFS3ERR_INVAL = new NfsStatus(22);
+    public static final NfsStatus NFS3ERR_INVAL = new NfsStatus(22, "NFS3ERR_INVAL");
 
     /**
      * File too large. The operation would have caused a file to grow beyond the
      * server's limit.
      */
-    public static final NfsStatus NFS3ERR_FBIG = new NfsStatus(27);
+    public static final NfsStatus NFS3ERR_FBIG = new NfsStatus(27, "NFS3ERR_FBIG");
 
     /**
      * No space left on device. The operation would have caused the server's
      * file system to exceed its limit.
      */
-    public static final NfsStatus NFS3ERR_NOSPC = new NfsStatus(28);
+    public static final NfsStatus NFS3ERR_NOSPC = new NfsStatus(28, "NFS3ERR_NOSPC");
 
     /**
      * Read-only file system. A modifying operation was attempted on a read-only
      * file system.
      */
-    public static final NfsStatus NFS3ERR_ROFS = new NfsStatus(30);
+    public static final NfsStatus NFS3ERR_ROFS = new NfsStatus(30, "NFS3ERR_ROFS");
 
     /**
      * Too many hard links.
      */
-    public static final NfsStatus NFS3ERR_MLINK = new NfsStatus(31);
+    public static final NfsStatus NFS3ERR_MLINK = new NfsStatus(31, "NFS3ERR_MLINK");
 
     /**
      * The filename in an operation was too long.
      */
-    public static final NfsStatus NFS3ERR_NAMETOOLONG = new NfsStatus(63);
+    public static final NfsStatus NFS3ERR_NAMETOOLONG = new NfsStatus(63, "NFS3ERR_NAMETOOLONG");
 
     /**
      * An attempt was made to remove a directory that was not empty.
      */
-    public static final NfsStatus NFS3ERR_NOTEMPTY = new NfsStatus(66);
+    public static final NfsStatus NFS3ERR_NOTEMPTY = new NfsStatus(66, "NFS3ERR_NOTEMPTY");
 
     /**
      * Resource (quota) hard limit exceeded. The user's resource limit on the
      * server has been exceeded.
      */
-    public static final NfsStatus NFS3ERR_DQUOT = new NfsStatus(69);
+    public static final NfsStatus NFS3ERR_DQUOT = new NfsStatus(69, "NFS3ERR_DQUOT");
 
     /**
      * Invalid file handle. The file handle given in the arguments was invalid.
      * The file referred to by that file handle no longer exists or access to it
      * has been revoked.
      */
-    public static final NfsStatus NFS3ERR_STALE = new NfsStatus(70);
+    public static final NfsStatus NFS3ERR_STALE = new NfsStatus(70, "NFS3ERR_STALE");
 
     /**
      * Too many levels of remote in path. The file handle given in the arguments
      * referred to a file on a non-local file system on the server.
      */
-    public static final NfsStatus NFS3ERR_REMOTE = new NfsStatus(71);
+    public static final NfsStatus NFS3ERR_REMOTE = new NfsStatus(71, "NFS3ERR_REMOTE");
 
     /**
      * Illegal NFS file handle. The file handle failed internal consistency
      * checks.
      */
-    public static final NfsStatus NFS3ERR_BADHANDLE = new NfsStatus(10001);
+    public static final NfsStatus NFS3ERR_BADHANDLE = new NfsStatus(10001, "NFS3ERR_BADHANDLE");
 
     /**
      * Update synchronization mismatch was detected during a SETATTR operation.
      */
-    public static final NfsStatus NFS3ERR_NOT_SYNC = new NfsStatus(10002);
+    public static final NfsStatus NFS3ERR_NOT_SYNC = new NfsStatus(10002, "NFS3ERR_NOT_SYNC");
 
     /**
      * READDIR or READDIRPLUS cookie is stale.
      */
-    public static final NfsStatus NFS3ERR_BAD_COOKIE = new NfsStatus(10003);
+    public static final NfsStatus NFS3ERR_BAD_COOKIE = new NfsStatus(10003, "NFS3ERR_BAD_COOKIE");
 
     /**
      * Operation is not supported.
      */
-    public static final NfsStatus NFS3ERR_NOTSUPP = new NfsStatus(10004);
+    public static final NfsStatus NFS3ERR_NOTSUPP = new NfsStatus(10004, "NFS3ERR_NOTSUPP");
 
     /**
      * Buffer or request is too small.
      */
-    public static final NfsStatus NFS3ERR_TOOSMALL = new NfsStatus(10005);
+    public static final NfsStatus NFS3ERR_TOOSMALL = new NfsStatus(10005, "NFS3ERR_TOOSMALL");
 
     /**
      * An error occurred on the server which does not map to any of the legal
@@ -179,13 +179,13 @@ public class NfsStatus {
      * into an appropriate error. UNIX clients may choose to translate this to
      * EIO.
      */
-    public static final NfsStatus NFS3ERR_SERVERFAULT = new NfsStatus(10006);
+    public static final NfsStatus NFS3ERR_SERVERFAULT = new NfsStatus(10006, "NFS3ERR_SERVERFAULT");
 
     /**
      * An attempt was made to create an object of a type not supported by the
      * server.
      */
-    public static final NfsStatus NFS3ERR_BADTYPE = new NfsStatus(10007);
+    public static final NfsStatus NFS3ERR_BADTYPE = new NfsStatus(10007, "NFS3ERR_BADTYPE");
 
     /**
      * The server initiated the request, but was not able to complete it in a
@@ -195,7 +195,7 @@ public class NfsStatus {
      * process a file that has been migrated. In this case, the server should
      * start the immigration process and respond to client with this error.
      */
-    public static final NfsStatus NFS3ERR_JUKEBOX = new NfsStatus(10008);
+    public static final NfsStatus NFS3ERR_JUKEBOX = new NfsStatus(10008, "NFS3ERR_JUKEBOX");
 
     /**
      * The known values.
@@ -247,6 +247,8 @@ public class NfsStatus {
      */
     private int _value;
 
+    private final String _name;
+
     /**
      * Creates the nfs status values, as specified by RFC 1813
      * (https://tools.ietf.org/html/rfc1813).
@@ -255,11 +257,16 @@ public class NfsStatus {
      *            The int status value.
      */
     private NfsStatus(int value) {
+        this(value, "UNKNOWN_NFSSTATUS");
+    }
+
+    private NfsStatus(int value, String name) {
         _value = value;
+        _name = name;
     }
 
     @Override
     public String toString() {
-        return "NfsStatus:" + _value;
+        return _name + "(" + _value + ")";
     }
 }

@@ -22,6 +22,8 @@ import com.emc.ecs.nfsclient.rpc.Xdr;
 import java.io.IOException;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Used to query the port used for a service (mount or NFS), as specified by
@@ -30,6 +32,8 @@ import org.apache.commons.lang3.NotImplementedException;
  * @author seibed
  */
 public class Portmapper {
+
+    private static final Logger LOG = LoggerFactory.getLogger(Portmapper.class);
 
     /**
      * TCP port for Portmap calls, as specified by
@@ -78,6 +82,8 @@ public class Portmapper {
         GetPortRequest request = new GetPortRequest(program, version);
         for (int i = 0; i < _maxRetry; ++i) {
             try {
+                LOG.debug("Querying portmapper: server={}, port={}, program={}, version={}, attempt={}/{}",
+                        serverIP, PMAP_PORT, program, version, i + 1, _maxRetry);
                 Xdr portmapXdr = new Xdr(PORTMAP_MAX_REQUEST_SIZE);
                 request.marshalling(portmapXdr);
 
@@ -86,18 +92,24 @@ public class Portmapper {
 
                 response = new GetPortResponse();
                 response.unmarshalling(reply);
+                break;
             } catch (RpcException e) {
-                handleRpcException(e, i, serverIP);
+                handleRpcException(e, i, serverIP, program, version);
             }
         }
 
         int port = response.getPort();
         if (port == 0) { // A port value of zeros means the program has not been
                          // registered.
-            String msg = String.format("No registry entry for program: %s, version: %s, serverIP: %s", program, version,
-                    serverIP);
+            String msg = String.format("Portmapper has no TCP service registration: server=%s, port=%d, program=%d,"
+                            + " version=%d. Check that the requested service/version is enabled and registered with rpcbind."
+                            + " NFSv3 requires both NFS (100003) and MOUNT (100005) services.",
+                    serverIP, PMAP_PORT, program, version);
+            LOG.warn("{}", msg);
             throw new IOException(msg);
         }
+        LOG.debug("Resolved RPC service port: server={}, program={}, version={}, servicePort={}",
+                serverIP, program, version, port);
         return port;
     }
 
@@ -110,19 +122,21 @@ public class Portmapper {
      *            The number of attempts so far.
      * @throws IOException
      */
-    private static void handleRpcException(RpcException e, int attemptNumber, String server) throws IOException {
-        String messageStart;
-        if (!(e.getStatus().equals(RpcStatus.NETWORK_ERROR))) {
-            messageStart = "network";
-        } else {
-            // check whether to retry
-            if (attemptNumber + 1 < _maxRetry) {
-                return;
-            }
-            messageStart = "rpc";
+    private static void handleRpcException(RpcException e, int attemptNumber, String server, int program, int version)
+            throws IOException {
+        boolean networkError = e.getStatus().equals(RpcStatus.NETWORK_ERROR);
+        if (networkError && attemptNumber + 1 < _maxRetry) {
+            LOG.warn("Portmapper query failed; retrying: server={}, port={}, program={}, version={}, attempt={}/{},"
+                            + " status={}: {}", server, PMAP_PORT, program, version,
+                    attemptNumber + 1, _maxRetry, e.getStatus(), e.getMessage(), e);
+            return;
         }
-        throw new IOException(
-                String.format("%s error, server: %s, RPC error: %s", messageStart, server, e.getMessage()), e);
+        String message = String.format("Portmapper %s failure: server=%s, port=%d, program=%d, version=%d, attempt=%d/%d,"
+                                + " status=%s: %s. Check rpcbind availability and TCP port 111 reachability.",
+                        networkError ? "network" : "RPC", server, PMAP_PORT, program, version,
+                        attemptNumber + 1, _maxRetry, e.getStatus(), e.getMessage());
+        LOG.warn("{}", message, e);
+        throw new IOException(message, e);
     }
 
     /**

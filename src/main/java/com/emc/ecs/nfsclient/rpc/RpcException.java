@@ -58,7 +58,12 @@ public class RpcException extends IOException {
      *            The exception.
      */
     public RpcException(RpcStatus status, String msg, Exception e) {
-        super(msg, e);
+        this(status, msg, (Throwable) e);
+    }
+
+    /** Construct an RPC exception while preserving the original asynchronous failure. */
+    public RpcException(RpcStatus status, String msg, Throwable cause) {
+        super(msg, cause);
         _status = status;
     }
 

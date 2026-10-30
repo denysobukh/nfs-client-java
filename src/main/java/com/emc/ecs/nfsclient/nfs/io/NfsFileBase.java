@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.emc.ecs.nfsclient.nfs.*;
 
@@ -31,6 +33,8 @@ import com.emc.ecs.nfsclient.nfs.*;
  * @author seibed
  */
 public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>> implements NfsFile<N, F> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(NfsFileBase.class);
 
     /**
      * The full network path to the file.
@@ -344,7 +348,8 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>> imp
             try {
                 return file.getAttributes();
             } catch (Exception e) {
-                // do nothing, this is expected
+                LOG.debug("Cannot read NFS attributes while resolving a link; using empty attributes: file={}",
+                        file.getAbsolutePath(), e);
             }
         }
         return new NfsGetAttributes();
@@ -577,6 +582,7 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>> imp
         try {
             return lengthEx();
         } catch (IOException e) {
+            LOG.debug("Cannot determine NFS file length; returning 0: file={}", getAbsolutePath(), e);
             return 0;
         }
     }
@@ -1380,7 +1386,7 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>> imp
                     fileHandle = getNfs().wrapped_getLookup(makeLookupRequest()).getFileHandle();
                 }
             } catch (IOException e) {
-                // do nothing, this will be a common exception
+                LOG.debug("Cannot look up NFS file handle; treating file as absent: file={}", getAbsolutePath(), e);
             }
         }
         setFileHandle(fileHandle);

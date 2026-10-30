@@ -44,10 +44,10 @@ public abstract class NfsResponseHandler<T extends NfsResponseBase> extends RpcR
         if (getResponse().getState() != NfsStatus.NFS3_OK.getValue()) {
             int responseState = getResponse().getState();
             if (responseState == NfsStatus.NFS3ERR_NOENT.getValue()) {
-                throw new FileNotFoundException(request.getErrorMessage());
+                throw new FileNotFoundException(request.getErrorMessage() + " status=" + NfsStatus.NFS3ERR_NOENT);
             }
             NfsStatus status = NfsStatus.fromValue(responseState);
-            throw new NfsException(status, request.getErrorMessage() + " error code:" + status.toString());
+            throw new NfsException(status, request.getErrorMessage() + " status=" + status);
         }
     }
 

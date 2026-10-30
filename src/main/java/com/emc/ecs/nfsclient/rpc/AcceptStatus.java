@@ -27,37 +27,37 @@ public class AcceptStatus extends RpcStatus {
      * Accept status specified by RFC 1831
      * (https://tools.ietf.org/html/rfc1831).
      */
-    static final AcceptStatus SUCCESS = new AcceptStatus(0);
+    static final AcceptStatus SUCCESS = new AcceptStatus(0, "SUCCESS");
 
     /**
      * Accept status specified by RFC 1831
      * (https://tools.ietf.org/html/rfc1831).
      */
-    static final AcceptStatus PROG_UNAVAIL = new AcceptStatus(1);
+    static final AcceptStatus PROG_UNAVAIL = new AcceptStatus(1, "PROG_UNAVAIL");
 
     /**
      * Accept status specified by RFC 1831
      * (https://tools.ietf.org/html/rfc1831).
      */
-    static final AcceptStatus PROG_MISMATCH = new AcceptStatus(2);
+    static final AcceptStatus PROG_MISMATCH = new AcceptStatus(2, "PROG_MISMATCH");
 
     /**
      * Accept status specified by RFC 1831
      * (https://tools.ietf.org/html/rfc1831).
      */
-    static final AcceptStatus PROC_UNAVAIL = new AcceptStatus(3);
+    static final AcceptStatus PROC_UNAVAIL = new AcceptStatus(3, "PROC_UNAVAIL");
 
     /**
      * Accept status specified by RFC 1831
      * (https://tools.ietf.org/html/rfc1831).
      */
-    static final AcceptStatus GARBAGE_ARGS = new AcceptStatus(4);
+    static final AcceptStatus GARBAGE_ARGS = new AcceptStatus(4, "GARBAGE_ARGS");
 
     /**
      * Accept status specified by RFC 1831
      * (https://tools.ietf.org/html/rfc1831).
      */
-    static final AcceptStatus SYSTEM_ERR = new AcceptStatus(5);
+    static final AcceptStatus SYSTEM_ERR = new AcceptStatus(5, "SYSTEM_ERR");
 
     /**
      * Preset values.
@@ -98,12 +98,19 @@ public class AcceptStatus extends RpcStatus {
      * 
      * @param value
      */
+    private final String _name;
+
     private AcceptStatus(int value) {
+        this(value, "UNKNOWN_ACCEPTSTATUS");
+    }
+
+    private AcceptStatus(int value, String name) {
         super(value);
+        _name = name;
     }
 
     @Override
     public String toString() {
-        return "AcceptStatus:" + getValue();
+        return _name + "(" + getValue() + ")";
     }
 }

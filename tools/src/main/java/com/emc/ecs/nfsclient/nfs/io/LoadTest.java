@@ -39,7 +39,7 @@ public class LoadTest {
         try {
             testThreadedReadingPerformance(export, fileName, fileSizeInKiloBytes, maximumNumberOfThreads, megaBytesToRead);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.err.println("NFS load test failed: export=" + export + ", file=" + fileName);
             e.printStackTrace();
         }
     }
@@ -104,13 +104,17 @@ public class LoadTest {
                                     }
                                     threadCounter.incrementNumberOfReadingThreadsCompleted();
                             } catch (Exception e) {
-                                System.out.println(e.getMessage());
+                                System.err.println("NFS load-test read failed: server=" + nfs3.getServer()
+                                        + ", export=" + nfs3.getExportedPath() + ", file=" + fileName
+                                        + ", thread=" + Thread.currentThread().getName());
+                                e.printStackTrace(System.err);
                             } finally {
                                 if (inputStream != null) {
                                     try {
                                         inputStream.close();
                                     } catch (IOException e) {
-                                        // e.printStackTrace();
+                                        System.err.println("NFS load-test stream close failed: file=" + fileName);
+                                        e.printStackTrace(System.err);
                                     }
                                 }
                             }
@@ -133,7 +137,8 @@ public class LoadTest {
             try {
                 futures[i].get();
             } catch (Exception e) {
-                // do nothing, the thread is done either way.
+                System.err.println("NFS load-test worker failed: file=" + fileName + ", worker=" + i);
+                e.printStackTrace(System.err);
             }
         }
     }

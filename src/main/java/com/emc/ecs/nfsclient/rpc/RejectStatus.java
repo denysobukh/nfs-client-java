@@ -27,13 +27,13 @@ public class RejectStatus extends RpcStatus {
      * Reject status specified by RFC 1831
      * (https://tools.ietf.org/html/rfc1831).
      */
-    static final RejectStatus RPC_MISMATCH = new RejectStatus(0);
+    static final RejectStatus RPC_MISMATCH = new RejectStatus(0, "RPC_MISMATCH");
 
     /**
      * Reject status specified by RFC 1831
      * (https://tools.ietf.org/html/rfc1831).
      */
-    public static final RejectStatus AUTH_ERROR = new RejectStatus(1);
+    public static final RejectStatus AUTH_ERROR = new RejectStatus(1, "AUTH_ERROR");
 
     /**
      * Preset values.
@@ -74,12 +74,19 @@ public class RejectStatus extends RpcStatus {
      * 
      * @param value
      */
+    private final String _name;
+
     private RejectStatus(int value) {
+        this(value, "UNKNOWN_REJECTSTATUS");
+    }
+
+    private RejectStatus(int value, String name) {
         super(value);
+        _name = name;
     }
 
     @Override
     public String toString() {
-        return "RejectStatus:" + getValue();
+        return _name + "(" + getValue() + ")";
     }
 }

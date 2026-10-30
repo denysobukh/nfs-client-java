@@ -48,9 +48,15 @@ public class ClientIOHandler extends SimpleChannelInboundHandler<byte[]> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        if (!(cause instanceof java.net.BindException)) {
-            LOG.error("Exception on connection to " + getRemoteAddress(), cause);
-            ctx.close();
+        if (cause instanceof java.net.BindException) {
+            // Privileged-port probing handles bind failures and reports exhaustion itself.
+            LOG.debug("Local TCP bind attempt failed: remote={}, local={}",
+                    getRemoteAddress(), ctx.channel().localAddress(), cause);
+            return;
         }
+        LOG.warn("TCP channel failed: remote={}, local={}, pending RPCs will fail: {}",
+                getRemoteAddress(), ctx.channel().localAddress(), cause.toString(), cause);
+        connection.close(cause);
+        ctx.close();
     }
 }

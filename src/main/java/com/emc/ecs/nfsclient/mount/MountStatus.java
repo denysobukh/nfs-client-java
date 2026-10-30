@@ -28,52 +28,52 @@ public class MountStatus {
     /**
      * No error.
      */
-    public static final MountStatus MNT3_OK = new MountStatus(0);
+    public static final MountStatus MNT3_OK = new MountStatus(0, "MNT3_OK");
 
     /**
      * Not owner.
      */
-    public static final MountStatus MNT3ERR_PERM = new MountStatus(1);
+    public static final MountStatus MNT3ERR_PERM = new MountStatus(1, "MNT3ERR_PERM");
 
     /**
      * No such file or directory.
      */
-    public static final MountStatus MNT3ERR_NOENT = new MountStatus(2);
+    public static final MountStatus MNT3ERR_NOENT = new MountStatus(2, "MNT3ERR_NOENT");
 
     /**
      * I/O error.
      */
-    public static final MountStatus MNT3ERR_IO = new MountStatus(5);
+    public static final MountStatus MNT3ERR_IO = new MountStatus(5, "MNT3ERR_IO");
 
     /**
      * Permission denied.
      */
-    public static final MountStatus MNT3ERR_ACCES = new MountStatus(13);
+    public static final MountStatus MNT3ERR_ACCES = new MountStatus(13, "MNT3ERR_ACCES");
 
     /**
      * Not a directory.
      */
-    public static final MountStatus MNT3ERR_NOTDIR = new MountStatus(20);
+    public static final MountStatus MNT3ERR_NOTDIR = new MountStatus(20, "MNT3ERR_NOTDIR");
 
     /**
      * Invalid argument.
      */
-    public static final MountStatus MNT3ERR_INVAL = new MountStatus(22);
+    public static final MountStatus MNT3ERR_INVAL = new MountStatus(22, "MNT3ERR_INVAL");
 
     /**
      * Filename too long.
      */
-    public static final MountStatus MNT3ERR_NAMETOOLONG = new MountStatus(63);
+    public static final MountStatus MNT3ERR_NAMETOOLONG = new MountStatus(63, "MNT3ERR_NAMETOOLONG");
 
     /**
      * Operation not supported.
      */
-    public static final MountStatus MNT3ERR_NOTSUPP = new MountStatus(10004);
+    public static final MountStatus MNT3ERR_NOTSUPP = new MountStatus(10004, "MNT3ERR_NOTSUPP");
 
     /**
      * A failure on the server.
      */
-    public static final MountStatus MNT3ERR_SERVERFAULT = new MountStatus(10006);
+    public static final MountStatus MNT3ERR_SERVERFAULT = new MountStatus(10006, "MNT3ERR_SERVERFAULT");
 
     /**
      * The known values.
@@ -122,6 +122,8 @@ public class MountStatus {
      */
     private int _value;
 
+    private final String _name;
+
     /**
      * Creates the mount status instances, as specified by RFC 1813
      * (https://tools.ietf.org/html/rfc1813).
@@ -130,11 +132,16 @@ public class MountStatus {
      *            The int status value.
      */
     private MountStatus(int value) {
+        this(value, "UNKNOWN_MOUNTSTATUS");
+    }
+
+    private MountStatus(int value, String name) {
         _value = value;
+        _name = name;
     }
 
     @Override
     public String toString() {
-        return "MountStatus:" + _value;
+        return _name + "(" + _value + ")";
     }
 }
