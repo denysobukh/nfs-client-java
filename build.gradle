@@ -211,6 +211,7 @@ tasks.register('aggregateDocs', Sync) {
     description = 'Stage Javadocs for GitHub Pages.'
     group = 'documentation'
     into layout.buildDirectory.dir('aggregatedDocs')
+    from('src/docs')
     into('latest/javadoc') {
         from tasks.named('javadoc')
     }
