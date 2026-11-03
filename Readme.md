@@ -1,9 +1,20 @@
-[![Dependency Security](https://github.com/denysobukh/nfs-client-java/actions/workflows/security.yml/badge.svg?branch=master)](https://github.com/denysobukh/nfs-client-java/actions/workflows/security.yml)
-[![CodeQL](https://github.com/denysobukh/nfs-client-java/actions/workflows/github-code-scanning/codeql/badge.svg?branch=master)](https://github.com/denysobukh/nfs-client-java/actions/workflows/github-code-scanning/codeql)
-[![Error Prone](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml/badge.svg?branch=master&label=Error%20Prone)](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml)
-[![SpotBugs](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml/badge.svg?branch=master&label=SpotBugs)](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml)
+[![Build & tests](https://img.shields.io/github/actions/workflow/status/denysobukh/nfs-client-java/ci.yml?branch=master&label=Build%20%26%20tests)](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml)
+[![Spotless](https://img.shields.io/github/actions/workflow/status/denysobukh/nfs-client-java/ci.yml?branch=master&label=Spotless)](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml)
+[![Error Prone](https://img.shields.io/github/actions/workflow/status/denysobukh/nfs-client-java/ci.yml?branch=master&label=Error%20Prone)](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml)
+[![SpotBugs](https://img.shields.io/github/actions/workflow/status/denysobukh/nfs-client-java/ci.yml?branch=master&label=SpotBugs)](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml)
+[![JaCoCo coverage gate](https://img.shields.io/github/actions/workflow/status/denysobukh/nfs-client-java/ci.yml?branch=master&label=JaCoCo%20coverage%20gate)](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml)
 [![JaCoCo line coverage](https://denysobukh.github.io/nfs-client-java/coverage.svg)](https://denysobukh.github.io/nfs-client-java/coverage/)
-[![Code style: Google Java Format (Spotless)](https://img.shields.io/badge/code_style-Google_Java_Format_(Spotless)-blue)](#code-formatting)
+
+[![Trivy: dependencies, secrets & config](https://img.shields.io/github/actions/workflow/status/denysobukh/nfs-client-java/security.yml?branch=master&label=Trivy%3A%20dependencies%2C%20secrets%20%26%20config)](https://github.com/denysobukh/nfs-client-java/actions/workflows/security.yml)
+[![CodeQL](https://github.com/denysobukh/nfs-client-java/actions/workflows/github-code-scanning/codeql/badge.svg?branch=master)](https://github.com/denysobukh/nfs-client-java/actions/workflows/github-code-scanning/codeql)
+[![Dependabot updates](https://github.com/denysobukh/nfs-client-java/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/denysobukh/nfs-client-java/actions/workflows/dependabot/dependabot-updates)
+[![Dependency submission](https://img.shields.io/github/actions/workflow/status/denysobukh/nfs-client-java/dependency-submission.yml?branch=master&label=Dependency%20submission)](https://github.com/denysobukh/nfs-client-java/actions/workflows/dependency-submission.yml)
+[![GitHub secret scanning: enabled](https://img.shields.io/badge/secret%20scanning-enabled-blue)](https://github.com/denysobukh/nfs-client-java/security/secret-scanning)
+[![GitHub push protection: enabled](https://img.shields.io/badge/push%20protection-enabled-blue)](https://github.com/denysobukh/nfs-client-java/security/secret-scanning)
+
+[![Javadocs & Pages](https://img.shields.io/github/actions/workflow/status/denysobukh/nfs-client-java/docs.yml?branch=master&label=Javadocs%20%26%20Pages)](https://github.com/denysobukh/nfs-client-java/actions/workflows/docs.yml)
+[![Release](https://img.shields.io/github/actions/workflow/status/denysobukh/nfs-client-java/release.yml?label=Release)](https://github.com/denysobukh/nfs-client-java/actions/workflows/release.yml)
+[![Code style: Google Java Format (Spotless)](https://img.shields.io/badge/code%20style-Google%20Java%20Format-blue)](#code-formatting)
 
 NFS Client for Java
 ===
@@ -88,8 +99,38 @@ Reviewed exceptions for intentional API, callback, and test patterns are documen
 in [the SpotBugs exclusion filter](config/spotbugs/exclude.xml). There is no blanket
 baseline; new findings must be reviewed and fixed or narrowly justified.
 
-The Error Prone and SpotBugs badges show the CI workflow status, which includes
-these checks.
+The build/tests, Spotless, Error Prone, SpotBugs, and coverage-gate badges share
+the CI workflow status; each named check runs within that workflow. The JaCoCo
+line-coverage badge shows measured coverage from the published report.
+
+Security checks
+---
+
+The [Trivy Security workflow](.github/workflows/security.yml) runs on pull requests,
+pushes to `master`, every Monday, and manual dispatch. Two independent jobs fail
+on HIGH or CRITICAL findings:
+
+- Dependency scanning checks a resolved CycloneDX SBOM covering runtime, test,
+  and demo dependencies across all modules, including transitive dependencies.
+  The SBOM is uploaded as the `cyclonedx-sbom` artifact. Vulnerabilities without
+  an available fix still fail the check.
+- Repository scanning checks the current checkout for secrets and supported
+  infrastructure misconfigurations, including the demo Dockerfiles. Git metadata,
+  Gradle and scanner caches, and generated build directories are excluded.
+
+The demo NFS server's root-user requirement is the only configuration exception,
+scoped to its Dockerfile and explained in [.trivyignore.yaml](.trivyignore.yaml).
+The Java demo client runs as an unprivileged user. New findings need review;
+there is no blanket baseline.
+
+These checks complement Dependabot's dependency alerts and updates and CodeQL's
+source-code analysis. Trivy's configuration scanner covers supported infrastructure
+formats, rather than arbitrary Java properties or every GitHub Actions setting.
+Trivy secret scanning covers the checkout, not the full Git history. GitHub secret
+scanning and push protection are also enabled; their badges describe repository
+settings rather than scan results. The Trivy badge shows the combined status of
+both security jobs, and dependency submission reports the resolved graph upload
+status rather than a vulnerability count.
 
 Test coverage
 ---

@@ -1,4 +1,4 @@
-name: Dependency Security
+name: Trivy Security
 
 on:
   push:
@@ -46,3 +46,24 @@ jobs:
           severity: HIGH,CRITICAL
           exit-code: '1'
           ignore-unfixed: false
+
+  repository:
+    name: Secrets and configuration
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Fail on HIGH or CRITICAL secrets and misconfigurations
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
+        with:
+          version: v0.76.1
+          scan-type: fs
+          scan-ref: .
+          scanners: secret,misconfig
+          format: table
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+          skip-dirs: .git,.gradle,.cache,**/build
+          trivyignores: .trivyignore.yaml

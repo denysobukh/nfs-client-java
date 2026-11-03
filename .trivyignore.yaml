@@ -1,0 +1,8 @@
+misconfigurations:
+  - id: AVD-DS-0002
+    paths:
+      - examples/nfs-demo/server/Dockerfile
+    statement: >-
+      The local NFS demo server needs root to start rpcbind on port 111 and
+      NFS-Ganesha with DAC_READ_SEARCH for its VFS export. This exception applies
+      only to the demo server; the Java demo client runs as an unprivileged user.
