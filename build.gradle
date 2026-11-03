@@ -171,7 +171,7 @@ distributions {
 mavenPublishing {
     publishToMavenCentral()
     signAllPublications()
-    coordinates('io.github.denysobukh', 'nfs-client', '1.1.1')
+    coordinates('io.github.denysobukh', 'nfs-client', '1.1.2')
 
     pom {
         name = 'NFS Client'

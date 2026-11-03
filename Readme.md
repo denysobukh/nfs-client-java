@@ -5,7 +5,7 @@ NFS Client for Java
 
 Maintained fork of the EMC NFS client with security fixes.
 
-Version **1.1.1** uses **Netty 4.2.16.Final** and requires **Java 17 or newer**
+Version **1.1.2** uses **Netty 4.2.16.Final** and requires **Java 17 or newer**
 at runtime.
 
 Description
@@ -38,14 +38,14 @@ Maven coordinates for this fork (once published to Maven Central):
     <dependency>
         <groupId>io.github.denysobukh</groupId>
         <artifactId>nfs-client</artifactId>
-        <version>1.1.1</version>
+        <version>1.1.2</version>
     </dependency>
 
 You can also use it as a Gradle dependency:
 
-    implementation 'io.github.denysobukh:nfs-client:1.1.1'
+    implementation 'io.github.denysobukh:nfs-client:1.1.2'
 
-**Version 1.1.1 requires Java 17 or newer. Java 21 is a supported runtime choice.**
+**Version 1.1.2 requires Java 17 or newer. Java 21 is a supported runtime choice.**
 
 Docs
 ---
