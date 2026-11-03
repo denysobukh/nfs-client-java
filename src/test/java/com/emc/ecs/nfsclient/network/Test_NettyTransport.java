@@ -10,12 +10,59 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.*;
 import org.junit.Test;
 
 public class Test_NettyTransport {
+  @Test(timeout = 15000)
+  public void firstReplyWinsWhenServerSendsDuplicateResponses()
+      throws IOException, InterruptedException, ExecutionException, TimeoutException {
+    ExecutorService executor = Executors.newSingleThreadExecutor();
+    CountDownLatch releasePeer = new CountDownLatch(1);
+    try (ServerSocket server = new ServerSocket(0)) {
+      server.setSoTimeout(5000);
+      Future<?> peer =
+          executor.submit(() -> {
+            try (Socket socket = server.accept()) {
+              socket.setSoTimeout(5000);
+              DataInputStream input = new DataInputStream(socket.getInputStream());
+              assertEquals(0x80000004, input.readInt());
+              int xid = input.readInt();
+              DataOutputStream output = new DataOutputStream(socket.getOutputStream());
+              for (int value : new int[] {84, 999}) {
+                output.writeInt(0x80000008);
+                output.writeInt(xid);
+                output.writeInt(value);
+              }
+              output.flush();
+              assertTrue("Peer was not released", releasePeer.await(5, TimeUnit.SECONDS));
+            } catch (IOException | InterruptedException e) {
+              throw new AssertionError(e);
+            }
+          });
+      Connection connection = new Connection("127.0.0.1", server.getLocalPort(), false);
+      try {
+        connection.connect();
+        Xdr request = new Xdr(4);
+        request.setXid(987);
+        request.putInt(987);
+        Xdr response = connection.sendAndWait(5, request);
+        response.setOffset(4);
+        assertEquals(84, response.getInt());
+        releasePeer.countDown();
+        peer.get(5, TimeUnit.SECONDS);
+      } finally {
+        releasePeer.countDown();
+        connection.close();
+      }
+    } finally {
+      executor.shutdownNow();
+    }
+  }
+
   @Test
   public void fragmentedAndCoalescedRecords() {
     EmbeddedChannel channel = new EmbeddedChannel(new RPCRecordDecoder());
@@ -63,7 +110,7 @@ public class Test_NettyTransport {
               // Close while a second request is pending.
               in.readInt();
               in.readInt();
-            } catch (Exception e) {
+            } catch (IOException e) {
               throw new RuntimeException(e);
             }
           });
@@ -130,8 +177,8 @@ public class Test_NettyTransport {
               DataInputStream in = new DataInputStream(socket.getInputStream());
               in.readInt();
               in.readInt();
-              releasePeer.await(5, TimeUnit.SECONDS);
-            } catch (Exception e) {
+              assertTrue("Peer was not released", releasePeer.await(5, TimeUnit.SECONDS));
+            } catch (IOException | InterruptedException e) {
               throw new RuntimeException(e);
             }
           });

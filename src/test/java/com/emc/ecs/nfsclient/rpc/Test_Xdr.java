@@ -24,6 +24,30 @@ import org.junit.Test;
 public class Test_Xdr extends Assert {
 
   @Test
+  public void payloadListOwnershipDoesNotAffectCallerOrWireLength() {
+    Xdr xdr = new Xdr(64);
+    List<ByteBuffer> input = new ArrayList<>();
+    input.add(ByteBuffer.wrap(new byte[] {1}));
+    xdr.putPayloads(input, 1);
+    input.clear();
+    List<ByteBuffer> wire = xdr.getPayloads();
+    assertEquals(2, wire.size()); // One byte plus three bytes of terminal padding.
+    assertEquals(1, wire.get(0).remaining());
+    assertEquals(3, wire.get(1).remaining());
+    wire.clear();
+    assertEquals(2, xdr.getPayloads().size());
+  }
+
+  @Test
+  public void payloadPaddingAcceptsAnUnmodifiableCallerList() {
+    Xdr xdr = new Xdr(64);
+    List<ByteBuffer> input = List.of(ByteBuffer.wrap(new byte[] {1}));
+    xdr.putPayloads(input, 1);
+    assertEquals(2, xdr.getPayloads().size());
+    assertEquals(1, input.size());
+  }
+
+  @Test
   public void testGetUnsignedIntBoundaries() {
     long[] values = {0L, 1L, 0x7fffffffL, 0x80000000L, 0x89abcdefL, 0xffffffffL};
     ByteBuffer wire = ByteBuffer.allocate(values.length * Integer.BYTES);

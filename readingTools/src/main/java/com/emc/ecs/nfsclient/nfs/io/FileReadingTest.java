@@ -65,7 +65,7 @@ public class FileReadingTest {
     System.out.println("     The default is to test plain file reads.");
   }
 
-  public static void testStreamReading(String export, String fileName) throws Exception {
+  public static void testStreamReading(String export, String fileName) throws IOException {
     Nfs3 nfs3 = new Nfs3(export, new CredentialUnix(0, 0, null), 3);
     NfsFileInputStream inputStream = null;
     try {
@@ -76,10 +76,10 @@ public class FileReadingTest {
       System.out.println("Testing stream reading");
       int bytesRead = inputStream.read(buffer);
       if (NfsFileInputStream.EOF != inputStream.read()) {
-        throw new Exception("Reading error - should have been at the end of the file");
+        throw new IOException("Reading error - should have been at the end of the file");
       }
       if (fileLength != bytesRead) {
-        throw new Exception(
+        throw new IOException(
             "Reading error - read " + bytesRead + " bytes, should have been " + fileLength);
       }
       System.out.println("Successful read, end of file returned correctly!");
@@ -99,7 +99,7 @@ public class FileReadingTest {
     }
   }
 
-  public static void testReading(String export, String fileName) throws Exception {
+  public static void testReading(String export, String fileName) throws IOException {
     Nfs3 nfs3 = new Nfs3(export, new CredentialUnix(0, 0, null), 3);
     try {
       NfsFile nfsFile = new Nfs3File(nfs3, fileName);
@@ -108,10 +108,10 @@ public class FileReadingTest {
       System.out.println("Testing with plain read");
       NfsReadResponse response = nfsFile.read(0, buffer.length, buffer, 0);
       if (!response.isEof()) {
-        throw new Exception("Reading error - should have been at the end of the file");
+        throw new IOException("Reading error - should have been at the end of the file");
       }
       if (fileLength != response.getBytesRead()) {
-        throw new Exception(
+        throw new IOException(
             "Reading error - read "
                 + response.getBytesRead()
                 + " bytes, should have been "

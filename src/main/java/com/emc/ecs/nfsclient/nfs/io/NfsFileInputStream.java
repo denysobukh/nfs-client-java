@@ -129,7 +129,7 @@ public class NfsFileInputStream extends InputStream {
    * @return the byte array
    * @throws IOException
    */
-  private byte[] makeBytes(int maximumBufferSize) throws IOException {
+  private synchronized byte[] makeBytes(int maximumBufferSize) throws IOException {
     int bufferSize =
         Math.min((int) Math.min(_file.length() - _offset, Integer.MAX_VALUE), maximumBufferSize);
     if (bufferSize == 0) {
@@ -143,7 +143,7 @@ public class NfsFileInputStream extends InputStream {
    *
    * @see java.io.InputStream#available()
    */
-  public int available() throws IOException {
+  public synchronized int available() throws IOException {
     checkForClosed();
     return (int) Math.min(_file.length() - _offset + bytesLeftInBuffer(), Integer.MAX_VALUE);
   }
@@ -153,7 +153,7 @@ public class NfsFileInputStream extends InputStream {
    *
    * @see java.io.InputStream#close()
    */
-  public void close() throws IOException {
+  public synchronized void close() throws IOException {
     _closed = true;
     super.close();
   }
@@ -181,7 +181,7 @@ public class NfsFileInputStream extends InputStream {
    *
    * @see java.io.InputStream#read()
    */
-  public int read() throws IOException {
+  public synchronized int read() throws IOException {
     byte[] b = new byte[1];
     int bytesRead = read(b, 0, 1);
     if (bytesRead == EOF) {
@@ -197,7 +197,7 @@ public class NfsFileInputStream extends InputStream {
    *
    * @see java.io.InputStream#read(byte[])
    */
-  public int read(byte[] b) throws IOException {
+  public synchronized int read(byte[] b) throws IOException {
     return read(b, 0, b.length);
   }
 
@@ -206,7 +206,7 @@ public class NfsFileInputStream extends InputStream {
    *
    * @see java.io.InputStream#read(byte[], int, int)
    */
-  public int read(byte[] b, int off, int len) throws IOException {
+  public synchronized int read(byte[] b, int off, int len) throws IOException {
     checkForClosed();
     if (b == null) {
       throw new NullPointerException();
@@ -252,7 +252,7 @@ public class NfsFileInputStream extends InputStream {
    *
    * @see java.io.InputStream#skip(long)
    */
-  public long skip(long bytesToSkip) throws IOException {
+  public synchronized long skip(long bytesToSkip) throws IOException {
     checkForClosed();
     long bytesSkipped = 0;
     while (bytesToSkip > bytesLeftInBuffer()) {

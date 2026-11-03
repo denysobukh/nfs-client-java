@@ -67,7 +67,7 @@ public abstract class RpcRequest {
    * This starts as <code>false</code>, and is changed to <code>true</code> if the rpc call is
    * rejected with an authentication error.
    */
-  private boolean _usePrivilegedPort = false;
+  private volatile boolean _usePrivilegedPort = false;
 
   /**
    * Create the request, as specified by RFC 1831 (https://tools.ietf.org/html/rfc1831).

@@ -20,7 +20,9 @@ import java.util.Map;
  *
  * @author seibed
  */
-public class NfsStatus {
+public class NfsStatus implements java.io.Serializable {
+
+  private static final long serialVersionUID = 1L;
 
   /** Indicates the call completed successfully. */
   public static final NfsStatus NFS3_OK = new NfsStatus(0, "NFS3_OK");
@@ -231,6 +233,10 @@ public class NfsStatus {
   private NfsStatus(int value, String name) {
     _value = value;
     _name = name;
+  }
+
+  private Object readResolve() {
+    return fromValue(_value);
   }
 
   @Override

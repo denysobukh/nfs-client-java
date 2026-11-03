@@ -107,20 +107,14 @@ public class NfsSetAttributes {
    * @param atime the time when the file data was last accessed.
    */
   public void setAtime(NfsTime atime) {
-    if (atime != null && atime.isBareTime()) {
-      throw new IllegalArgumentException("The atime must be a time setting time");
-    }
-    _atime = atime;
+    _atime = checkSettingTime(atime, "atime");
   }
 
   /**
    * @param mtime the time when the file data was last modified.
    */
   public void setMtime(NfsTime mtime) {
-    if (mtime != null && mtime.isBareTime()) {
-      throw new IllegalArgumentException("The mtime must be a time setting time");
-    }
-    _mtime = mtime;
+    _mtime = checkSettingTime(mtime, "mtime");
   }
 
   /** Default constructor */
@@ -156,8 +150,15 @@ public class NfsSetAttributes {
     _uid = uid;
     _gid = gid;
     _size = size;
-    setAtime(atime);
-    setMtime(mtime);
+    _atime = checkSettingTime(atime, "atime");
+    _mtime = checkSettingTime(mtime, "mtime");
+  }
+
+  private static NfsTime checkSettingTime(NfsTime time, String name) {
+    if (time != null && time.isBareTime()) {
+      throw new IllegalArgumentException("The " + name + " must be a time setting time");
+    }
+    return time;
   }
 
   /**

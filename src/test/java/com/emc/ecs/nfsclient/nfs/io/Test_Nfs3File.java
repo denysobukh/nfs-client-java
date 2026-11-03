@@ -567,7 +567,7 @@ public class Test_Nfs3File extends NfsTestBase {
     try {
       link.followLinks();
       fail("This should have thrown an exception.");
-    } catch (Exception e) {
+    } catch (IOException e) {
       // do nothing, this is expected.
     }
   }

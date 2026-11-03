@@ -47,7 +47,7 @@ public class LoadTest {
       int fileSizeInKiloBytes,
       int maximumNumberOfThreads,
       int megaBytesToRead)
-      throws Exception {
+      throws IOException, InterruptedException {
     Nfs3 nfs3 = new Nfs3(export, new CredentialUnix(0, 0, null), 3);
     int fileLength = writeFile(nfs3, fileName, fileSizeInKiloBytes);
     for (int numberOfThreads = 1;
@@ -70,15 +70,15 @@ public class LoadTest {
 
     byte[] dataChunk = "another chunk of data!".getBytes(RpcRequest.CHARSET);
     int longerSize = (1000 * fileSizeInKiloBytes) + dataChunk.length;
-    NfsFileOutputStream outputStream = new NfsFileOutputStream(test);
     byte[] expectedData = new byte[longerSize];
     int chunkStart = 0;
     while (chunkStart + dataChunk.length < longerSize) {
       System.arraycopy(dataChunk, 0, expectedData, chunkStart, dataChunk.length);
       chunkStart += dataChunk.length;
     }
-    outputStream.write(expectedData);
-    outputStream.close();
+    try (NfsFileOutputStream outputStream = new NfsFileOutputStream(test)) {
+      outputStream.write(expectedData);
+    }
     return longerSize;
   }
 
@@ -88,7 +88,7 @@ public class LoadTest {
       final int fileLength,
       final int numberOfThreadsToUse,
       int megaBytesToRead)
-      throws Exception {
+      throws IOException, InterruptedException {
     final ThreadCounter threadCounter = new ThreadCounter();
     Future<?>[] futures = new Future<?>[numberOfThreadsToUse];
     ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreadsToUse);
@@ -178,7 +178,7 @@ public class LoadTest {
 
     int numberOfReadingThreadsCompleted = 0;
 
-    public int getNumberOfReadingThreadsCompleted() {
+    public synchronized int getNumberOfReadingThreadsCompleted() {
       return numberOfReadingThreadsCompleted;
     }
 

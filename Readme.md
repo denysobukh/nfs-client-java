@@ -1,5 +1,6 @@
 [![Dependency Security](https://github.com/denysobukh/nfs-client-java/actions/workflows/security.yml/badge.svg?branch=master)](https://github.com/denysobukh/nfs-client-java/actions/workflows/security.yml)
 [![Error Prone](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml/badge.svg?branch=master&label=Error%20Prone)](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml)
+[![SpotBugs](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml/badge.svg?branch=master&label=SpotBugs)](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml)
 [![Code style: Google Java Format (Spotless)](https://img.shields.io/badge/code_style-Google_Java_Format_(Spotless)-blue)](#code-formatting)
 
 NFS Client for Java
@@ -81,7 +82,18 @@ default warning-level findings are reported in the compiler output.
 ./gradlew clean build demoClasses # Build, test, and analyze all Java source sets
 ```
 
-The Error Prone badge shows the CI workflow status, which includes these checks.
+[SpotBugs](https://spotbugs.github.io/) also analyzes every Java source set during
+`./gradlew check` and `./gradlew build`, including tests and the demo, at maximum
+effort with all confidence levels included. Unsuppressed findings fail the build.
+HTML and XML reports are generated under each module's `build/reports/spotbugs/`
+directory and uploaded as the `spotbugs-reports` CI artifact.
+
+Reviewed exceptions for intentional API, callback, and test patterns are documented
+in [the SpotBugs exclusion filter](config/spotbugs/exclude.xml). There is no blanket
+baseline; new findings must be reviewed and fixed or narrowly justified.
+
+The Error Prone and SpotBugs badges show the CI workflow status, which includes
+these checks.
 
 How to use the bare client
 ---

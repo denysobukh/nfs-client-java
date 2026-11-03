@@ -364,7 +364,7 @@ public class Xdr {
   public void putPayloads(List<ByteBuffer> payloads, int size) {
     putInt(size);
     if (_payloads == null) {
-      _payloads = payloads;
+      _payloads = new ArrayList<>(payloads);
     } else {
       _payloads.addAll(payloads);
     }
@@ -381,7 +381,7 @@ public class Xdr {
       paddingList.add(terminalPadding);
       putPayloads(paddingList, terminalPadding.remaining());
     }
-    return _payloads;
+    return _payloads == null ? null : new ArrayList<>(_payloads);
   }
 
   /**

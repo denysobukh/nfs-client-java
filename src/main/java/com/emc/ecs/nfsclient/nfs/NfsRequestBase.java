@@ -90,7 +90,7 @@ public abstract class NfsRequestBase extends RpcRequest implements NfsRequest {
    *     </ul>
    */
   public final byte[] getFileHandle() {
-    return _fileHandle;
+    return _fileHandle.clone();
   }
 
   /**

@@ -44,15 +44,16 @@ public class Test_StreamDiagnostics {
                       throw new AssertionError("Unexpected file operation: " + method.getName());
                   }
                 });
-    NfsFileOutputStream stream = new NfsFileOutputStream(file);
-    stream.write(new byte[] {1, 2, 3});
-    try (LogCapture logs = new LogCapture()) {
-      stream.close(); // Retains the existing close() exception-suppression behavior.
-      assertTrue(logs.output().contains("WARN"));
-      assertTrue(logs.output().contains("file=server:/export/test.bin"));
-      assertTrue(logs.output().contains("bufferedBytes=3"));
-      assertTrue(logs.output().contains("data may not have reached stable storage"));
-      assertTrue(logs.output().contains("simulated write failure"));
+    try (NfsFileOutputStream stream = new NfsFileOutputStream(file)) {
+      stream.write(new byte[] {1, 2, 3});
+      try (LogCapture logs = new LogCapture()) {
+        stream.close(); // Retains the existing close() exception-suppression behavior.
+        assertTrue(logs.output().contains("WARN"));
+        assertTrue(logs.output().contains("file=server:/export/test.bin"));
+        assertTrue(logs.output().contains("bufferedBytes=3"));
+        assertTrue(logs.output().contains("data may not have reached stable storage"));
+        assertTrue(logs.output().contains("simulated write failure"));
+      }
     }
   }
 }

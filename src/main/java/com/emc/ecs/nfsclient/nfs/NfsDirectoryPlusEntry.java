@@ -59,6 +59,6 @@ public class NfsDirectoryPlusEntry extends NfsDirectoryEntry {
    * @return The file handle, for use in RPC calls.
    */
   public final byte[] getFileHandle() {
-    return _fileHandle;
+    return _fileHandle == null ? null : _fileHandle.clone();
   }
 }

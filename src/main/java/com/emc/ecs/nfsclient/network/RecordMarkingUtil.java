@@ -29,7 +29,7 @@ import org.apache.commons.lang3.NotImplementedException;
  *
  * @author seibed
  */
-public class RecordMarkingUtil {
+public final class RecordMarkingUtil {
 
   /**
    * Special constant used for the last fragment size. This is a number bigger than the largest

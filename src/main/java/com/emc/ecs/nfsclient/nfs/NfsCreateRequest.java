@@ -15,7 +15,7 @@ package com.emc.ecs.nfsclient.nfs;
 import com.emc.ecs.nfsclient.rpc.Credential;
 import com.emc.ecs.nfsclient.rpc.Xdr;
 import java.io.FileNotFoundException;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * The request, as specified by RFC 1813 (https://tools.ietf.org/html/rfc1813).
@@ -94,10 +94,10 @@ public class NfsCreateRequest extends NfsRequestBase {
     _attributes = attributes;
     if (_createMode == NfsCreateMode.EXCLUSIVE) {
       if (verifier != null) {
-        _verifier = verifier;
+        _verifier = verifier.clone();
       } else {
         _verifier = new byte[NFS3_CREATEVERFSIZE];
-        new Random().nextBytes(_verifier);
+        ThreadLocalRandom.current().nextBytes(_verifier);
       }
     }
   }
@@ -133,6 +133,6 @@ public class NfsCreateRequest extends NfsRequestBase {
    *     provided for exclusive creation, this was generated.
    */
   public byte[] getVerifier() {
-    return _verifier;
+    return _verifier == null ? null : _verifier.clone();
   }
 }

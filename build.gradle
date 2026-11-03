@@ -20,6 +20,7 @@ plugins {
     id 'signing'
     id 'com.diffplug.spotless' version '8.11.0'
     id 'net.ltgt.errorprone' version '5.2.0'
+    id 'com.github.spotbugs' version '6.5.13'
     id 'org.cyclonedx.bom' version '3.5.1'
     id 'com.vanniktech.maven.publish' version '0.37.0'
 }
@@ -78,6 +79,26 @@ allprojects {
     }
     plugins.withId('java') {
         apply plugin: 'net.ltgt.errorprone'
+        apply plugin: 'com.github.spotbugs'
+
+        spotbugs {
+            toolVersion = '4.10.5'
+            effort = com.github.spotbugs.snom.Effort.valueOf('MAX')
+            reportLevel = com.github.spotbugs.snom.Confidence.valueOf('LOW')
+            excludeFilter = rootProject.file('config/spotbugs/exclude.xml')
+        }
+        tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {
+            reports {
+                xml.required = true
+                html.required = true
+            }
+        }
+        sourceSets.configureEach { sourceSet ->
+            tasks.named(sourceSet.getTaskName('spotbugs', null)) {
+                // Shared test fixtures also reference implementation dependencies from the client.
+                auxClassPaths.from(sourceSet.runtimeClasspath)
+            }
+        }
 
         dependencies {
             errorprone 'com.google.errorprone:error_prone_core:2.52.0'

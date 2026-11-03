@@ -82,15 +82,8 @@ public class Connection {
    * Store the response promises while they are in progress. The map is final, but the content will
    * change.
    */
-  private final ConcurrentHashMap<Integer, Promise<Void>> _futureMap =
-      new ConcurrentHashMap<Integer, Promise<Void>>();
-
-  /**
-   * Store the Xdr response instances while they are in progress. The map is final, but the content
-   * will change.
-   */
-  private final ConcurrentHashMap<Integer, Xdr> _responseMap =
-      new ConcurrentHashMap<Integer, Xdr>();
+  private final ConcurrentHashMap<Integer, Promise<Xdr>> _futureMap =
+      new ConcurrentHashMap<Integer, Promise<Xdr>>();
 
   /**
    * Simple enums for communicating connection states.
@@ -228,19 +221,18 @@ public class Connection {
     }
 
     // put the request into a map for timeout management
-    Promise<Void> timeoutFuture = _channel.newPromise();
+    Promise<Xdr> timeoutFuture = new DefaultPromise<>(_channel.eventLoop());
     Integer xid = Integer.valueOf(xdrRequest.getXid());
     _futureMap.put(xid, timeoutFuture);
 
     // put the request into the queue of the netty, netty will send data
     // asynchronously
-    RecordMarkingUtil.putRecordMarkingAndSend(_channel, xdrRequest);
-
-    timeoutFuture.awaitUninterruptibly(timeout, TimeUnit.SECONDS);
-
-    // remove the response from timeout maps
-    Xdr response = _responseMap.remove(xid);
-    _futureMap.remove(xid);
+    try {
+      RecordMarkingUtil.putRecordMarkingAndSend(_channel, xdrRequest);
+      timeoutFuture.awaitUninterruptibly(timeout, TimeUnit.SECONDS);
+    } finally {
+      _futureMap.remove(xid, timeoutFuture);
+    }
 
     if (timeoutFuture.isSuccess() == false) {
 
@@ -261,7 +253,7 @@ public class Connection {
       }
     }
 
-    return response;
+    return timeoutFuture.getNow();
   }
 
   /**
@@ -345,7 +337,7 @@ public class Connection {
     NetMgr.getInstance().dropConnection(InetSocketAddress.createUnresolved(_remoteHost, _port));
 
     // notify all the pending requests in the timeout map
-    for (Promise<Void> future : _futureMap.values()) {
+    for (Promise<Xdr> future : _futureMap.values()) {
       future.tryFailure(failure);
     }
   }
@@ -358,10 +350,9 @@ public class Connection {
    * @param response
    */
   protected void notifySender(Integer xid, Xdr response) {
-    Promise<Void> future = _futureMap.get(xid);
+    Promise<Xdr> future = _futureMap.get(xid);
     if (future != null) {
-      _responseMap.put(xid, response);
-      future.trySuccess(null);
+      future.trySuccess(response);
     } else {
       LOG.debug(
           "Ignoring RPC response without a pending request (possibly timed out): remote={}, xid={}",
@@ -372,7 +363,7 @@ public class Connection {
 
   /** Notify all the senders of all pending requests */
   protected void notifyAllPendingSenders(String message) {
-    for (Promise<Void> future : _futureMap.values()) {
+    for (Promise<Xdr> future : _futureMap.values()) {
       future.tryFailure(new java.io.IOException(message));
     }
   }

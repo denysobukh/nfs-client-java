@@ -16,6 +16,7 @@ import com.emc.ecs.nfsclient.rpc.Credential;
 import com.emc.ecs.nfsclient.rpc.Xdr;
 import java.io.FileNotFoundException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -113,7 +114,7 @@ public class NfsWriteRequest extends NfsRequestBase {
 
     _offset = offset;
     _syncType = syncType;
-    _payload = payload;
+    _payload = payload == null ? null : new ArrayList<>(payload);
     int payload_size = 0;
     if (_payload != null) {
       for (ByteBuffer b : _payload) {

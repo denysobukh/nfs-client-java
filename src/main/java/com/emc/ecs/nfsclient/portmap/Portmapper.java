@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author seibed
  */
-public class Portmapper {
+public final class Portmapper {
 
   private static final Logger LOG = LoggerFactory.getLogger(Portmapper.class);
 

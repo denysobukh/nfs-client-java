@@ -38,36 +38,36 @@ public class Test_Streams extends NfsTestBase {
 
     Nfs3File test = new Nfs3File(nfs3, "/testIo1");
 
-    NfsFileOutputStream outputStream = new NfsFileOutputStream(test);
-    assertTrue(test.exists());
-    assertTrue(test.canModify());
-    assertTrue(test.canRead());
     byte[] expectedData = new byte[] {1, 2, 3, 127, -1, -128, 0, 1, 32};
-    outputStream.write(expectedData);
-    outputStream.close();
-
-    NfsFileInputStream inputStream = new NfsFileInputStream(test);
-    assertEquals(expectedData.length, inputStream.available());
-    int bytesRead = (int) inputStream.skip(expectedData.length);
-    assertEquals(0, inputStream.available());
-    inputStream.close();
-
-    inputStream = new NfsFileInputStream(test);
-    for (int i = 0; i < expectedData.length; ++i) {
-      int nextByte = inputStream.read();
-      assertNotEquals(NfsFileInputStream.EOF, nextByte);
-      assertEquals(expectedData[i], (byte) nextByte);
+    try (NfsFileOutputStream outputStream = new NfsFileOutputStream(test)) {
+      assertTrue(test.exists());
+      assertTrue(test.canModify());
+      assertTrue(test.canRead());
+      outputStream.write(expectedData);
     }
-    assertEquals(NfsFileInputStream.EOF, inputStream.read());
-    inputStream.close();
 
-    inputStream = new NfsFileInputStream(test);
+    try (NfsFileInputStream inputStream = new NfsFileInputStream(test)) {
+      assertEquals(expectedData.length, inputStream.available());
+      assertEquals(expectedData.length, inputStream.skip(expectedData.length));
+      assertEquals(0, inputStream.available());
+    }
+
+    try (NfsFileInputStream inputStream = new NfsFileInputStream(test)) {
+      for (int i = 0; i < expectedData.length; ++i) {
+        int nextByte = inputStream.read();
+        assertNotEquals(NfsFileInputStream.EOF, nextByte);
+        assertEquals(expectedData[i], (byte) nextByte);
+      }
+      assertEquals(NfsFileInputStream.EOF, inputStream.read());
+    }
+
     byte[] buffer = new byte[1000];
-    assertEquals(expectedData.length, inputStream.available());
-    bytesRead = inputStream.read(buffer);
-    assertEquals(0, inputStream.available());
-    inputStream.close();
-
+    int bytesRead;
+    try (NfsFileInputStream inputStream = new NfsFileInputStream(test)) {
+      assertEquals(expectedData.length, inputStream.available());
+      bytesRead = inputStream.read(buffer);
+      assertEquals(0, inputStream.available());
+    }
     assertEquals(expectedData.length, bytesRead);
     for (int i = 0; i < bytesRead; ++i) {
       assertEquals(expectedData[i], buffer[i]);
@@ -75,41 +75,38 @@ public class Test_Streams extends NfsTestBase {
 
     test.delete();
     assertFalse(test.exists());
-
     test = new Nfs3File(nfs3, "/testIo2");
     assertFalse(test.exists());
 
     byte[] dataChunk = "another chunk of data!".getBytes(RpcRequest.CHARSET);
     int longerSize = 100000000 + dataChunk.length;
-    outputStream = new NfsFileOutputStream(test);
-    assertTrue(test.exists());
-    assertTrue(test.canModify());
-    assertTrue(test.canRead());
     expectedData = new byte[longerSize];
     int chunkStart = 0;
     while (chunkStart + dataChunk.length < longerSize) {
       System.arraycopy(dataChunk, 0, expectedData, chunkStart, dataChunk.length);
       chunkStart += dataChunk.length;
     }
-
     long timeInMillis = Calendar.getInstance().getTimeInMillis();
-    outputStream.write(expectedData);
-    outputStream.close();
+    try (NfsFileOutputStream outputStream = new NfsFileOutputStream(test)) {
+      assertTrue(test.exists());
+      assertTrue(test.canModify());
+      assertTrue(test.canRead());
+      outputStream.write(expectedData);
+    }
     timeInMillis = Calendar.getInstance().getTimeInMillis() - timeInMillis;
     System.out.println("Milliseconds to write 100 MB: " + timeInMillis);
 
-    inputStream = new NfsFileInputStream(test);
     buffer = new byte[longerSize];
     timeInMillis = Calendar.getInstance().getTimeInMillis();
-    bytesRead = inputStream.read(buffer);
-    inputStream.close();
+    try (NfsFileInputStream inputStream = new NfsFileInputStream(test)) {
+      bytesRead = inputStream.read(buffer);
+    }
     timeInMillis = Calendar.getInstance().getTimeInMillis() - timeInMillis;
     System.out.println("Milliseconds to read 100 MB: " + timeInMillis);
     assertEquals(expectedData.length, bytesRead);
     for (int i = 0; i < bytesRead; ++i) {
       assertEquals(expectedData[i], buffer[i]);
     }
-
     test.delete();
   }
 

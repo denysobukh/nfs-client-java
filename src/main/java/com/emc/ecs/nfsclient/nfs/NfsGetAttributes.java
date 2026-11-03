@@ -266,7 +266,7 @@ public class NfsGetAttributes {
    *     the server and the client must agree on the values passed.
    */
   public long[] getRdev() {
-    return _rdev;
+    return _rdev == null ? null : _rdev.clone();
   }
 
   /**

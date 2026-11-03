@@ -26,7 +26,7 @@ jobs:
           distribution: temurin
           java-version: '25'
           cache: gradle
-      - name: Build, test, and run Error Prone (Java 17 target)
+      - name: Build, test, and run Error Prone and SpotBugs (Java 17 target)
         run: ./gradlew --no-daemon clean build demoClasses
       - name: Upload test reports
         if: failure()
@@ -34,3 +34,9 @@ jobs:
         with:
           name: test-reports
           path: '**/build/reports/tests/'
+      - name: Upload SpotBugs reports
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: spotbugs-reports
+          path: '**/build/reports/spotbugs/'

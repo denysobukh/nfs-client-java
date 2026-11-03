@@ -20,6 +20,8 @@ import java.util.Map;
  */
 public class AcceptStatus extends RpcStatus {
 
+  private static final long serialVersionUID = 1L;
+
   /** Accept status specified by RFC 1831 (https://tools.ietf.org/html/rfc1831). */
   static final AcceptStatus SUCCESS = new AcceptStatus(0, "SUCCESS");
 

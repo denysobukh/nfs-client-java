@@ -21,7 +21,9 @@ import java.util.Map;
  *
  * @author seibed
  */
-public class MountStatus {
+public class MountStatus implements java.io.Serializable {
+
+  private static final long serialVersionUID = 1L;
 
   /** No error. */
   public static final MountStatus MNT3_OK = new MountStatus(0, "MNT3_OK");
@@ -122,6 +124,10 @@ public class MountStatus {
   private MountStatus(int value, String name) {
     _value = value;
     _name = name;
+  }
+
+  private Object readResolve() {
+    return fromValue(_value);
   }
 
   @Override

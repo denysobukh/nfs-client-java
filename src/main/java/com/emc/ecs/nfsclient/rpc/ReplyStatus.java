@@ -20,6 +20,8 @@ import java.util.Map;
  */
 public class ReplyStatus extends RpcStatus {
 
+  private static final long serialVersionUID = 1L;
+
   /** Accepted - reply status specified by RFC 1831 (https://tools.ietf.org/html/rfc1831). */
   public static final ReplyStatus MSG_ACCEPTED = new ReplyStatus(0, "MSG_ACCEPTED");
 

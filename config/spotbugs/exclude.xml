@@ -1,0 +1,408 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+  <!-- Reviewed exceptions only. Do not add a baseline or disable entire bug categories. -->
+  <!-- Decoded RFC 1813 fields are part of the public result API and are consumed by library users even when this repository does not read them. -->
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.NfsFsInfo" />
+    <Bug pattern="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" />
+    <Field name="properties" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.NfsFsStat" />
+    <Bug pattern="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" />
+    <Field name="ffiles" />
+  </Match>
+  <!-- Executor Runnable test peers cannot declare checked failures. They wrap I/O/interruption failures so Future.get fails the test with the original cause. -->
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.network.Test_NettyTransport" />
+    <Bug pattern="THROWS_METHOD_THROWS_RUNTIMEEXCEPTION" />
+    <Or>
+      <Method name="lambda$rpcTimeoutIdentifiesRequestAndEndpoint$0" />
+      <Method name="lambda$tcpRoundTripAndDisconnect$0" />
+    </Or>
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.nfs3.Test_CustomPorts$Peer" />
+    <Bug pattern="THROWS_METHOD_THROWS_RUNTIMEEXCEPTION" />
+    <Method name="lambda$new$0" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.nfs3.Test_MountDiagnostics$Peer" />
+    <Bug pattern="THROWS_METHOD_THROWS_RUNTIMEEXCEPTION" />
+    <Method name="lambda$new$0" />
+  </Match>
+  <!-- Existing public accessors belong to different protocol holder types. Preserve their spelling for source and binary compatibility. -->
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.NfsDirectoryEntry" />
+    <Bug pattern="NM_CONFUSING" />
+    <Method name="getFileId" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.NfsGetAttributes" />
+    <Bug pattern="NM_CONFUSING" />
+    <Or>
+      <Method name="getCtime" />
+      <Method name="getMtime" />
+    </Or>
+  </Match>
+  <!-- Intentional extension hooks: NfsFileBase creates the concrete parent-file type, and Nfs3 supports overriding service discovery. Existing subclasses and local peer tests rely on construction invoking these hooks; implementations must not depend on uninitialized subclass fields. -->
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.io.NfsFileBase" />
+    <Bug pattern="MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR" />
+    <Method name="&lt;init&gt;" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.nfs3.Nfs3" />
+    <Bug pattern="MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR" />
+    <Method name="&lt;init&gt;" />
+  </Match>
+  <!-- JUnit test entry points and peer await helpers intentionally propagate checked failures to the runner so their original causes fail the test. -->
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.network.Test_NettyTransport" />
+    <Bug pattern="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION" />
+    <Or>
+      <Method name="channelFailureIsLoggedAndPreservesOriginalThrowable" />
+      <Method name="failedConnectUnblocksSender" />
+      <Method name="rpcTimeoutIdentifiesRequestAndEndpoint" />
+      <Method name="tcpRoundTripAndDisconnect" />
+    </Or>
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.Test_NfsCompatibility" />
+    <Bug pattern="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION" />
+    <Method name="oldImplementationCompilesUnchangedAndItsOldBytecodeUsesTheDefaultMethod" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.io.Test_LoadTest" />
+    <Bug pattern="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION" />
+    <Or>
+      <Method name="testThreadedReadingPerformance100MB" />
+      <Method name="testThreadedReadingPerformance10MB" />
+      <Method name="testThreadedReadingPerformance1MB" />
+      <Method name="testThreadedReadingPerformance500kB" />
+    </Or>
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.io.Test_Nfs3File" />
+    <Bug pattern="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION" />
+    <Or>
+      <Method name="testAttributeSettingAndGetting" />
+      <Method name="testDirectoryReading" />
+      <Method name="testFileAndDirectoryCreationAndDeletion" />
+      <Method name="testLinkHandling" />
+      <Method name="testSpecialHandling" />
+    </Or>
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.io.Test_StreamDiagnostics" />
+    <Bug pattern="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION" />
+    <Method name="suppressedCloseFailureWarnsAboutBufferedDataAndFile" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.io.Test_Streams" />
+    <Bug pattern="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION" />
+    <Or>
+      <Method name="testClosing" />
+      <Method name="testReadingAndWriting" />
+    </Or>
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.nfs3.Test_CustomPorts$Peer" />
+    <Bug pattern="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION" />
+    <Method name="await" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.nfs3.Test_MountDiagnostics$Peer" />
+    <Bug pattern="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION" />
+    <Method name="await" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.nfs3.Test_Nfs3" />
+    <Bug pattern="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION" />
+    <Or>
+      <Method name="testGetRootHandle" />
+      <Method name="testSetAttrGuarded" />
+    </Or>
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.rpc.Test_RpcDiagnostics" />
+    <Bug pattern="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION" />
+    <Or>
+      <Method name="knownStatusesIncludeSymbolicNameAndCode" />
+      <Method name="missingFileRemainsFileNotFoundExceptionWithEndpoint" />
+      <Method name="nfsStatusFailuresHaveEndpointAndPreserveStatusWithoutRetry" />
+      <Method name="retriesIdentifyOperationAndKeepTerminalCause" />
+    </Or>
+  </Match>
+  <!-- NfsSetAttributes is a mutable request builder, deliberately shared until marshalling. Callers must finish configuring it before sending the request. -->
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.NfsCreateRequest" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+    <Field name="_attributes" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.NfsMkdirRequest" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+    <Field name="_attributes" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.NfsMknodRequest" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+    <Field name="_attributes" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.NfsSetAttrRequest" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+    <Field name="_attributes" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.NfsSymlinkRequest" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+    <Field name="_attributes" />
+  </Match>
+  <!-- Only the root-handle reference is replaced during remount. Each published array is privately cloned and never modified; getters return clones, so volatile element updates are unnecessary. -->
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.nfs3.Nfs3" />
+    <Bug pattern="VO_VOLATILE_REFERENCE_TO_ARRAY" />
+    <Field name="_rootFileHandle" />
+  </Match>
+  <!-- READ explicitly fills the caller-provided destination buffer; copying it would discard the result visible to the caller. -->
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.NfsReadResponse" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+    <Field name="_bytes" />
+  </Match>
+  <!-- READDIR and READDIRPLUS explicitly append into the caller-provided list across response pages. getEntries returns that same accumulator by contract. -->
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.NfsReaddirResponse" />
+    <Bug pattern="EI_EXPOSE_REP" />
+    <Field name="_entries" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.NfsReaddirResponse" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+    <Field name="_entries" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.NfsReaddirplusResponse" />
+    <Bug pattern="EI_EXPOSE_REP" />
+    <Field name="_entries" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.NfsReaddirplusResponse" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+    <Field name="_entries" />
+  </Match>
+  <!-- Response handlers are created for one synchronous RPC and do not escape the call; test fixtures live only for the test. Their enclosing references do not create a long-lived retention leak. -->
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.Test_NfsCompatibility" />
+    <Bug pattern="SIC_INNER_SHOULD_BE_STATIC_ANON" />
+    <Method name="oldImplementationCompilesUnchangedAndItsOldBytecodeUsesTheDefaultMethod" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.io.Test_Nfs3File" />
+    <Bug pattern="SIC_INNER_SHOULD_BE_STATIC_ANON" />
+    <Method name="testDirectoryReading" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.io.Test_StreamDiagnostics" />
+    <Bug pattern="SIC_INNER_SHOULD_BE_STATIC_ANON" />
+    <Method name="suppressedCloseFailureWarnsAboutBufferedDataAndFile" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.nfs3.Nfs3" />
+    <Bug pattern="SIC_INNER_SHOULD_BE_STATIC_ANON" />
+    <Or>
+      <Method name="nullCall" />
+      <Method name="read" />
+      <Method name="wrapped_getAccess" />
+      <Method name="wrapped_getAttr" />
+      <Method name="wrapped_getFsInfo" />
+      <Method name="wrapped_getFsStat" />
+      <Method name="wrapped_getPathconf" />
+      <Method name="wrapped_getRead" />
+      <Method name="wrapped_getReaddir" />
+      <Method name="wrapped_getReaddirplus" />
+      <Method name="wrapped_getReadlink" />
+      <Method name="wrapped_sendCommit" />
+      <Method name="wrapped_sendCreate" />
+      <Method name="wrapped_sendLink" />
+      <Method name="wrapped_sendMkdir" />
+      <Method name="wrapped_sendMknod" />
+      <Method name="wrapped_sendRemove" />
+      <Method name="wrapped_sendRename" />
+      <Method name="wrapped_sendRmdir" />
+      <Method name="wrapped_sendSymlink" />
+      <Method name="wrapped_sendWrite" />
+      <Method name="wrapped_setAttr" />
+    </Or>
+  </Match>
+  <!-- The private per-operation callback is passed only to callRpcWrapped with its corresponding LOOKUP or WRITE request in the immediately enclosing method. -->
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.nfs3.Nfs3$4" />
+    <Bug pattern="BC_UNCONFIRMED_CAST" />
+    <Method name="checkResponse" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.nfs3.Nfs3$9" />
+    <Bug pattern="BC_UNCONFIRMED_CAST" />
+    <Method name="checkResponse" />
+  </Match>
+  <!-- These are shared client/file collaborators, not owned value objects. Identity and live shared state are required for I/O, parent navigation, and symbolic-link resolution. -->
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.io.NfsFileBase" />
+    <Bug pattern="EI_EXPOSE_REP" />
+    <Or>
+      <Field name="_backingFile" />
+      <Field name="_nfs" />
+      <Field name="_parentFile" />
+    </Or>
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.io.NfsFileBase" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+    <Field name="_nfs" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.io.NfsFileInputStream" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+    <Field name="_file" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.io.NfsFileOutputStream" />
+    <Bug pattern="EI_EXPOSE_REP2" />
+    <Field name="_nfsFile" />
+  </Match>
+  <!-- These calls must throw IOException on a closed stream. Any normal return immediately invokes fail(), so there is no successful read/skip result to inspect. -->
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.io.Test_Streams" />
+    <Bug pattern="RR_NOT_CHECKED" />
+    <Method name="testClosing" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.io.Test_Streams" />
+    <Bug pattern="SR_NOT_CHECKED" />
+    <Method name="testClosing" />
+  </Match>
+  <!-- These extensible protocol/data and stream constructors validate arguments and perform I/O. They do not enforce a Java trust boundary or grant process privileges; a failed instance cannot bypass server-side NFS authorization. Keeping their throwing constructors is intentional. -->
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.NfsTestBase" />
+    <Bug pattern="CT_CONSTRUCTOR_THROW" />
+    <Method name="&lt;init&gt;" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.NfsCreateRequest" />
+    <Bug pattern="CT_CONSTRUCTOR_THROW" />
+    <Method name="&lt;init&gt;" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.NfsLinkRequest" />
+    <Bug pattern="CT_CONSTRUCTOR_THROW" />
+    <Method name="&lt;init&gt;" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.NfsLookupRequest" />
+    <Bug pattern="CT_CONSTRUCTOR_THROW" />
+    <Method name="&lt;init&gt;" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.NfsMkdirRequest" />
+    <Bug pattern="CT_CONSTRUCTOR_THROW" />
+    <Method name="&lt;init&gt;" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.NfsMknodRequest" />
+    <Bug pattern="CT_CONSTRUCTOR_THROW" />
+    <Method name="&lt;init&gt;" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.NfsRemoveRequest" />
+    <Bug pattern="CT_CONSTRUCTOR_THROW" />
+    <Method name="&lt;init&gt;" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.NfsRenameRequest" />
+    <Bug pattern="CT_CONSTRUCTOR_THROW" />
+    <Method name="&lt;init&gt;" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.NfsRequestBase" />
+    <Bug pattern="CT_CONSTRUCTOR_THROW" />
+    <Method name="&lt;init&gt;" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.NfsRmdirRequest" />
+    <Bug pattern="CT_CONSTRUCTOR_THROW" />
+    <Method name="&lt;init&gt;" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.NfsSetAttrRequest" />
+    <Bug pattern="CT_CONSTRUCTOR_THROW" />
+    <Method name="&lt;init&gt;" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.NfsSetAttributes" />
+    <Bug pattern="CT_CONSTRUCTOR_THROW" />
+    <Method name="&lt;init&gt;" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.NfsSymlinkRequest" />
+    <Bug pattern="CT_CONSTRUCTOR_THROW" />
+    <Method name="&lt;init&gt;" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.NfsWriteRequest" />
+    <Bug pattern="CT_CONSTRUCTOR_THROW" />
+    <Method name="&lt;init&gt;" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.io.NfsFileBase" />
+    <Bug pattern="CT_CONSTRUCTOR_THROW" />
+    <Method name="&lt;init&gt;" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.io.NfsFileInputStream" />
+    <Bug pattern="CT_CONSTRUCTOR_THROW" />
+    <Method name="&lt;init&gt;" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.io.NfsFileOutputStream" />
+    <Bug pattern="CT_CONSTRUCTOR_THROW" />
+    <Method name="&lt;init&gt;" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.nfs3.Nfs3" />
+    <Bug pattern="CT_CONSTRUCTOR_THROW" />
+    <Method name="&lt;init&gt;" />
+  </Match>
+  <!-- These tests explicitly verify public credential/exception type contracts, including cause types. The type check is the behavior under test, not an unnecessary guard for a cast. -->
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.network.Test_NettyTransport" />
+    <Bug pattern="JUA_DONT_ASSERT_INSTANCEOF_IN_TESTS" />
+    <Method name="failedConnectUnblocksSender" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.nfs3.Test_CustomPorts" />
+    <Bug pattern="JUA_DONT_ASSERT_INSTANCEOF_IN_TESTS" />
+    <Method name="suppliedHandleAndExplicitNfsPortNeedNoDiscoveryOrMount" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.nfs3.Test_MountDiagnostics" />
+    <Bug pattern="JUA_DONT_ASSERT_INSTANCEOF_IN_TESTS" />
+    <Method name="unavailableMountProgramPreservesRpcCause" />
+  </Match>
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.rpc.Test_RpcDiagnostics" />
+    <Bug pattern="JUA_DONT_ASSERT_INSTANCEOF_IN_TESTS" />
+    <Or>
+      <Method name="missingFileRemainsFileNotFoundExceptionWithEndpoint" />
+      <Method name="nfsStatusFailuresHaveEndpointAndPreserveStatusWithoutRetry" />
+    </Or>
+  </Match>
+  <!-- list() is overridable. Retain the defensive null guard for external NfsFileBase subclasses that return null, even though the base implementation returns a list. -->
+  <Match>
+    <Class name="com.emc.ecs.nfsclient.nfs.io.NfsFileBase" />
+    <Bug pattern="RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE" />
+    <Method name="list" />
+  </Match>
+</FindBugsFilter>

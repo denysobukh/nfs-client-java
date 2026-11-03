@@ -15,19 +15,21 @@ package com.emc.ecs.nfsclient.rpc;
 /**
  * @author seibed
  */
-public class RpcStatus {
+public class RpcStatus implements java.io.Serializable {
+
+  private static final long serialVersionUID = 1L;
 
   /**
    * Unable to bind to a privileged port as requested. NOT specified by RFC 1831
    * (https://tools.ietf.org/html/rfc1831).
    */
-  public static final RpcStatus LOCAL_BINDING_ERROR = new RpcStatus(-1001);
+  public static final RpcStatus LOCAL_BINDING_ERROR = new RpcStatus(-1001, "LOCAL_BINDING_ERROR");
 
   /**
    * Network error blocking RFC request or response. NOT specified by RFC 1831
    * (https://tools.ietf.org/html/rfc1831).
    */
-  public static final RpcStatus NETWORK_ERROR = new RpcStatus(-1001);
+  public static final RpcStatus NETWORK_ERROR = new RpcStatus(-1001, "NETWORK_ERROR");
 
   /**
    * @return The int status value.
@@ -39,13 +41,30 @@ public class RpcStatus {
   /** The int status value. */
   private final int _value;
 
+  private final String _name;
+
   /**
    * Create the instance from the int status value.
    *
    * @param value
    */
   protected RpcStatus(int value) {
+    this(value, null);
+  }
+
+  private RpcStatus(int value, String name) {
     _value = value;
+    _name = name;
+  }
+
+  protected Object readResolve() {
+    if ("LOCAL_BINDING_ERROR".equals(_name)) {
+      return LOCAL_BINDING_ERROR;
+    }
+    if ("NETWORK_ERROR".equals(_name)) {
+      return NETWORK_ERROR;
+    }
+    return this;
   }
 
   @Override

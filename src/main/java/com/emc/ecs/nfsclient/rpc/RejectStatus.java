@@ -20,6 +20,8 @@ import java.util.Map;
  */
 public class RejectStatus extends RpcStatus {
 
+  private static final long serialVersionUID = 1L;
+
   /** Reject status specified by RFC 1831 (https://tools.ietf.org/html/rfc1831). */
   static final RejectStatus RPC_MISMATCH = new RejectStatus(0, "RPC_MISMATCH");
 

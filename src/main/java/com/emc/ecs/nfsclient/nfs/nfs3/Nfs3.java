@@ -103,23 +103,23 @@ public class Nfs3 implements Nfs<Nfs3File> {
   private final String _server;
 
   /** The remote NFS server port, configured explicitly or obtained from Portmap. */
-  private int _port = 0;
+  private volatile int _port = 0;
 
   private final int _configuredNfsPort;
   private final int _configuredMountPort;
-  private int _mountPort;
+  private volatile int _mountPort;
 
   /** The exported path handled by this client. */
   private final String _exportedPath;
 
   /** The root file handle for the exported path, obtained by a MOUNT call. */
-  private byte[] _rootFileHandle = null;
+  private volatile byte[] _rootFileHandle = null;
 
   /** Maximum NFS call retries, used in the wrapped method calls. */
   private final int _maximumRetries;
 
   /** The default wait time between retries in milliseconds. */
-  private final int DEFAULT_WAIT_TIME_MILLIS = 1000;
+  private static final int DEFAULT_WAIT_TIME_MILLIS = 1000;
 
   /** The wait time between retries in milliseconds. */
   private final int _retryWait = DEFAULT_WAIT_TIME_MILLIS;
@@ -351,7 +351,7 @@ public class Nfs3 implements Nfs<Nfs3File> {
           "Discovering NFSv{} services: server={}, export={}", VERSION, _server, _exportedPath);
       _port = resolveNfsPort();
       _rpcWrapper.setPort(_port);
-      _rootFileHandle = lookupRootHandle();
+      _rootFileHandle = lookupRootHandle().clone();
     } finally {
       _prepareLock.unlock();
     }
@@ -759,7 +759,7 @@ public class Nfs3 implements Nfs<Nfs3File> {
           public void checkResponse(RpcRequest request) throws IOException {
             // If the root file handle is bad, we should mount again.
             if ((getResponse().getState() == NfsStatus.NFS3ERR_BADHANDLE.getValue())
-                && (((NfsLookupRequest) request).getFileHandle() == _rootFileHandle)) {
+                && Arrays.equals(((NfsLookupRequest) request).getFileHandle(), _rootFileHandle)) {
               prepareRootFhAndNfsPort();
             }
             super.checkResponse(request);

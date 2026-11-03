@@ -152,6 +152,6 @@ public class NfsTime implements NfsRequest, NfsResponse {
    * @return true if the time in milliseconds will be used, false otherwise.
    */
   private boolean captureTime() {
-    return (isBareTime() || (SET_TO_CLIENT_TIME == _timeSettingType));
+    return (IS_BARE_TIME == _timeSettingType || SET_TO_CLIENT_TIME == _timeSettingType);
   }
 }

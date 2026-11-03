@@ -120,11 +120,15 @@ public class NfsTestBase extends Assert {
       }
     }
 
-    Assume.assumeNotNull(inputStream);
+    if (inputStream == null) {
+      Assume.assumeTrue("No NFS test configuration found", false);
+      return new Properties();
+    }
 
-    Properties properties = new Properties();
-    properties.load(inputStream);
-    inputStream.close();
-    return properties;
+    try (InputStream stream = inputStream) {
+      Properties properties = new Properties();
+      properties.load(stream);
+      return properties;
+    }
   }
 }

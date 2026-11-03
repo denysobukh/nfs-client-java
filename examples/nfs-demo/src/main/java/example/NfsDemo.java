@@ -6,6 +6,7 @@ import com.emc.ecs.nfsclient.nfs.io.NfsFileInputStream;
 import com.emc.ecs.nfsclient.nfs.io.NfsFileOutputStream;
 import com.emc.ecs.nfsclient.nfs.nfs3.Nfs3;
 import com.emc.ecs.nfsclient.rpc.CredentialUnix;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Arrays;
@@ -15,7 +16,7 @@ import java.util.UUID;
 public final class NfsDemo {
   private static int passed;
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) throws IOException {
     String server = args.length > 0 ? args[0] : "127.0.0.1";
     String export = args.length > 1 ? args[1] : "/export";
     long started = System.nanoTime();
@@ -34,7 +35,7 @@ public final class NfsDemo {
     }
   }
 
-  private static void run(String server, String export) throws Exception {
+  private static void run(String server, String export) throws IOException {
     Nfs3 nfs = new Nfs3(server, export, new CredentialUnix(0, 0, null), 1);
     Nfs3File root = new Nfs3File(nfs, "/");
     check(root.exists() && root.isDirectory(), "MOUNT / LOOKUP", "export root is a directory");
