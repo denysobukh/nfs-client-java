@@ -1,4 +1,5 @@
 [![Dependency Security](https://github.com/denysobukh/nfs-client-java/actions/workflows/security.yml/badge.svg?branch=master)](https://github.com/denysobukh/nfs-client-java/actions/workflows/security.yml)
+[![CodeQL](https://github.com/denysobukh/nfs-client-java/actions/workflows/github-code-scanning/codeql/badge.svg?branch=master)](https://github.com/denysobukh/nfs-client-java/actions/workflows/github-code-scanning/codeql)
 [![Error Prone](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml/badge.svg?branch=master&label=Error%20Prone)](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml)
 [![SpotBugs](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml/badge.svg?branch=master&label=SpotBugs)](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml)
 [![JaCoCo line coverage](https://denysobukh.github.io/nfs-client-java/coverage.svg)](https://denysobukh.github.io/nfs-client-java/coverage/)
