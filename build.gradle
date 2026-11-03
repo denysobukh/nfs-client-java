@@ -19,6 +19,7 @@ plugins {
     id 'distribution'
     id 'signing'
     id 'com.diffplug.spotless' version '8.11.0'
+    id 'net.ltgt.errorprone' version '5.2.0'
     id 'org.cyclonedx.bom' version '3.5.1'
     id 'com.vanniktech.maven.publish' version '0.37.0'
 }
@@ -76,6 +77,12 @@ allprojects {
         tools // specifies tool artifacts for the distribution (placed in the tools/ directory)
     }
     plugins.withId('java') {
+        apply plugin: 'net.ltgt.errorprone'
+
+        dependencies {
+            errorprone 'com.google.errorprone:error_prone_core:2.52.0'
+        }
+
         java {
             toolchain {
                 languageVersion = JavaLanguageVersion.of(25)

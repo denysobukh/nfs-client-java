@@ -26,8 +26,8 @@ jobs:
           distribution: temurin
           java-version: '25'
           cache: gradle
-      - name: Build and test (Java 17 target)
-        run: ./gradlew --no-daemon clean build
+      - name: Build, test, and run Error Prone (Java 17 target)
+        run: ./gradlew --no-daemon clean build demoClasses
       - name: Upload test reports
         if: failure()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6

@@ -1,4 +1,5 @@
 [![Dependency Security](https://github.com/denysobukh/nfs-client-java/actions/workflows/security.yml/badge.svg?branch=master)](https://github.com/denysobukh/nfs-client-java/actions/workflows/security.yml)
+[![Error Prone](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml/badge.svg?branch=master&label=Error%20Prone)](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml)
 [![Code style: Google Java Format (Spotless)](https://img.shields.io/badge/code_style-Google_Java_Format_(Spotless)-blue)](#code-formatting)
 
 NFS Client for Java
@@ -67,6 +68,20 @@ as required by this project's build toolchain.
 ```
 
 Formatting is also checked by `./gradlew check` and the existing CI build.
+
+Static analysis
+---
+
+[Error Prone](https://errorprone.info/) runs during Java compilation in all
+modules, including tests and the NFS demo. It uses the existing JDK 25 toolchain
+and keeps the Java 17 bytecode target. Default error-level findings fail compilation;
+default warning-level findings are reported in the compiler output.
+
+```sh
+./gradlew clean build demoClasses # Build, test, and analyze all Java source sets
+```
+
+The Error Prone badge shows the CI workflow status, which includes these checks.
 
 How to use the bare client
 ---
