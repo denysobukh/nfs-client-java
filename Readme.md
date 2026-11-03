@@ -1,7 +1,11 @@
-NFS Client for Java
+NFSv3 Client for Java
 ===
 
-**Visit the project website: [nfs-client.dev](https://nfs-client.dev/)**
+This repository contains the **NFSv3 client for Java**, available under the
+**[Apache License 2.0](LICENSE.txt)**.
+
+**For NFSv4, Kerberos authentication, and support under a commercial license,
+visit [nfs-client.dev](https://nfs-client.dev/).**
 
 | Checks | Status |
 | --- | --- |
@@ -20,9 +24,8 @@ at runtime.
 Description
 ---
 
-This project is an NFS Java client, with some extra abstraction
-to allow extensions to handle other NFS versions (it currently handles
-only NFS v3). The package
+This project implements NFSv3 in Java, with generic abstractions
+that allow extensions for other NFS versions. The package
 com.emc.ecs.nfsclient.nfs has generic classes and interfaces,
 while com.emc.ecs.nfsclient.nfs.nfs3 has the NFS Version 3 implementation
 based on RFC 1813 (https://tools.ietf.org/html/rfc1813). For full details
