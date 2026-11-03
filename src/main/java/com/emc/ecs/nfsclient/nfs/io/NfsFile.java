@@ -151,39 +151,36 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    */
   boolean createNewFile() throws IOException;
 
-  /**
-   * Deletes this file/directory.
-   *
-   * @throws IOException
-   */
+  /** Deletes this file/directory. */
   void delete() throws IOException;
 
   /**
    * Tests whether this file exists on the NFS server.
    *
    * @return <code>true</code> if the file exists on the NFS server
-   * @throws IOException
    */
   boolean exists() throws IOException;
 
   /**
+   * Resolves symbolic links while tracking link traversal.
+   *
    * @return The backing file obtained by following all symbolic links in the path, if any.
-   * @throws IOException
    */
   F followLinks() throws IOException;
 
   /**
+   * Resolves symbolic links while tracking link traversal.
+   *
    * @param linkTracker The tracker to use. This must be passed so that monitoring is continued
    *     until the link resolves to a file that is not a symbolic link.
    * @return The backing file obtained by following all symbolic links in the path, if any.
-   * @throws IOException
    */
   F followLinks(LinkTracker<N, F> linkTracker) throws IOException;
 
   /**
-   * @return The fully qualified path to the file in this network, including the server name and the
-   *     exported folders, using the usual form: <code>
-   *     server:exported_folders/path_from_exported_filesystem_root</code>
+   * Returns the fully qualified path to the file in this network, including the server name and the
+   * exported folders, using the usual form: <code>
+   * server:exported_folders/path_from_exported_filesystem_root</code>.
    */
   String getAbsolutePath();
 
@@ -242,21 +239,23 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
   long getAccess(long accessToCheck) throws IOException;
 
   /**
+   * Returns the NFS attributes, as specified by RFC 1813 (https://tools.ietf.org/html/rfc1813).
+   *
    * @return The NFS attributes, as specified by RFC 1813 (https://tools.ietf.org/html/rfc1813).
-   * @throws IOException
    */
   NfsGetAttributes getAttributes() throws IOException;
 
   /**
-   * @param childName
+   * Returns the child file.
+   *
    * @return The child file.
-   * @throws IOException
    */
   F getChildFile(String childName) throws IOException;
 
   /**
+   * Returns the number of unallocated bytes in the partition named by this abstract path name.
+   *
    * @return The number of unallocated bytes in the partition named by this abstract path name.
-   * @throws IOException
    */
   long getFreeSpace() throws IOException;
 
@@ -283,74 +282,76 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * </ul>
    *
    * @return The protection mode bits for the file.
-   * @throws IOException
    */
   long getMode() throws IOException;
 
-  /**
-   * @return The name
-   */
+  /** Returns the name. */
   String getName();
 
-  /**
-   * @return The path of the parent folder, or null if there is none
-   */
+  /** Returns the path of the parent folder, or null if there is none. */
   String getParent();
 
-  /**
-   * @return The NfsFile of the parent folder, or null if there is none.
-   */
+  /** Returns the NfsFile of the parent folder, or null if there is none. */
   F getParentFile();
 
   /**
-   * @return The absolute path, from the root of the exported folders. Synonymous with
-   *     getAbsolutePath().
+   * Returns the absolute path, from the root of the exported folders. Synonymous with
+   * getAbsolutePath().
    */
   String getPath();
 
   /**
+   * Returns the size of the partition named by this abstract pathname.
+   *
    * @return The size of the partition named by this abstract pathname.
-   * @throws IOException
    */
   long getTotalSpace() throws IOException;
 
   /**
+   * Returns the number of free bytes available to this client on the partition named by this
+   * abstract pathname.
+   *
    * @return The number of free bytes available to this client on the partition named by this
    *     abstract pathname.
-   * @throws IOException
    */
   long getUsableSpace() throws IOException;
 
   /**
+   * Returns true if it is, false if it is not.
+   *
    * @return true if it is, false if it is not
-   * @throws IOException
    */
   boolean isDirectory() throws IOException;
 
   /**
+   * Returns true if it is a normal file, false if it is not.
+   *
    * @return true if it is a normal file, false if it is not
-   * @throws IOException
    */
   boolean isFile() throws IOException;
 
   /**
+   * Returns true if it is the root file of the mount, false if it is not.
+   *
    * @return true if it is the root file of the mount, false if it is not
-   * @throws IOException
    */
   boolean isRootFile() throws IOException;
 
   /**
+   * Returns time of last modification.
+   *
    * @return time of last modification
-   * @throws IOException
    */
   long lastModified() throws IOException;
 
   /**
-   * @return the length in bytes, or 0 if the file does not exist or the attributes cannot be read.
+   * Returns the length in bytes, or 0 if the file does not exist or the attributes cannot be read.
    */
   long length();
 
   /**
+   * Returns the length in bytes.
+   *
    * @return the length in bytes
    * @throws IOException if the file does not exist or the attributes cannot be read.
    */
@@ -365,7 +366,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * list if a specific order is required. A listing is not a snapshot of a changing directory.
    *
    * @return the names of all files in the directory
-   * @throws IOException
    */
   List<String> list() throws IOException;
 
@@ -375,9 +375,7 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * <p>Preserves the relative server order of accepted entries. The ordering and consistency
    * considerations described in {@link #list()} apply.
    *
-   * @param filter
    * @return the names of all files matching the filter in the directory
-   * @throws IOException
    */
   List<String> list(NfsFilenameFilter filter) throws IOException;
 
@@ -388,7 +386,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * and consistency considerations described there apply.
    *
    * @return NfsFile objects for all files in the directory
-   * @throws IOException
    */
   List<F> listFiles() throws IOException;
 
@@ -398,9 +395,7 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * <p>Preserves the relative server order of accepted entries. The ordering and consistency
    * considerations described in {@link #list()} apply.
    *
-   * @param filter
    * @return NfsFile objects for all files matching the filter in the directory
-   * @throws IOException
    */
   List<F> listFiles(NfsFilenameFilter filter) throws IOException;
 
@@ -410,9 +405,7 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * <p>Preserves the relative server order of accepted entries. The ordering and consistency
    * considerations described in {@link #list()} apply.
    *
-   * @param filter
    * @return NfsFile objects for all files matching the filter in the directory
-   * @throws IOException
    */
   List<F> listFiles(NfsFileFilter filter) throws IOException;
 
@@ -434,9 +427,7 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * Creates a new file with the current file as its parent directory. This does not create the file
    * on the NFS mount.
    *
-   * @param childName
    * @return the new file
-   * @throws IOException
    */
   F newChildFile(String childName) throws IOException;
 
@@ -448,18 +439,10 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * atomic, and it might not succeed if a file with the destination abstract pathname already
    * exists. The return value should always be checked to make sure that the rename operation was
    * successful.
-   *
-   * @param destination
-   * @throws IOException
    */
   boolean renameTo(F destination) throws IOException;
 
-  /**
-   * Sets NFS file attributes, as specified by RFC 1813 (https://tools.ietf.org/html/rfc1813).
-   *
-   * @param nfsSetAttributes
-   * @throws IOException
-   */
+  /** Sets NFS file attributes, as specified by RFC 1813 (https://tools.ietf.org/html/rfc1813). */
   public void setAttributes(NfsSetAttributes nfsSetAttributes) throws IOException;
 
   /**
@@ -473,7 +456,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    *
    * @param millis - The new last-modified time, measured in milliseconds since the epoch (00:00:00
    *     GMT, January 1, 1970)
-   * @throws IOException
    */
   void setLastModified(long millis) throws IOException;
 
@@ -502,18 +484,16 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * </ul>
    *
    * @param mode the protection mode bits
-   * @throws IOException
    */
   void setMode(long mode) throws IOException;
 
-  /**
-   * @return The low-level NFS client supporting this NfsFile instance.
-   */
+  /** Returns the low-level NFS client supporting this NfsFile instance. */
   public N getNfs();
 
   /**
+   * Returns the NFS file handle, as specified by RFC 1813 (https://tools.ietf.org/html/rfc1813).
+   *
    * @return The NFS file handle, as specified by RFC 1813 (https://tools.ietf.org/html/rfc1813).
-   * @throws IOException
    */
   byte[] getFileHandle() throws IOException;
 
@@ -534,7 +514,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * elsewhere).
    *
    * @return the response
-   * @throws IOException
    */
   NfsGetAttrResponse getattr() throws IOException;
 
@@ -548,7 +527,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * elsewhere).
    *
    * @return the request
-   * @throws IOException
    */
   NfsGetAttrRequest makeGetAttrRequest() throws IOException;
 
@@ -565,7 +543,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    *     <code>guardTime</code> to the current ctime of the object. If the values are different, the
    *     server must preserve the object attributes and must return a status of NFS3ERR_NOT_SYNC.
    * @return the response
-   * @throws IOException
    */
   NfsSetAttrResponse setattr(NfsSetAttributes attributes, NfsTime guardTime) throws IOException;
 
@@ -581,7 +558,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    *     <code>guardTime</code> to the current ctime of the object. If the values are different, the
    *     server must preserve the object attributes and must return a status of NFS3ERR_NOT_SYNC.
    * @return the request
-   * @throws IOException
    */
   NfsSetAttrRequest makeSetAttrRequest(NfsSetAttributes attributes, NfsTime guardTime)
       throws IOException;
@@ -595,7 +571,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * the corresponding file system object.
    *
    * @return the response
-   * @throws IOException
    */
   NfsLookupResponse lookup() throws IOException;
 
@@ -607,7 +582,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * the corresponding file system object.
    *
    * @return the request
-   * @throws IOException
    */
   NfsLookupRequest makeLookupRequest() throws IOException;
 
@@ -638,7 +612,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    *            </pre>
    *
    * @return the response
-   * @throws IOException
    */
   NfsAccessResponse access(long accessToCheck) throws IOException;
 
@@ -668,7 +641,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    *            </pre>
    *
    * @return the request
-   * @throws IOException
    */
   NfsAccessRequest makeAccessRequest(long accessToCheck) throws IOException;
 
@@ -690,7 +662,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * interpretation of the data in the symbolic link.
    *
    * @return the response
-   * @throws IOException
    */
   NfsReadlinkResponse readlink() throws IOException;
 
@@ -711,7 +682,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * interpretation of the data in the symbolic link.
    *
    * @return the request
-   * @throws IOException
    */
   NfsReadlinkRequest makeReadlinkRequest() throws IOException;
 
@@ -736,7 +706,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    *     new, empty buffer for receiving the data.
    * @param position position to start writing, defaults to 0 if buffer is null
    * @return the response
-   * @throws IOException
    */
   NfsReadResponse read(long offset, int size, byte[] bytes, int position) throws IOException;
 
@@ -757,7 +726,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    *     in the FSINFO reply structure for the file system that contains file. If greater, the
    *     server may return only <code>rtmax</code> bytes, resulting in a short read.
    * @return the request
-   * @throws IOException
    */
   NfsReadRequest makeReadRequest(long offset, int size) throws IOException;
 
@@ -779,7 +747,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    *            </pre>
    *
    * @return the response
-   * @throws IOException
    */
   NfsWriteResponse write(long offset, List<ByteBuffer> payload, int syncType) throws IOException;
 
@@ -805,7 +772,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    *     to determine whether the server has changed state between a call to WRITE and a subsequent
    *     call to either WRITE or COMMIT.
    * @return the response
-   * @throws IOException
    */
   NfsWriteResponse write(long offset, List<ByteBuffer> payload, int syncType, Long verifier)
       throws IOException;
@@ -828,7 +794,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    *     </ul>
    *
    * @return the request
-   * @throws IOException
    */
   NfsWriteRequest makeWriteRequest(long offset, List<ByteBuffer> payload, int syncType)
       throws IOException;
@@ -854,7 +819,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * @param verifier A unique identifier to ensure exclusive creation of the new file. If no value
    *     is provided for exclusive creation, this is generated.
    * @return the response
-   * @throws IOException
    */
   NfsCreateResponse create(NfsCreateMode createMode, NfsSetAttributes attributes, byte[] verifier)
       throws IOException;
@@ -879,7 +843,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * @param verifier A unique identifier to ensure exclusive creation of the new file. If no value
    *     is provided for exclusive creation, this is generated.
    * @return the request
-   * @throws IOException
    */
   NfsCreateRequest makeCreateRequest(
       NfsCreateMode createMode, NfsSetAttributes attributes, byte[] verifier) throws IOException;
@@ -893,7 +856,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    *
    * @param attributes The initial attributes for the subdirectory.
    * @return the response
-   * @throws IOException
    */
   NfsMkdirResponse mkdir(NfsSetAttributes attributes) throws IOException;
 
@@ -905,7 +867,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    *
    * @param attributes The initial attributes for the subdirectory.
    * @return the request
-   * @throws IOException
    */
   NfsMkdirRequest makeMkdirRequest(NfsSetAttributes attributes) throws IOException;
 
@@ -919,7 +880,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * @param symbolicLinkData The string containing the symbolic link data.
    * @param attributes The initial attributes for the symbolic link.
    * @return the response
-   * @throws IOException
    */
   NfsSymlinkResponse symlink(String symbolicLinkData, NfsSetAttributes attributes)
       throws IOException;
@@ -933,7 +893,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * @param symbolicLinkData The string containing the symbolic link data.
    * @param attributes The initial attributes for the symbolic link.
    * @return the request
-   * @throws IOException
    */
   NfsSymlinkRequest makeSymlinkRequest(String symbolicLinkData, NfsSetAttributes attributes)
       throws IOException;
@@ -952,7 +911,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    *     or a block special file ( <code>type</code> is <code>NF3BLK</code>), <code>rdev[0]</code>
    *     is the major number and <code>rdev[1]</code> is the minor number.
    * @return the response
-   * @throws IOException
    */
   NfsMknodResponse mknod(NfsType type, NfsSetAttributes attributes, long[] rdev) throws IOException;
 
@@ -969,7 +927,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    *     or a block special file ( <code>type</code> is <code>NF3BLK</code>), <code>rdev[0]</code>
    *     is the major number and <code>rdev[1]</code> is the minor number.
    * @return the request
-   * @throws IOException
    */
   NfsMknodRequest makeMknodRequest(NfsType type, NfsSetAttributes attributes, long[] rdev)
       throws IOException;
@@ -983,7 +940,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * was the last reference to the corresponding file system object, the object may be destroyed.
    *
    * @return the response
-   * @throws IOException
    */
   NfsRemoveResponse remove() throws IOException;
 
@@ -995,7 +951,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * was the last reference to the corresponding file system object, the object may be destroyed.
    *
    * @return the request
-   * @throws IOException
    */
   NfsRemoveRequest makeRemoveRequest() throws IOException;
 
@@ -1008,7 +963,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * the subdirectory is the last reference to the subdirectory, the subdirectory may be destroyed.
    *
    * @return the response
-   * @throws IOException
    */
   NfsRmdirResponse rmdir() throws IOException;
 
@@ -1020,7 +974,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * the subdirectory is the last reference to the subdirectory, the subdirectory may be destroyed.
    *
    * @return the request
-   * @throws IOException
    */
   NfsRmdirRequest makeRmdirRequest() throws IOException;
 
@@ -1035,7 +988,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    *
    * @param toFile A file object with the new path for this object.
    * @return the response
-   * @throws IOException
    */
   NfsRenameResponse rename(F toFile) throws IOException;
 
@@ -1049,7 +1001,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    *
    * @param toFile A file object with the new path for this object.
    * @return the request
-   * @throws IOException
    */
   NfsRenameRequest makeRenameRequest(F toFile) throws IOException;
 
@@ -1063,7 +1014,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    *
    * @param source The existing file system object to which this file should be linked.
    * @return the response
-   * @throws IOException
    */
   NfsLinkResponse link(F source) throws IOException;
 
@@ -1076,7 +1026,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    *
    * @param source The existing file system object to which this file should be linked.
    * @return the request
-   * @throws IOException
    */
   NfsLinkRequest makeLinkRequest(F source) throws IOException;
 
@@ -1098,7 +1047,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * @param count The maximum size of the READDIR3resok structure, in bytes. The size must include
    *     all XDR overhead. The server is free to return less than count bytes of data.
    * @return the response
-   * @throws IOException
    */
   NfsReaddirResponse readdir(long cookie, long cookieverf, int count) throws IOException;
 
@@ -1121,7 +1069,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    *     all XDR overhead. The server is free to return less than count bytes of data.
    * @param entries A list to which the incoming data should be appended.
    * @return the response
-   * @throws IOException
    */
   NfsReaddirResponse readdir(
       long cookie, long cookieverf, int count, List<NfsDirectoryEntry> entries) throws IOException;
@@ -1143,7 +1090,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * @param count The maximum size of the READDIR3resok structure, in bytes. The size must include
    *     all XDR overhead. The server is free to return less than count bytes of data.
    * @return the request
-   * @throws IOException
    */
   NfsReaddirRequest makeReaddirRequest(long cookie, long cookieverf, int count) throws IOException;
 
@@ -1171,7 +1117,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    *     include all XDR overhead. The server is free to return less than <code>maxcount</code>
    *     bytes of data.
    * @return the response
-   * @throws IOException
    */
   NfsReaddirplusResponse readdirplus(long cookie, long cookieverf, int dircount, int maxcount)
       throws IOException;
@@ -1201,7 +1146,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    *     bytes of data.
    * @param entries A list to which the incoming data should be appended.
    * @return the response
-   * @throws IOException
    */
   NfsReaddirplusResponse readdirplus(
       long cookie, long cookieverf, int dircount, int maxcount, List<NfsDirectoryPlusEntry> entries)
@@ -1230,7 +1174,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    *     include all XDR overhead. The server is free to return less than <code>maxcount</code>
    *     bytes of data.
    * @return the request
-   * @throws IOException
    */
   NfsReaddirplusRequest makeReaddirplusRequest(
       long cookie, long cookieverf, int dircount, int maxcount) throws IOException;
@@ -1243,7 +1186,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * <p>Procedure FSSTAT retrieves volatile file system state information.
    *
    * @return the response
-   * @throws IOException
    */
   NfsFsStatResponse fsstat() throws IOException;
 
@@ -1254,7 +1196,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * <p>Procedure FSSTAT retrieves volatile file system state information.
    *
    * @return the request
-   * @throws IOException
    */
   NfsFsStatRequest makeFsStatRequest() throws IOException;
 
@@ -1267,7 +1208,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * about the NFS version 3 protocol server implementation.
    *
    * @return the response
-   * @throws IOException
    */
   NfsFsInfoResponse fsinfo() throws IOException;
 
@@ -1279,7 +1219,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * about the NFS version 3 protocol server implementation.
    *
    * @return the request
-   * @throws IOException
    */
   NfsFsInfoRequest makeFsInfoRequest() throws IOException;
 
@@ -1294,7 +1233,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * resides.
    *
    * @return the response
-   * @throws IOException
    */
   NfsPathconfResponse pathconf() throws IOException;
 
@@ -1308,7 +1246,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * resides.
    *
    * @return the request
-   * @throws IOException
    */
   NfsPathconfRequest makePathconfRequest() throws IOException;
 
@@ -1325,7 +1262,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * @param dataSizeToCommit The number of bytes of data to flush. If count is 0, a flush from
    *     offset to the end of file is done.
    * @return the response
-   * @throws IOException
    */
   NfsCommitResponse commit(long offsetToCommit, int dataSizeToCommit) throws IOException;
 
@@ -1341,7 +1277,6 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
    * @param dataSizeToCommit The number of bytes of data to flush. If count is 0, a flush from
    *     offset to the end of file is done.
    * @return the request
-   * @throws IOException
    */
   NfsCommitRequest makeCommitRequest(long offsetToCommit, int dataSizeToCommit) throws IOException;
 }

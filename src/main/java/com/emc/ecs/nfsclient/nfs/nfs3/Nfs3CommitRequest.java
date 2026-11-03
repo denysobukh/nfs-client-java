@@ -36,7 +36,6 @@ public class Nfs3CommitRequest extends NfsCommitRequest {
    * @param dataSizeToCommit The number of bytes of data to flush. If count is 0, a flush from
    *     offset to the end of file is done.
    * @param credential The credential used for RPC authentication.
-   * @throws FileNotFoundException
    */
   public Nfs3CommitRequest(
       byte[] fileHandle, long offsetToCommit, int dataSizeToCommit, Credential credential)

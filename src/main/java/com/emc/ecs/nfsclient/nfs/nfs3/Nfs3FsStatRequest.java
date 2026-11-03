@@ -34,7 +34,6 @@ public class Nfs3FsStatRequest extends NfsFsStatRequest {
    *     file handle for a mount point for a file system, as originally obtained from the MOUNT
    *     service on the server.
    * @param credential The credential to use for the request
-   * @throws FileNotFoundException
    */
   public Nfs3FsStatRequest(byte[] fileHandle, Credential credential) throws FileNotFoundException {
     super(fileHandle, credential, Nfs3.VERSION);

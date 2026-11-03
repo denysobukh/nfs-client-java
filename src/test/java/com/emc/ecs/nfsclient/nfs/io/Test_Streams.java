@@ -25,9 +25,6 @@ import org.junit.Test;
  */
 public class Test_Streams extends NfsTestBase {
 
-  /**
-   * @throws IOException
-   */
   public Test_Streams() throws IOException {
     super();
   }
@@ -117,11 +114,7 @@ public class Test_Streams extends NfsTestBase {
     NfsFileOutputStream outputStream = new NfsFileOutputStream(test);
     outputStream.close();
 
-    try {
-      outputStream.close();
-    } catch (IOException e) {
-      fail("This should not throw an IOException");
-    }
+    outputStream.close();
 
     try {
       outputStream.flush();
@@ -161,11 +154,7 @@ public class Test_Streams extends NfsTestBase {
       // Do nothing, this was expected.
     }
 
-    try {
-      inputStream.close();
-    } catch (IOException e) {
-      fail("This should not throw an IOException");
-    }
+    inputStream.close();
 
     try {
       inputStream.read();

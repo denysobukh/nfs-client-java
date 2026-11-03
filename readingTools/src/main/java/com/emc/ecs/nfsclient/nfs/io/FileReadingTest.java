@@ -22,9 +22,14 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 
 /**
+ * Command-line checks for plain and streamed reads from an NFS export.
+ *
  * @author seibed
  */
 public class FileReadingTest {
+
+  /** Creates an instance of this command-line utility. */
+  public FileReadingTest() {}
 
   private static final Set<String> USAGE_REQUESTS = new HashSet<String>();
 
@@ -32,6 +37,11 @@ public class FileReadingTest {
     USAGE_REQUESTS.addAll(Arrays.asList(new String[] {"-h", "--help", "--usage"}));
   }
 
+  /**
+   * Runs the NFS benchmark with the supplied command-line arguments.
+   *
+   * @param args export path, file name, and benchmark options
+   */
   public static void main(String[] args) {
     String export = args.length < 2 ? null : args[0];
     if (StringUtils.isEmpty(export) || USAGE_REQUESTS.contains(export)) {
@@ -58,13 +68,19 @@ public class FileReadingTest {
     }
   }
 
-  /** */
   private static void usage() {
     System.out.println(
         "usage: java -jar readingTest-X.jar <export> <fileName> [<test_stream_reading>]");
     System.out.println("     The default is to test plain file reads.");
   }
 
+  /**
+   * Reads a file through the NFS input stream and checks its length and EOF.
+   *
+   * @param export NFS server and export path
+   * @param fileName path of the file to read
+   * @throws IOException if the NFS client cannot be initialized
+   */
   public static void testStreamReading(String export, String fileName) throws IOException {
     Nfs3 nfs3 = new Nfs3(export, new CredentialUnix(0, 0, null), 3);
     NfsFileInputStream inputStream = null;
@@ -99,6 +115,13 @@ public class FileReadingTest {
     }
   }
 
+  /**
+   * Reads a file through a plain NFS READ call and checks its length and EOF.
+   *
+   * @param export NFS server and export path
+   * @param fileName path of the file to read
+   * @throws IOException if the NFS client cannot be initialized
+   */
   public static void testReading(String export, String fileName) throws IOException {
     Nfs3 nfs3 = new Nfs3(export, new CredentialUnix(0, 0, null), 3);
     try {

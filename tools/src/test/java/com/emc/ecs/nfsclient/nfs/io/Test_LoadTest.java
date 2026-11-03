@@ -21,9 +21,6 @@ import org.junit.Test;
  */
 public class Test_LoadTest extends NfsTestBase {
 
-  /**
-   * @throws IOException
-   */
   public Test_LoadTest() throws IOException {
     super();
   }

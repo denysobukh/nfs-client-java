@@ -50,9 +50,7 @@ public class MountException extends IOException {
     _status = status;
   }
 
-  /**
-   * @return The input status instance.
-   */
+  /** Returns the input status instance. */
   public MountStatus getStatus() {
     return _status;
   }

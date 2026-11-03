@@ -13,6 +13,8 @@
 package com.emc.ecs.nfsclient.rpc;
 
 /**
+ * Status of a local RPC operation.
+ *
  * @author seibed
  */
 public class RpcStatus implements java.io.Serializable {
@@ -31,9 +33,7 @@ public class RpcStatus implements java.io.Serializable {
    */
   public static final RpcStatus NETWORK_ERROR = new RpcStatus(-1001, "NETWORK_ERROR");
 
-  /**
-   * @return The int status value.
-   */
+  /** Returns the int status value. */
   public final int getValue() {
     return _value;
   }
@@ -43,11 +43,7 @@ public class RpcStatus implements java.io.Serializable {
 
   private final String _name;
 
-  /**
-   * Create the instance from the int status value.
-   *
-   * @param value
-   */
+  /** Create the instance from the int status value. */
   protected RpcStatus(int value) {
     this(value, null);
   }

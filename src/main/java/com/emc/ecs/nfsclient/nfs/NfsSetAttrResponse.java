@@ -40,20 +40,14 @@ public class NfsSetAttrResponse extends NfsResponseBase {
     super();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsResponseBase#unmarshalling(com.emc.ecs.
-   * nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void unmarshalling(Xdr xdr) throws RpcException {
     super.unmarshalling(xdr);
     _objectWccData = new NfsWccData(xdr);
   }
 
-  /**
-   * @return A structure containing the old and new attributes for the object.
-   */
+  /** Returns a structure containing the old and new attributes for the object. */
   public NfsWccData getObjectWccData() {
     return _objectWccData;
   }

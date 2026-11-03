@@ -70,12 +70,8 @@ public class NfsWriteResponse extends NfsResponseBase {
     super();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsResponseBase#unmarshalling(com.emc.ecs.
-   * nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void unmarshalling(Xdr xdr) throws RpcException {
     super.unmarshalling(xdr);
     _fileWccData = new NfsWccData(xdr);
@@ -88,40 +84,40 @@ public class NfsWriteResponse extends NfsResponseBase {
   }
 
   /**
-   * @return One of the values below.
-   *     <ul>
-   *       <li>UNSTABLE = 0 - Best effort was made, no promises.
-   *       <li>DATA_SYNC = 1 - Committed all data to stable storage, plus enough metadata for
-   *           retrieval, before returning.
-   *       <li>FILE_SYNC = 2 - Committed all data and metadata to stable storage before returning.
-   *     </ul>
+   * Returns one of the values below.
+   *
+   * <ul>
+   *   <li>UNSTABLE = 0 - Best effort was made, no promises.
+   *   <li>DATA_SYNC = 1 - Committed all data to stable storage, plus enough metadata for retrieval,
+   *       before returning.
+   *   <li>FILE_SYNC = 2 - Committed all data and metadata to stable storage before returning.
+   * </ul>
+   *
+   * .
    */
   public int getCommitted() {
     return _committed;
   }
 
   /**
-   * @return The number of bytes of data written to the file. The server may write fewer bytes than
-   *     requested. If so, the actual number of bytes written starting at location, <code>offset
-   *     </code>, is returned.
+   * Returns the number of bytes of data written to the file. The server may write fewer bytes than
+   * requested. If so, the actual number of bytes written starting at location, <code>offset
+   * </code>, is returned.
    */
   public int getCount() {
     return _count;
   }
 
-  /**
-   * @return Weak cache consistency data for the file.
-   */
+  /** Returns weak cache consistency data for the file. */
   public NfsWccData getFileWccData() {
     return _fileWccData;
   }
 
   /**
-   * @return This is a cookie that the client can use to determine whether the server has changed
-   *     state between a call to WRITE and a subsequent call to either WRITE or COMMIT. This cookie
-   *     must be consistent during a single instance of the NFS version 3 protocol service and must
-   *     be unique between instances of the NFS version 3 protocol server, where uncommitted data
-   *     may be lost.
+   * Returns this is a cookie that the client can use to determine whether the server has changed
+   * state between a call to WRITE and a subsequent call to either WRITE or COMMIT. This cookie must
+   * be consistent during a single instance of the NFS version 3 protocol service and must be unique
+   * between instances of the NFS version 3 protocol server, where uncommitted data may be lost.
    */
   public long getVerf() {
     return _verf;

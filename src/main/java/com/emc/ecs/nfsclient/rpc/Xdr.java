@@ -228,7 +228,7 @@ public class Xdr {
    * @return float
    */
   public float getFloat() {
-    return (Float.intBitsToFloat(getInt()));
+    return Float.intBitsToFloat(getInt());
   }
 
   /**
@@ -339,28 +339,17 @@ public class Xdr {
     skip(len);
   }
 
-  /**
-   * @return the xid.
-   */
+  /** Returns the xid. */
   public int getXid() {
     return _xid;
   }
 
-  /**
-   * Set xid
-   *
-   * @param xid
-   */
+  /** Set xid */
   public void setXid(int xid) {
     _xid = xid;
   }
 
-  /**
-   * add payloads, more than one can be added.
-   *
-   * @param payloads
-   * @param size
-   */
+  /** add payloads, more than one can be added. */
   public void putPayloads(List<ByteBuffer> payloads, int size) {
     putInt(size);
     if (_payloads == null) {
@@ -371,9 +360,7 @@ public class Xdr {
     _payloadsSize += size;
   }
 
-  /**
-   * @return The terminated list of payloads, properly padded and ready for sending.
-   */
+  /** Returns the terminated list of payloads, properly padded and ready for sending. */
   public List<ByteBuffer> getPayloads() {
     ByteBuffer terminalPadding = getTerminalPadding();
     if (terminalPadding != null) {

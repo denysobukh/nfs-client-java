@@ -28,24 +28,13 @@ public class NfsException extends IOException {
   /** The status instance. */
   private NfsStatus _status;
 
-  /**
-   * Construct a new NFS exception with the given status instance and message
-   *
-   * @param status
-   * @param message
-   */
+  /** Construct a new NFS exception with the given status instance and message */
   public NfsException(NfsStatus status, String message) {
     super(message);
     _status = status;
   }
 
-  /**
-   * Construct a new NFS exception with the given status instance, message, and exception
-   *
-   * @param status
-   * @param message
-   * @param e
-   */
+  /** Construct a new NFS exception with the given status instance, message, and exception */
   public NfsException(NfsStatus status, String message, RpcException e) {
     this(status, message, (Throwable) e);
   }
@@ -56,9 +45,7 @@ public class NfsException extends IOException {
     _status = status;
   }
 
-  /**
-   * @return The status instance.
-   */
+  /** Returns the status instance. */
   public NfsStatus getStatus() {
     return _status;
   }

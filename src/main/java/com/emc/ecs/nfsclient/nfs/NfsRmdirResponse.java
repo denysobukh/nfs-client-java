@@ -41,20 +41,14 @@ public class NfsRmdirResponse extends NfsResponseBase {
     super();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsResponseBase#unmarshalling(com.emc.ecs.
-   * nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void unmarshalling(Xdr xdr) throws RpcException {
     super.unmarshalling(xdr);
     _directoryWccData = new NfsWccData(xdr);
   }
 
-  /**
-   * @return Weak cache consistency data for the directory.
-   */
+  /** Returns weak cache consistency data for the directory. */
   public NfsWccData getDirectoryWccData() {
     return _directoryWccData;
   }

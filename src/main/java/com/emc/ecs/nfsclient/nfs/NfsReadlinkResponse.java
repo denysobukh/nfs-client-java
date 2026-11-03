@@ -59,12 +59,8 @@ public class NfsReadlinkResponse extends NfsResponseBase {
   /** The data associated with the symbolic link. */
   private String _data;
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsResponseBase#unmarshalling(com.emc.ecs.
-   * nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void unmarshalling(Xdr xdr) throws RpcException {
     super.unmarshalling(xdr);
     unmarshallingAttributes(xdr);
@@ -73,9 +69,7 @@ public class NfsReadlinkResponse extends NfsResponseBase {
     }
   }
 
-  /**
-   * @return The data associated with the symbolic link.
-   */
+  /** Returns the data associated with the symbolic link. */
   public String getData() {
     return _data;
   }

@@ -27,13 +27,8 @@ import java.io.IOException;
  */
 public abstract class NfsResponseHandler<T extends NfsResponseBase> extends RpcResponseHandler<T> {
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * com.emc.ecs.nfsclient.rpc.RpcResponseHandler#checkResponse(com.emc.ecs.
-   * nfsclient.rpc.RpcRequest)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void checkResponse(RpcRequest request) throws IOException {
     if (getResponse().getRejectStatus() == RejectStatus.AUTH_ERROR.getValue()) {
       request.setUsePrivilegedPort(true);

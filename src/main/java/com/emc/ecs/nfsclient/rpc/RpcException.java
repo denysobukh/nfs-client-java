@@ -55,9 +55,7 @@ public class RpcException extends IOException {
     _status = status;
   }
 
-  /**
-   * @return The status.
-   */
+  /** Returns the status. */
   public RpcStatus getStatus() {
     return _status;
   }

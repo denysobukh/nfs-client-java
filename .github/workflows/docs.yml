@@ -25,8 +25,10 @@ jobs:
           distribution: temurin
           java-version: '25'
           cache: gradle
-      - name: Generate Javadocs
+      - name: Generate Javadocs and coverage reports
         run: ./gradlew --no-daemon aggregateDocs
+      - name: Generate coverage badge
+        run: python3 scripts/coverage-badge.py build/reports/jacoco/aggregate/coverage.xml build/aggregatedDocs/coverage.svg
       - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
       - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
         with:

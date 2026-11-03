@@ -72,20 +72,14 @@ public class CredentialUnix extends CredentialBase {
     this(0, 0, null);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.rpc.CredentialBase#getCredentialFlavor()
-   */
+  /** {@inheritDoc} */
+  @Override
   protected int getCredentialFlavor() {
     return AUTH_UNIX;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.rpc.CredentialBase#getCredential()
-   */
+  /** {@inheritDoc} */
+  @Override
   protected Xdr getCredential() {
     Xdr credentials = new Xdr(_maximumXdrBytes);
     credentials.setOffset(0);

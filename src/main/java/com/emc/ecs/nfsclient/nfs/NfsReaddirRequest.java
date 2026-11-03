@@ -64,7 +64,6 @@ public class NfsReaddirRequest extends NfsRequestBase {
    *     all XDR overhead. The server is free to return less than count bytes of data.
    * @param credential The credential used for RPC authentication.
    * @param nfsVersion The NFS version number
-   * @throws FileNotFoundException
    */
   public NfsReaddirRequest(
       byte[] fileHandle,
@@ -80,12 +79,8 @@ public class NfsReaddirRequest extends NfsRequestBase {
     _count = count;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsRequestBase#marshalling(com.emc.ecs.
-   * nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void marshalling(Xdr xdr) {
     super.marshalling(xdr);
     xdr.putLong(_cookie);
@@ -93,11 +88,8 @@ public class NfsReaddirRequest extends NfsRequestBase {
     xdr.putUnsignedInt(_count);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#toString()
-   */
+  /** {@inheritDoc} */
+  @Override
   public String toString() {
     return startToString("NfsReaddirRequest")
         .append(" cookie:")

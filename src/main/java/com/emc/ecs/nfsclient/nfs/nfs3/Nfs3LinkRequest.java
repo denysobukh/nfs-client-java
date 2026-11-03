@@ -40,7 +40,6 @@ public class Nfs3LinkRequest extends NfsLinkRequest {
    *     created.
    * @param name The name that is to be associated with the created link.
    * @param credential The credential used for RPC authentication.
-   * @throws FileNotFoundException
    */
   Nfs3LinkRequest(
       byte[] fileHandle, byte[] parentDirectoryFileHandle, String name, Credential credential)

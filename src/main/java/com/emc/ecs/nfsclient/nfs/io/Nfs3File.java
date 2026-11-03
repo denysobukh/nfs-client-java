@@ -27,7 +27,6 @@ public class Nfs3File extends NfsFileBase<Nfs3, Nfs3File> {
    *
    * @param nfs The supporting NFS client.
    * @param path The full path of the file, starting with the mount point.
-   * @throws IOException
    */
   public Nfs3File(Nfs3 nfs, String path) throws IOException {
     super(nfs, path, null);
@@ -40,7 +39,6 @@ public class Nfs3File extends NfsFileBase<Nfs3, Nfs3File> {
    * @param path The full path of the file, starting with the mount point.
    * @param linkTracker The tracker to use. This must be passed so that monitoring is continued
    *     until the link resolves to a file that is not a symbolic link.
-   * @throws IOException
    */
   public Nfs3File(Nfs3 nfs, String path, LinkTracker<Nfs3, Nfs3File> linkTracker)
       throws IOException {
@@ -52,26 +50,19 @@ public class Nfs3File extends NfsFileBase<Nfs3, Nfs3File> {
    *
    * @param parent The parent file, stored to reduce lookup overhead
    * @param child The short name of the file, starting from the parent path.
-   * @throws IOException
    */
   public Nfs3File(Nfs3File parent, String child) throws IOException {
     super(parent, child);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#newChildFile(java.lang.String)
-   */
+  /** {@inheritDoc} */
+  @Override
   public Nfs3File newChildFile(String childName) throws IOException {
     return new Nfs3File(this, childName);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFileBase#newFile(java.lang.String)
-   */
+  /** {@inheritDoc} */
+  @Override
   protected Nfs3File newFile(String path, LinkTracker<Nfs3, Nfs3File> linkTracker)
       throws IOException {
     return new Nfs3File(getNfs(), path, linkTracker);

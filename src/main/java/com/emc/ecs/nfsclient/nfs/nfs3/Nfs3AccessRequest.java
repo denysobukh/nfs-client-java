@@ -60,7 +60,6 @@ public class Nfs3AccessRequest extends NfsAccessRequest {
    *            </pre>
    *
    * @param credential The credential used for RPC authentication.
-   * @throws FileNotFoundException
    */
   public Nfs3AccessRequest(byte[] fileHandle, long accessToCheck, Credential credential)
       throws FileNotFoundException {

@@ -16,6 +16,7 @@ plugins {
     id 'idea'
     id 'eclipse'
     id 'java-library'
+    id 'jacoco'
     id 'distribution'
     id 'signing'
     id 'com.diffplug.spotless' version '8.11.0'
@@ -78,8 +79,23 @@ allprojects {
         tools // specifies tool artifacts for the distribution (placed in the tools/ directory)
     }
     plugins.withId('java') {
+        apply plugin: 'jacoco'
         apply plugin: 'net.ltgt.errorprone'
         apply plugin: 'com.github.spotbugs'
+
+        jacoco {
+            toolVersion = '0.8.15'
+        }
+        tasks.named('test') {
+            finalizedBy tasks.named('jacocoTestReport')
+        }
+        tasks.named('jacocoTestReport') {
+            dependsOn tasks.named('test')
+            reports {
+                xml.required = true
+                html.required = true
+            }
+        }
 
         spotbugs {
             toolVersion = '4.10.5'
@@ -168,10 +184,14 @@ tasks.withType(JavaCompile) {
 }
 
 jar {
+    def implementationVersion = project.version.toString()
+    def runtimeFiles = configurations.runtimeClasspath
+    inputs.property('implementationVersion', implementationVersion)
+    inputs.files(runtimeFiles).withPropertyName('manifestClasspath')
     doFirst {
         manifest {
-            attributes 'Implementation-Version': project.version,
-                    'Class-Path': configurations.runtimeClasspath.collect { it.getName() }.join(' ')
+            attributes 'Implementation-Version': implementationVersion,
+                    'Class-Path': runtimeFiles.collect { it.getName() }.join(' ')
         }
     }
     into("META-INF/maven/$project.group/$project.name") {
@@ -243,12 +263,37 @@ signing {
     useGpgCmd()
 }
 
+// Merge all test executions, including tool tests that exercise client classes.
+tasks.register('jacocoAggregateReport', JacocoReport) {
+    description = 'Generate combined coverage for the client and both tool modules.'
+    group = 'verification'
+    dependsOn allprojects.collect { it.tasks.named('test') }
+    sourceDirectories.from(provider { allprojects.collect { it.sourceSets.main.allJava.srcDirs } })
+    classDirectories.from(provider { allprojects.collect { it.sourceSets.main.output.classesDirs } })
+    executionData.from(allprojects.collect {
+        fileTree(it.layout.buildDirectory) { include 'jacoco/test.exec' }
+    })
+    reports {
+        xml.required = true
+        xml.outputLocation = layout.buildDirectory.file('reports/jacoco/aggregate/coverage.xml')
+        html.required = true
+        html.outputLocation = layout.buildDirectory.dir('reports/jacoco/aggregate/html')
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('jacocoAggregateReport')
+}
+
 // Build the static site deployed by the GitHub Pages workflow.
 tasks.register('aggregateDocs', Sync) {
-    description = 'Stage Javadocs for GitHub Pages.'
+    description = 'Stage Javadocs and test coverage for GitHub Pages.'
     group = 'documentation'
     into layout.buildDirectory.dir('aggregatedDocs')
     from('src/docs')
+    into('coverage') {
+        from tasks.named('jacocoAggregateReport').map { it.reports.html.outputLocation }
+    }
     into('latest/javadoc') {
         from tasks.named('javadoc')
     }

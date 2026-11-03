@@ -85,9 +85,7 @@ public class NfsCreateMode {
     _value = value;
   }
 
-  /**
-   * @return The integer value used in the request.
-   */
+  /** Returns the integer value used in the request. */
   int getValue() {
     return _value;
   }

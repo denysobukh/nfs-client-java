@@ -45,12 +45,8 @@ public class NfsPathconfResponse extends NfsResponseBase {
     super();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsResponseBase#unmarshalling(com.emc.ecs.
-   * nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void unmarshalling(Xdr xdr) throws RpcException {
     super.unmarshalling(xdr);
     unmarshallingAttributes(xdr);
@@ -60,9 +56,7 @@ public class NfsPathconfResponse extends NfsResponseBase {
     }
   }
 
-  /**
-   * @return The posix attributes.
-   */
+  /** Returns the posix attributes. */
   public NfsPosixAttributes getPosixAttributes() {
     return _attributes;
   }

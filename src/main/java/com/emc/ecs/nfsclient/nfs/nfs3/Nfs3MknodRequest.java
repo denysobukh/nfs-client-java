@@ -42,7 +42,6 @@ public class Nfs3MknodRequest extends NfsMknodRequest {
    *     or a block special file ( <code>type</code> is <code>NF3BLK</code>), <code>rdev[0]</code>
    *     is the major number and <code>rdev[1]</code> is the minor number.
    * @param credential The credential used for RPC authentication.
-   * @throws FileNotFoundException
    */
   public Nfs3MknodRequest(
       byte[] fileHandle,

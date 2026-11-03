@@ -99,9 +99,7 @@ public class MountStatus implements java.io.Serializable {
     }
   }
 
-  /**
-   * @return The int status value.
-   */
+  /** Returns the int status value. */
   public int getValue() {
     return _value;
   }

@@ -32,9 +32,7 @@ public class NetMgr {
   /** The single instance. */
   private static final NetMgr _instance = new NetMgr();
 
-  /**
-   * @return The instance.
-   */
+  /** Returns the instance. */
   public static NetMgr getInstance() {
     return _instance;
   }
@@ -86,7 +84,6 @@ public class NetMgr {
    * @param xdrRequest The Xdr data for the request.
    * @param timeout The timeout in seconds.
    * @return The Xdr data for the response.
-   * @throws RpcException
    */
   public Xdr sendAndWait(
       String serverIP, int port, boolean usePrivilegedPort, Xdr xdrRequest, int timeout)

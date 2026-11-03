@@ -116,7 +116,6 @@ public final class Portmapper {
    *
    * @param e The exception.
    * @param attemptNumber The number of attempts so far.
-   * @throws IOException
    */
   private static void handleRpcException(
       RpcException e, int attemptNumber, String server, int program, int version)

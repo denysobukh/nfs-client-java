@@ -35,7 +35,6 @@ public class Nfs3RemoveRequest extends NfsRemoveRequest {
    * @param fileHandle The file handle for the directory from which the entry is to be removed.
    * @param name The name of the entry to be removed.
    * @param credential The credential used for RPC authentication.
-   * @throws FileNotFoundException
    */
   Nfs3RemoveRequest(byte[] fileHandle, String name, Credential credential)
       throws FileNotFoundException {

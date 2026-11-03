@@ -1,6 +1,7 @@
 [![Dependency Security](https://github.com/denysobukh/nfs-client-java/actions/workflows/security.yml/badge.svg?branch=master)](https://github.com/denysobukh/nfs-client-java/actions/workflows/security.yml)
 [![Error Prone](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml/badge.svg?branch=master&label=Error%20Prone)](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml)
 [![SpotBugs](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml/badge.svg?branch=master&label=SpotBugs)](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml)
+[![JaCoCo line coverage](https://denysobukh.github.io/nfs-client-java/coverage.svg)](https://denysobukh.github.io/nfs-client-java/coverage/)
 [![Code style: Google Java Format (Spotless)](https://img.shields.io/badge/code_style-Google_Java_Format_(Spotless)-blue)](#code-formatting)
 
 NFS Client for Java
@@ -94,6 +95,27 @@ baseline; new findings must be reviewed and fixed or narrowly justified.
 
 The Error Prone and SpotBugs badges show the CI workflow status, which includes
 these checks.
+
+Test coverage
+---
+
+[JaCoCo](https://www.jacoco.org/jacoco/) collects coverage when tests run in any
+module. `./gradlew build` also generates a combined report for the client and both
+tool modules, merging their test executions so calls into the client from tool
+tests count toward client coverage.
+
+```sh
+./gradlew jacocoAggregateReport # Run tests and generate combined HTML and XML
+```
+
+Open `build/reports/jacoco/aggregate/html/index.html` for the combined report;
+modules with test execution also have a report under `build/reports/jacoco/test/`.
+CI uploads these as the `jacoco-reports` artifact. The GitHub Pages workflow
+publishes the [combined report](https://denysobukh.github.io/nfs-client-java/coverage/)
+and updates the README badge with its measured line coverage on each master build.
+Tests requiring an external NFS server are skipped unless `test.properties` is
+configured; skipped tests do not contribute coverage. No coverage threshold or
+production-class exclusions are applied.
 
 How to use the bare client
 ---

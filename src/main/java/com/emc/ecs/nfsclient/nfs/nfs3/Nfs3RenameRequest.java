@@ -41,7 +41,6 @@ public class Nfs3RenameRequest extends NfsRenameRequest {
    * @param toFileHandle The file handle for the directory to which the object is to be renamed.
    * @param toName The new name for the object.
    * @param credential The credential used for RPC authentication.
-   * @throws FileNotFoundException
    */
   public Nfs3RenameRequest(
       byte[] fileHandle, String name, byte[] toFileHandle, String toName, Credential credential)

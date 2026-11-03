@@ -133,11 +133,7 @@ public class NfsGetAttributes {
    */
   private NfsTime _ctime;
 
-  /**
-   * Reads the Xdr response, as specified by RFC 1813 (https://tools.ietf.org/html/rfc1813).
-   *
-   * @param xdr
-   */
+  /** Reads the Xdr response, as specified by RFC 1813 (https://tools.ietf.org/html/rfc1813). */
   public void unmarshalling(Xdr xdr) {
     _loaded = true;
     _type = NfsType.fromValue((int) xdr.getUnsignedInt());
@@ -160,17 +156,18 @@ public class NfsGetAttributes {
   }
 
   /**
-   * @return <code>true</code> if the properties have been loaded from NFS server data, <code>false
-   *     </code> otherwise.
+   * Returns <code>true</code> if the properties have been loaded from NFS server data, <code>false
+   * </code> otherwise.
    */
   public boolean isLoaded() {
     return _loaded;
   }
 
   /**
-   * @return the ftype3 enum of the file, as specified by RFC 1813
-   *     (https://tools.ietf.org/html/rfc1813).<br>
-   *     <pre>
+   * Returns the ftype3 enum of the file, as specified by RFC 1813
+   * (https://tools.ietf.org/html/rfc1813).<br>
+   *
+   * <pre>
    * enum ftype3 {
    *    NF3REG    = 1,
    *    NF3DIR    = 2,
@@ -181,136 +178,125 @@ public class NfsGetAttributes {
    *    NF3FIFO   = 7
    * };
    *         </pre>
-   *     The enumeration, ftype3, gives the type of a file. The type, NF3REG, is a regular file,
-   *     NF3DIR is a directory, NF3BLK is a block special device file, NF3CHR is a character special
-   *     device file, NF3LNK is a symbolic link, NF3SOCK is a socket, and NF3FIFO is a named pipe.
-   *     Note that the precise enum encoding must be followed.
+   *
+   * The enumeration, ftype3, gives the type of a file. The type, NF3REG, is a regular file, NF3DIR
+   * is a directory, NF3BLK is a block special device file, NF3CHR is a character special device
+   * file, NF3LNK is a symbolic link, NF3SOCK is a socket, and NF3FIFO is a named pipe. Note that
+   * the precise enum encoding must be followed.
    */
   public NfsType getType() {
     return _type;
   }
 
   /**
-   * @return the protection mode bits, as specified by RFC 1813
-   *     (https://tools.ietf.org/html/rfc1813):
-   *     <ul>
-   *       <li><strong>0x00800</strong> - Set user ID on execution.
-   *       <li><strong>0x00400</strong> - Set group ID on execution.
-   *       <li><strong>0x00200</strong> - Save swapped text (not defined in POSIX).
-   *       <li><strong>0x00100</strong> - Read permission for owner.
-   *       <li><strong>0x00080</strong> - Write permission for owner.
-   *       <li><strong>0x00040</strong> - Execute permission for owner on a file. Or lookup (search)
-   *           permission for owner in directory.
-   *       <li><strong>0x00020</strong> - Read permission for group.
-   *       <li><strong>0x00010</strong> - Write permission for group.
-   *       <li><strong>0x00008</strong> - Execute permission for group on a file. Or lookup (search)
-   *           permission for group in directory.
-   *       <li><strong>0x00004</strong> - Read permission for others.
-   *       <li><strong>0x00002</strong> - Write permission for others.
-   *       <li><strong>0x00001</strong> - Execute permission for others on a file. Or lookup
-   *           (search) permission for others in directory.
-   *     </ul>
+   * Returns the protection mode bits, as specified by RFC 1813
+   * (https://tools.ietf.org/html/rfc1813):
+   *
+   * <ul>
+   *   <li><strong>0x00800</strong> - Set user ID on execution.
+   *   <li><strong>0x00400</strong> - Set group ID on execution.
+   *   <li><strong>0x00200</strong> - Save swapped text (not defined in POSIX).
+   *   <li><strong>0x00100</strong> - Read permission for owner.
+   *   <li><strong>0x00080</strong> - Write permission for owner.
+   *   <li><strong>0x00040</strong> - Execute permission for owner on a file. Or lookup (search)
+   *       permission for owner in directory.
+   *   <li><strong>0x00020</strong> - Read permission for group.
+   *   <li><strong>0x00010</strong> - Write permission for group.
+   *   <li><strong>0x00008</strong> - Execute permission for group on a file. Or lookup (search)
+   *       permission for group in directory.
+   *   <li><strong>0x00004</strong> - Read permission for others.
+   *   <li><strong>0x00002</strong> - Write permission for others.
+   *   <li><strong>0x00001</strong> - Execute permission for others on a file. Or lookup (search)
+   *       permission for others in directory.
+   * </ul>
+   *
+   * .
    */
   public long getMode() {
     return _mode;
   }
 
   /**
-   * @return the number of hard links to the file - that is, the number of different names for the
-   *     same file.
+   * Returns the number of hard links to the file - that is, the number of different names for the
+   * same file.
    */
   public long getNlink() {
     return _nlink;
   }
 
-  /**
-   * @return the user ID of the owner of the file.
-   */
+  /** Returns the user ID of the owner of the file. */
   public long getUid() {
     return _uid;
   }
 
-  /**
-   * @return the group ID of the group of the file.
-   */
+  /** Returns the group ID of the group of the file. */
   public long getGid() {
     return _gid;
   }
 
-  /**
-   * @return the size of the file in bytes.
-   */
+  /** Returns the size of the file in bytes. */
   public long getSize() {
     return _size;
   }
 
   /**
-   * @return the number of bytes of disk space that the file actually uses (which can be smaller
-   *     than the size because the file may have holes or it may be larger due to fragmentation).
+   * Returns the number of bytes of disk space that the file actually uses (which can be smaller
+   * than the size because the file may have holes or it may be larger due to fragmentation).
    */
   public long getUsed() {
     return _used;
   }
 
   /**
-   * @return a description of the device file if the file type is NF3CHR or NF3BLK.The
-   *     interpretation of rdev depends on the type of file system object. For a block special
-   *     (NF3BLK) or character special (NF3CHR) file, rdev[0] and rdev[1] are the major and minor
-   *     device numbers, respectively. (This is obviously a UNIX-specific interpretation.) For all
-   *     other file types, these two elements should either be set to 0 or the values should be
-   *     agreed upon by the client and server. If the client and server do not agree upon the
-   *     values, the client should treat these fields as if they are set to 0. This data field is
-   *     returned as part of the fattr3 structure and so is available from all replies returning
-   *     attributes. Since these fields are otherwise unused for objects which are not devices, out
-   *     of band information can be passed from the server to the client. However, once again, both
-   *     the server and the client must agree on the values passed.
+   * Returns a description of the device file if the file type is NF3CHR or NF3BLK.The
+   * interpretation of rdev depends on the type of file system object. For a block special (NF3BLK)
+   * or character special (NF3CHR) file, rdev[0] and rdev[1] are the major and minor device numbers,
+   * respectively. (This is obviously a UNIX-specific interpretation.) For all other file types,
+   * these two elements should either be set to 0 or the values should be agreed upon by the client
+   * and server. If the client and server do not agree upon the values, the client should treat
+   * these fields as if they are set to 0. This data field is returned as part of the fattr3
+   * structure and so is available from all replies returning attributes. Since these fields are
+   * otherwise unused for objects which are not devices, out of band information can be passed from
+   * the server to the client. However, once again, both the server and the client must agree on the
+   * values passed.
    */
   public long[] getRdev() {
     return _rdev == null ? null : _rdev.clone();
   }
 
-  /**
-   * @return the file system identifier for the file system.
-   */
+  /** Returns the file system identifier for the file system. */
   public long getFsid() {
     return _fsid;
   }
 
   /**
-   * @return a number which uniquely identifies the file within its file system (on UNIX this would
-   *     be the inumber).
+   * Returns a number which uniquely identifies the file within its file system (on UNIX this would
+   * be the inumber).
    */
   public long getFileid() {
     return _fileid;
   }
 
-  /**
-   * @return the time when the file data was last accessed.
-   */
+  /** Returns the time when the file data was last accessed. */
   public NfsTime getAtime() {
     return _atime;
   }
 
-  /**
-   * @return the time when the file data was last modified.
-   */
+  /** Returns the time when the file data was last modified. */
   public NfsTime getMtime() {
     return _mtime;
   }
 
   /**
-   * @return the time when the attributes of the file were last changed. Writing to the file changes
-   *     the ctime in addition to the mtime.
+   * Returns the time when the attributes of the file were last changed. Writing to the file changes
+   * the ctime in addition to the mtime.
    */
   public NfsTime getCtime() {
     return _ctime;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#toString()
-   */
+  /** {@inheritDoc} */
+  @Override
   public String toString() {
     return "NfsAttr{"
         + "type="

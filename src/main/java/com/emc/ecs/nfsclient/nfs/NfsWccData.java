@@ -44,16 +44,12 @@ public class NfsWccData {
     _attributes = makeAttributes(xdr);
   }
 
-  /**
-   * @return Attributes before the operation.
-   */
+  /** Returns attributes before the operation. */
   public NfsPreOpAttributes getPreOpAttributes() {
     return _preOpAttributes;
   }
 
-  /**
-   * @return Attributes after the operation.
-   */
+  /** Returns attributes after the operation. */
   public NfsGetAttributes getAttributes() {
     return _attributes;
   }
@@ -61,7 +57,6 @@ public class NfsWccData {
   /**
    * Extracts the pre-operation attributes.
    *
-   * @param xdr
    * @return The attributes.
    */
   private static NfsPreOpAttributes makePreOpAttributes(Xdr xdr) {
@@ -75,7 +70,6 @@ public class NfsWccData {
   /**
    * Extracts the post-operation attributes.
    *
-   * @param xdr
    * @return The attributes.
    */
   private static NfsGetAttributes makeAttributes(Xdr xdr) {

@@ -53,7 +53,6 @@ public class Nfs3ReaddirplusRequest extends NfsReaddirplusRequest {
    *     include all XDR overhead. The server is free to return less than <code>maxcount</code>
    *     bytes of data.
    * @param credential The credential used for RPC authentication.
-   * @throws FileNotFoundException
    */
   public Nfs3ReaddirplusRequest(
       byte[] fileHandle,

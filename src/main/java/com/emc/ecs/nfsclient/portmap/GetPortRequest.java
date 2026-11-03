@@ -90,13 +90,8 @@ public class GetPortRequest extends RpcRequest {
     _networkProtocol = networkProtocol;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * com.emc.ecs.nfsclient.rpc.RpcRequest#marshalling(com.emc.ecs.nfsclient.
-   * rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void marshalling(Xdr x) {
     super.marshalling(x);
     x.putInt(_programToQuery);
@@ -105,11 +100,8 @@ public class GetPortRequest extends RpcRequest {
     x.putInt(_port);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.rpc.RpcRequest#getErrorMessage()
-   */
+  /** {@inheritDoc} */
+  @Override
   public String getErrorMessage() {
     throw new NotImplementedException("This method should never be used during Portmapper calls.");
   }

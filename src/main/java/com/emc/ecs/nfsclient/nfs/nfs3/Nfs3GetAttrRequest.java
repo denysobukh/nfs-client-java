@@ -38,7 +38,6 @@ public class Nfs3GetAttrRequest extends NfsGetAttrRequest {
    *
    * @param fileHandle The file handle of an object whose attributes are to be retrieved.
    * @param credential The credential to use for the request
-   * @throws FileNotFoundException
    */
   public Nfs3GetAttrRequest(byte[] fileHandle, Credential credential) throws FileNotFoundException {
     super(fileHandle, credential, Nfs3.VERSION);

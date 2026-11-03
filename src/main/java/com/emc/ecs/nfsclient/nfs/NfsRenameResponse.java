@@ -48,28 +48,20 @@ public class NfsRenameResponse extends NfsResponseBase {
     super();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsResponseBase#unmarshalling(com.emc.ecs.
-   * nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void unmarshalling(Xdr xdr) throws RpcException {
     super.unmarshalling(xdr);
     _fromDirectoryWccData = new NfsWccData(xdr);
     _toDirectoryWccData = new NfsWccData(xdr);
   }
 
-  /**
-   * @return The weak consistency data for the from directory.
-   */
+  /** Returns the weak consistency data for the from directory. */
   public NfsWccData getFromDirectoryWccData() {
     return _fromDirectoryWccData;
   }
 
-  /**
-   * @return The weak consistency data for the to directory.
-   */
+  /** Returns the weak consistency data for the to directory. */
   public NfsWccData getToDirectoryWccData() {
     return _toDirectoryWccData;
   }

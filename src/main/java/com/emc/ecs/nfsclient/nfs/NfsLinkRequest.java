@@ -47,7 +47,6 @@ public class NfsLinkRequest extends NfsRequestBase {
    * @param name The name that is to be associated with the created link.
    * @param credential The credential used for RPC authentication.
    * @param nfsVersion The NFS version number
-   * @throws FileNotFoundException
    */
   public NfsLinkRequest(
       byte[] fileHandle,
@@ -61,23 +60,16 @@ public class NfsLinkRequest extends NfsRequestBase {
     _name = trimFileName(name);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsRequestBase#marshalling(com.emc.ecs.
-   * nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void marshalling(Xdr xdr) {
     super.marshalling(xdr);
     xdr.putByteArray(_parentDirectoryFileHandle);
     xdr.putString(_name);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#toString()
-   */
+  /** {@inheritDoc} */
+  @Override
   public String toString() {
     return startToString("NfsLinkRequest")
         .append(" parentDirectoryFileHandle:")

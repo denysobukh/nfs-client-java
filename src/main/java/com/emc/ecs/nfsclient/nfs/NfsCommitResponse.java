@@ -53,12 +53,8 @@ public class NfsCommitResponse extends NfsResponseBase {
     super();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsResponseBase#unmarshalling(com.emc.ecs.
-   * nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void unmarshalling(Xdr xdr) throws RpcException {
     super.unmarshalling(xdr);
     _fileWccData = new NfsWccData(xdr);
@@ -69,18 +65,16 @@ public class NfsCommitResponse extends NfsResponseBase {
   }
 
   /**
-   * @return A cookie that the client can use to determine whether the server has rebooted between a
-   *     call to WRITE and a subsequent call to COMMIT. This cookie must be consistent during a
-   *     single boot session and must be unique between instances of the NFS version 3 protocol
-   *     server where uncommitted data may be lost.
+   * Returns a cookie that the client can use to determine whether the server has rebooted between a
+   * call to WRITE and a subsequent call to COMMIT. This cookie must be consistent during a single
+   * boot session and must be unique between instances of the NFS version 3 protocol server where
+   * uncommitted data may be lost.
    */
   public long getVerf() {
     return _verf;
   }
 
-  /**
-   * @return Weak cache consistency data for the file.
-   */
+  /** Returns weak cache consistency data for the file. */
   public NfsWccData getFileWccData() {
     return _fileWccData;
   }

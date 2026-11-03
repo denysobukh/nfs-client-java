@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Acceptance status of an RPC reply, as specified by RFC 1831.
+ *
  * @author seibed
  */
 public class AcceptStatus extends RpcStatus {
@@ -74,11 +76,7 @@ public class AcceptStatus extends RpcStatus {
     }
   }
 
-  /**
-   * Create the instance from the int status value.
-   *
-   * @param value
-   */
+  /** Create the instance from the int status value. */
   private final String _name;
 
   private AcceptStatus(int value) {

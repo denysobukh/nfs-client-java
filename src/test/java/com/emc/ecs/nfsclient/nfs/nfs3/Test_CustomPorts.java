@@ -101,23 +101,15 @@ public class Test_CustomPorts {
           Peer nfs = new Peer(Nfs.RPC_PROGRAM, 0)) {
         resetDiscovery();
         String path = export(nfs, mount);
-        Nfs3 client;
-        switch (variant) {
-          case 0:
-            client = new DiscoveryClient("127.0.0.1", path, ROOT, 1);
-            break;
-          case 1:
-            client = new DiscoveryClient("127.0.0.1", path, CREDENTIAL, 1);
-            break;
-          case 2:
-            client = new DiscoveryClient("127.0.0.1:" + path, 123, 456, 1);
-            break;
-          case 3:
-            client = new DiscoveryClient("127.0.0.1:" + path, CREDENTIAL, 1);
-            break;
-          default:
-            client = new DiscoveryClient("127.0.0.1", path, ROOT, CREDENTIAL, 1);
-        }
+
+        Nfs3 client =
+            switch (variant) {
+              case 0 -> new DiscoveryClient("127.0.0.1", path, ROOT, 1);
+              case 1 -> new DiscoveryClient("127.0.0.1", path, CREDENTIAL, 1);
+              case 2 -> new DiscoveryClient("127.0.0.1:" + path, 123, 456, 1);
+              case 3 -> new DiscoveryClient("127.0.0.1:" + path, CREDENTIAL, 1);
+              default -> new DiscoveryClient("127.0.0.1", path, ROOT, CREDENTIAL, 1);
+            };
         assertEquals(1, DiscoveryClient.nfsQueries.get());
         assertEquals(hasHandle ? 0 : 1, DiscoveryClient.mountQueries.get());
         assertEquals(hasHandle ? 0 : mount.port(), client.getMountPort());
@@ -191,13 +183,13 @@ public class Test_CustomPorts {
     @Override
     int getNfsPortFromServer() {
       nfsQueries.incrementAndGet();
-      return Integer.parseInt(getExportedPath().split("/")[1]);
+      return Integer.parseInt(getExportedPath().split("/", -1)[1]);
     }
 
     @Override
     int getMountPortFromServer() {
       mountQueries.incrementAndGet();
-      return Integer.parseInt(getExportedPath().split("/")[2]);
+      return Integer.parseInt(getExportedPath().split("/", -1)[2]);
     }
   }
 

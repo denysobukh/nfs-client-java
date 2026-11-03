@@ -42,8 +42,6 @@ public class NfsPreOpAttributes {
   /**
    * Creates a new structure from the Xdr response, as specified by RFC 1813
    * (https://tools.ietf.org/html/rfc1813).
-   *
-   * @param xdr
    */
   public NfsPreOpAttributes(Xdr xdr) {
     _size = xdr.getLong();
@@ -54,23 +52,21 @@ public class NfsPreOpAttributes {
   }
 
   /**
-   * @return The number of bytes of disk space that the file actually uses (which can be smaller
-   *     than the size because the file may have holes or it may be larger due to fragmentation).
+   * Returns the number of bytes of disk space that the file actually uses (which can be smaller
+   * than the size because the file may have holes or it may be larger due to fragmentation).
    */
   public long getSize() {
     return _size;
   }
 
-  /**
-   * @return The time when the file data was last modified.
-   */
+  /** Returns the time when the file data was last modified. */
   public NfsTime getMTime() {
     return _mtime;
   }
 
   /**
-   * @return The time when the attributes of the file were last changed. Writing to the file changes
-   *     the ctime in addition to the mtime.
+   * Returns the time when the attributes of the file were last changed. Writing to the file changes
+   * the ctime in addition to the mtime.
    */
   public NfsTime getCTime() {
     return _ctime;

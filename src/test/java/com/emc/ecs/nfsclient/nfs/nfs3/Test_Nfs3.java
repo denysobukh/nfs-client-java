@@ -32,9 +32,6 @@ public class Test_Nfs3 extends NfsTestBase {
   /** Name of a test file to use in the export */
   private static final String TEST_FILE_NAME = "test";
 
-  /**
-   * @throws IOException
-   */
   public Test_Nfs3() throws IOException {
     super();
   }
@@ -98,13 +95,10 @@ public class Test_Nfs3 extends NfsTestBase {
     }
   }
 
-  /**
-   * @param fileHandle
-   */
   static void printFileHandle(byte[] fileHandle) {
     int len = fileHandle.length;
 
-    StringBuffer buf = new StringBuffer();
+    StringBuilder buf = new StringBuilder();
     buf.append("file handle: [" + String.valueOf(len) + "] ");
     for (byte e : fileHandle) {
       buf.append((int) e);

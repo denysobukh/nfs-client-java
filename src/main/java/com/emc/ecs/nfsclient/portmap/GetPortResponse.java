@@ -29,22 +29,16 @@ public class GetPortResponse extends RpcResponse {
    */
   private int _port;
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * com.emc.ecs.nfsclient.rpc.RpcResponse#unmarshalling(com.emc.ecs.nfsclient
-   * .rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void unmarshalling(Xdr x) throws RpcException {
     super.unmarshalling(x);
     _port = x.getInt();
   }
 
   /**
-   * @return The port number on which the program is awaiting call requests. A port value of zeros
-   *     means the program has not been registered. Specified by
-   *     https://tools.ietf.org/html/rfc1833.
+   * Returns the port number on which the program is awaiting call requests. A port value of zeros
+   * means the program has not been registered. Specified by https://tools.ietf.org/html/rfc1833.
    */
   public int getPort() {
     return _port;

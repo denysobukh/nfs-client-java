@@ -65,13 +65,8 @@ public class MountResponse extends RpcResponse {
     super();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * com.emc.ecs.nfsclient.rpc.RpcResponse#unmarshalling(com.emc.ecs.nfsclient
-   * .rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void unmarshalling(Xdr xdr) throws RpcException {
     super.unmarshalling(xdr);
     _mountStatus = xdr.getInt();
@@ -86,34 +81,35 @@ public class MountResponse extends RpcResponse {
   }
 
   /**
-   * @return A status indicator, expected to have one of the MountStatus values as below.
-   *     <ul>
-   *       <li>MNT3_OK = 0 (no error)
-   *       <li>MNT3ERR_PERM = 1 (Not owner)
-   *       <li>MNT3ERR_NOENT = 2 (No such file or directory)
-   *       <li>MNT3ERR_IO = 5 (I/O error)
-   *       <li>MNT3ERR_ACCES = 13 (Permission denied)
-   *       <li>MNT3ERR_NOTDIR = 20 (Not a directory)
-   *       <li>MNT3ERR_INVAL = 22 (Invalid argument)
-   *       <li>MNT3ERR_NAMETOOLONG = 63 (Filename too long)
-   *       <li>MNT3ERR_NOTSUPP = 10004 (Operation not supported)
-   *       <li>MNT3ERR_SERVERFAULT = 10006 (A failure on the server)
-   *     </ul>
+   * Returns a status indicator, expected to have one of the MountStatus values as below.
+   *
+   * <ul>
+   *   <li>MNT3_OK = 0 (no error)
+   *   <li>MNT3ERR_PERM = 1 (Not owner)
+   *   <li>MNT3ERR_NOENT = 2 (No such file or directory)
+   *   <li>MNT3ERR_IO = 5 (I/O error)
+   *   <li>MNT3ERR_ACCES = 13 (Permission denied)
+   *   <li>MNT3ERR_NOTDIR = 20 (Not a directory)
+   *   <li>MNT3ERR_INVAL = 22 (Invalid argument)
+   *   <li>MNT3ERR_NAMETOOLONG = 63 (Filename too long)
+   *   <li>MNT3ERR_NOTSUPP = 10004 (Operation not supported)
+   *   <li>MNT3ERR_SERVERFAULT = 10006 (A failure on the server)
+   * </ul>
+   *
+   * .
    */
   public int getMountStatus() {
     return _mountStatus;
   }
 
-  /**
-   * @return The file handle for the exported directory.
-   */
+  /** Returns the file handle for the exported directory. */
   public byte[] getRootFileHandle() {
     return _rootFileHandle.clone();
   }
 
   /**
-   * @return The array of supported authentication flavors, as defined in RFC 1831
-   *     (https://tools.ietf.org/html/rfc1831).
+   * Returns the array of supported authentication flavors, as defined in RFC 1831
+   * (https://tools.ietf.org/html/rfc1831).
    */
   public int[] getAuthenticationFlavors() {
     return (_authenticationFlavors == null) ? null : _authenticationFlavors.clone();

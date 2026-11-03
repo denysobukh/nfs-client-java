@@ -41,12 +41,8 @@ public class NfsLookupResponse extends NfsResponseBase {
     super();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsResponseBase#unmarshalling(com.emc.ecs.
-   * nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void unmarshalling(Xdr xdr) throws RpcException {
     super.unmarshalling(xdr);
     if (stateIsOk()) {
@@ -56,9 +52,7 @@ public class NfsLookupResponse extends NfsResponseBase {
     _directoryAttributes = makeNfsGetAttributes(xdr);
   }
 
-  /**
-   * @return The post-operation attributes for the directory.
-   */
+  /** Returns the post-operation attributes for the directory. */
   public NfsGetAttributes getDirectoryAttributes() {
     return _directoryAttributes;
   }

@@ -52,7 +52,6 @@ public class Nfs3ReadlinkRequest extends NfsReadlinkRequest {
    *
    * @param fileHandle the fileHandle for the symbolic link
    * @param credential The credential used for RPC authentication.
-   * @throws FileNotFoundException
    */
   public Nfs3ReadlinkRequest(byte[] fileHandle, Credential credential)
       throws FileNotFoundException {

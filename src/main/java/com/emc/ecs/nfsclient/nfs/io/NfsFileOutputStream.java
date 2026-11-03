@@ -133,12 +133,11 @@ public class NfsFileOutputStream extends OutputStream {
 
     // Validate the syncType value.
     switch (syncType) {
-      case NfsWriteRequest.DATA_SYNC:
-      case NfsWriteRequest.FILE_SYNC:
-      case NfsWriteRequest.UNSTABLE:
-        break; // do nothing, these are fine.
-      default:
-        throw new IllegalArgumentException("The value of syncType is undefined: " + syncType);
+      case NfsWriteRequest.DATA_SYNC, NfsWriteRequest.FILE_SYNC, NfsWriteRequest.UNSTABLE -> {
+        // do nothing, these are fine.
+      }
+      default ->
+          throw new IllegalArgumentException("The value of syncType is undefined: " + syncType);
     }
 
     _nfsFile = nfsFile;
@@ -160,11 +159,8 @@ public class NfsFileOutputStream extends OutputStream {
     _buffer = new byte[(int) Math.min(_nfsFile.fsinfo().getFsInfo().wtpref, Integer.MAX_VALUE)];
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.io.OutputStream#close()
-   */
+  /** {@inheritDoc} */
+  @Override
   public void close() throws IOException {
     if (!_closed) {
       try {
@@ -185,11 +181,8 @@ public class NfsFileOutputStream extends OutputStream {
     }
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.io.OutputStream#flush()
-   */
+  /** {@inheritDoc} */
+  @Override
   public void flush() throws IOException {
     checkForClosed();
     writeBufferToFile();
@@ -200,29 +193,20 @@ public class NfsFileOutputStream extends OutputStream {
     super.flush();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.io.OutputStream#write(int)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void write(int b) throws IOException {
     write(new byte[] {(byte) b}, 0, 1);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.io.OutputStream#write(byte[])
-   */
+  /** {@inheritDoc} */
+  @Override
   public void write(byte[] b) throws IOException {
     write(b, 0, b.length);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.io.OutputStream#write(byte[], int, int)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void write(byte[] b, int off, int len) throws IOException {
     checkForClosed();
     if (b == null) {
@@ -263,11 +247,7 @@ public class NfsFileOutputStream extends OutputStream {
     }
   }
 
-  /**
-   * Write the buffer contents to the file and reset the buffer afterwards.
-   *
-   * @throws IOException
-   */
+  /** Write the buffer contents to the file and reset the buffer afterwards. */
   private void writeBufferToFile() throws IOException {
     if (_bufferOffset > 0) {
       List<ByteBuffer> payload = new ArrayList<ByteBuffer>(1);

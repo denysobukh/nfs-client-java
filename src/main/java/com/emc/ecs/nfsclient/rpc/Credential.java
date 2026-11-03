@@ -25,10 +25,6 @@ public interface Credential {
    */
   static final int AUTH_NONE = 0;
 
-  /**
-   * Put the credential into an XDR buffer.
-   *
-   * @param xdr
-   */
+  /** Put the credential into an XDR buffer. */
   void marshalling(Xdr xdr);
 }

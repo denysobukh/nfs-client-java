@@ -35,7 +35,6 @@ public class Nfs3MkdirRequest extends NfsMkdirRequest {
    * @param name The name that is to be associated with the created subdirectory.
    * @param attributes The initial attributes for the subdirectory.
    * @param credential The credential used for RPC authentication.
-   * @throws FileNotFoundException
    */
   public Nfs3MkdirRequest(
       byte[] fileHandle, String name, NfsSetAttributes attributes, Credential credential)

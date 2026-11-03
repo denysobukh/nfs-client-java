@@ -46,7 +46,6 @@ public class NfsSymlinkRequest extends NfsRequestBase {
    * @param attributes The initial attributes for the symbolic link.
    * @param credential The credential used for RPC authentication.
    * @param nfsVersion The NFS version number
-   * @throws FileNotFoundException
    */
   public NfsSymlinkRequest(
       String symbolicLinkData,
@@ -62,12 +61,8 @@ public class NfsSymlinkRequest extends NfsRequestBase {
     _attributes = attributes;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsRequestBase#marshalling(com.emc.ecs.
-   * nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void marshalling(Xdr xdr) {
     super.marshalling(xdr);
     xdr.putString(_name);
@@ -75,11 +70,8 @@ public class NfsSymlinkRequest extends NfsRequestBase {
     xdr.putString(_symbolicLinkData);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#toString()
-   */
+  /** {@inheritDoc} */
+  @Override
   public String toString() {
     return startToString("NfsSymbolicLinkRequest")
         .append(" name:")

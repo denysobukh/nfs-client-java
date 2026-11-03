@@ -68,12 +68,8 @@ public class NfsAccessResponse extends NfsResponseBase {
     super();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsResponseBase#unmarshalling(com.emc.ecs.
-   * nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void unmarshalling(Xdr xdr) throws RpcException {
     super.unmarshalling(xdr);
     unmarshallingAttributes(xdr);
@@ -83,8 +79,9 @@ public class NfsAccessResponse extends NfsResponseBase {
   }
 
   /**
-   * @return the access bits, as specified by RFC 1813 (https://tools.ietf.org/html/rfc1813):
-   *     <pre>
+   * Returns the access bits, as specified by RFC 1813 (https://tools.ietf.org/html/rfc1813):
+   *
+   * <pre>
    * ACCESS3_READ    = 0x0001 - Read data from file or read a directory.
    * ACCESS3_LOOKUP  = 0x0002 - Look up a name in a directory (no meaning for non-directory objects).
    * ACCESS3_MODIFY  = 0x0004 - Rewrite existing file data or modify existing directory entries.
@@ -92,6 +89,8 @@ public class NfsAccessResponse extends NfsResponseBase {
    * ACCESS3_DELETE  = 0x0010 - Delete an existing directory entry.
    * ACCESS3_EXECUTE = 0x0020 - Execute file (no meaning for a directory).
    *         </pre>
+   *
+   * .
    */
   public long getAccess() {
     return _access;

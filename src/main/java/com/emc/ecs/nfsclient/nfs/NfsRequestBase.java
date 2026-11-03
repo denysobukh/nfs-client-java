@@ -55,8 +55,6 @@ public abstract class NfsRequestBase extends RpcRequest implements NfsRequest {
    *       <li>For operations LOOKUP, CREATE, MKDIR, SYMLINK, MKNOD, REMOVE, RMDIR, RENAME, this is
    *           the file handle for the directory on which the operation will be performed.
    *     </ul>
-   *
-   * @throws FileNotFoundException
    */
   public NfsRequestBase(
       int serviceProgram,
@@ -69,54 +67,44 @@ public abstract class NfsRequestBase extends RpcRequest implements NfsRequest {
     _fileHandle = cloneFileHandle(fileHandle);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.rpc.RpcRequest#getErrorMessage()
-   */
+  /** {@inheritDoc} */
+  @Override
   public final String getErrorMessage() {
     return "Error in " + toString();
   }
 
   /**
-   * @return The primary file handle, as specified by RFC 1813
-   *     (https://tools.ietf.org/html/rfc1813).
-   *     <ul>
-   *       <li>For operations GETATTR, SETATTR, ACCESS, READLINK, READ, WRITE, LINK, READDIR,
-   *           READDIRPLUS, SSTAT, FSINFO, PATHCONF, and COMMIT, this is the file handle for the
-   *           object on which the operation will be performed.
-   *       <li>For operations LOOKUP, CREATE, MKDIR, SYMLINK, MKNOD, REMOVE, RMDIR, RENAME, this is
-   *           the file handle for the directory on which the operation will be performed.
-   *     </ul>
+   * Returns the primary file handle, as specified by RFC 1813
+   * (https://tools.ietf.org/html/rfc1813).
+   *
+   * <ul>
+   *   <li>For operations GETATTR, SETATTR, ACCESS, READLINK, READ, WRITE, LINK, READDIR,
+   *       READDIRPLUS, SSTAT, FSINFO, PATHCONF, and COMMIT, this is the file handle for the object
+   *       on which the operation will be performed.
+   *   <li>For operations LOOKUP, CREATE, MKDIR, SYMLINK, MKNOD, REMOVE, RMDIR, RENAME, this is the
+   *       file handle for the directory on which the operation will be performed.
+   * </ul>
+   *
+   * .
    */
   public final byte[] getFileHandle() {
     return _fileHandle.clone();
   }
 
-  /**
-   * @return the key, used in determining IP addresses for RPC calls.
-   */
+  /** Returns the key, used in determining IP addresses for RPC calls. */
   public final byte[] getIpKey() {
     return getFileHandle();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * com.emc.ecs.nfsclient.rpc.RpcRequest#marshalling(com.emc.ecs.nfsclient.
-   * rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void marshalling(Xdr xdr) {
     super.marshalling(xdr);
     xdr.putByteArray(_fileHandle);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.rpc.RpcRequest#startToString(java.lang.String)
-   */
+  /** {@inheritDoc} */
+  @Override
   protected final StringBuilder startToString(String requestlabel) {
     return super.startToString(requestlabel)
         .append(" fileHandle:")

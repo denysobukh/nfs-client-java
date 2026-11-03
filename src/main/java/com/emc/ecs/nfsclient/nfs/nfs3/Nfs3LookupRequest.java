@@ -35,7 +35,6 @@ public class Nfs3LookupRequest extends NfsLookupRequest {
    * @param fileHandle The file handle for the directory to search.
    * @param name The filename to be searched for.
    * @param credential The credential to use for the request
-   * @throws FileNotFoundException
    */
   public Nfs3LookupRequest(byte[] fileHandle, String name, Credential credential)
       throws FileNotFoundException {

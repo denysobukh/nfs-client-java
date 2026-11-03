@@ -44,7 +44,6 @@ public class Nfs3ReaddirRequest extends NfsReaddirRequest {
    * @param count The maximum size of the READDIR3resok structure, in bytes. The size must include
    *     all XDR overhead. The server is free to return less than count bytes of data.
    * @param credential The credential used for RPC authentication.
-   * @throws FileNotFoundException
    */
   public Nfs3ReaddirRequest(
       byte[] fileHandle, long cookie, long cookieverf, int count, Credential credential)

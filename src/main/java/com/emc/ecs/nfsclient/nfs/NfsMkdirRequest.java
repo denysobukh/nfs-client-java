@@ -41,7 +41,6 @@ public class NfsMkdirRequest extends NfsRequestBase {
    * @param attributes The initial attributes for the subdirectory.
    * @param credential The credential used for RPC authentication.
    * @param nfsVersion The NFS version number
-   * @throws FileNotFoundException
    */
   public NfsMkdirRequest(
       byte[] fileHandle,
@@ -55,23 +54,16 @@ public class NfsMkdirRequest extends NfsRequestBase {
     _attributes = attributes;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsRequestBase#marshalling(com.emc.ecs.
-   * nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void marshalling(Xdr xdr) {
     super.marshalling(xdr);
     xdr.putString(_name);
     _attributes.marshalling(xdr);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#toString()
-   */
+  /** {@inheritDoc} */
+  @Override
   public String toString() {
     return startToString("NfsMkdirRequest")
         .append(" name:")

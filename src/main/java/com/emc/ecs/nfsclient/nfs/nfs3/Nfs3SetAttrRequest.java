@@ -39,7 +39,6 @@ public class Nfs3SetAttrRequest extends NfsSetAttrRequest {
    *     <code>guardTime</code> to the current ctime of the object. If the values are different, the
    *     server must preserve the object attributes and must return a status of NFS3ERR_NOT_SYNC.
    * @param credential The credential used for RPC authentication.
-   * @throws FileNotFoundException
    */
   public Nfs3SetAttrRequest(
       byte[] fileHandle, NfsSetAttributes attributes, NfsTime guardTime, Credential credential)

@@ -73,11 +73,7 @@ public class NfsPosixAttributes {
    */
   private boolean casePreserving;
 
-  /**
-   * Reads the Xdr response, as specified by RFC 1813 (https://tools.ietf.org/html/rfc1813).
-   *
-   * @param xdr
-   */
+  /** Reads the Xdr response, as specified by RFC 1813 (https://tools.ietf.org/html/rfc1813). */
   public void unmarshalling(Xdr xdr) {
     _loaded = true;
     linkMaximum = xdr.getUnsignedInt();
@@ -89,84 +85,92 @@ public class NfsPosixAttributes {
   }
 
   /**
-   * @return
-   *     <ul>
-   *       <li><code>true</code> if the properties have been loaded from NFS server data.
-   *       <li><code>false</code> otherwise.
-   *     </ul>
+   * Returns
+   *
+   * <ul>
+   *   <li><code>true</code> if the properties have been loaded from NFS server data.
+   *   <li><code>false</code> otherwise.
+   * </ul>
+   *
+   * .
    */
   public boolean isLoaded() {
     return _loaded;
   }
 
-  /**
-   * @return The maximum number of hard links to an object.
-   */
+  /** Returns the maximum number of hard links to an object. */
   public long getLinkMaximum() {
     return linkMaximum;
   }
 
-  /**
-   * @return The maximum length of a component of a filename.
-   */
+  /** Returns the maximum length of a component of a filename. */
   public long getNameMaximum() {
     return nameMaximum;
   }
 
   /**
-   * @return
-   *     <ul>
-   *       <li><code>true</code> if the server file system does not distinguish case when
-   *           interpreting filenames.
-   *       <li><code>false</code> otherwise.
-   *     </ul>
+   * Returns
+   *
+   * <ul>
+   *   <li><code>true</code> if the server file system does not distinguish case when interpreting
+   *       filenames.
+   *   <li><code>false</code> otherwise.
+   * </ul>
+   *
+   * .
    */
   public boolean isCaseInsensitive() {
     return caseInsensitive;
   }
 
   /**
-   * @return
-   *     <ul>
-   *       <li><code>true</code> if the server file system will preserve the case of a name during a
-   *           CREATE, MKDIR, MKNOD, SYMLINK, RENAME, or LINK operation.
-   *       <li><code>false</code> otherwise.
-   *     </ul>
+   * Returns
+   *
+   * <ul>
+   *   <li><code>true</code> if the server file system will preserve the case of a name during a
+   *       CREATE, MKDIR, MKNOD, SYMLINK, RENAME, or LINK operation.
+   *   <li><code>false</code> otherwise.
+   * </ul>
+   *
+   * .
    */
   public boolean isCasePreserving() {
     return casePreserving;
   }
 
   /**
-   * @return
-   *     <ul>
-   *       <li><code>true</code> if the server will reject any request to change either the owner or
-   *           the group associated with a file if the caller is not the privileged user (uid 0).
-   *       <li><code>false</code> otherwise.
-   *     </ul>
+   * Returns
+   *
+   * <ul>
+   *   <li><code>true</code> if the server will reject any request to change either the owner or the
+   *       group associated with a file if the caller is not the privileged user (uid 0).
+   *   <li><code>false</code> otherwise.
+   * </ul>
+   *
+   * .
    */
   public boolean isChownRestricted() {
     return chownRestricted;
   }
 
   /**
-   * @return
-   *     <ul>
-   *       <li><code>true</code> if the server will reject any request that includes a name longer
-   *           than getNameMaximum() with the error, NFS3ERR_NAMETOOLONG.
-   *       <li><code>false</code> if any length name over getNameMaximum() bytes will be silently
-   *           truncated to getNameMaximum() bytes.
-   *     </ul>
+   * Returns
+   *
+   * <ul>
+   *   <li><code>true</code> if the server will reject any request that includes a name longer than
+   *       getNameMaximum() with the error, NFS3ERR_NAMETOOLONG.
+   *   <li><code>false</code> if any length name over getNameMaximum() bytes will be silently
+   *       truncated to getNameMaximum() bytes.
+   * </ul>
+   *
+   * .
    */
   public boolean isNoTruncation() {
     return noTruncation;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#toString()
-   */
+  /** {@inheritDoc} */
+  @Override
   public String toString() {
     return "NfsPosixAttributes [loaded="
         + _loaded

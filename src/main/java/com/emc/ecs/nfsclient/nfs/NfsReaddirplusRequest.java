@@ -79,7 +79,6 @@ public class NfsReaddirplusRequest extends NfsRequestBase {
    *     bytes of data.
    * @param credential The credential used for RPC authentication.
    * @param nfsVersion The NFS version number
-   * @throws FileNotFoundException
    */
   public NfsReaddirplusRequest(
       byte[] fileHandle,
@@ -97,12 +96,8 @@ public class NfsReaddirplusRequest extends NfsRequestBase {
     _maxcount = maxcount;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsRequestBase#marshalling(com.emc.ecs.
-   * nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void marshalling(Xdr xdr) {
     super.marshalling(xdr);
     xdr.putLong(_cookie);
@@ -111,11 +106,8 @@ public class NfsReaddirplusRequest extends NfsRequestBase {
     xdr.putUnsignedInt(_maxcount);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#toString()
-   */
+  /** {@inheritDoc} */
+  @Override
   public String toString() {
     return startToString("NfsReaddirplusRequest")
         .append(" cookie:")

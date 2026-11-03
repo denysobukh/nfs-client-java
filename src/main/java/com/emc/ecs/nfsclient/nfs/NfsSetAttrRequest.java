@@ -42,7 +42,6 @@ public class NfsSetAttrRequest extends NfsRequestBase {
    *     server must preserve the object attributes and must return a status of NFS3ERR_NOT_SYNC.
    * @param credential The credential used for RPC authentication.
    * @param nfsVersion The NFS version number
-   * @throws FileNotFoundException
    */
   public NfsSetAttrRequest(
       byte[] fileHandle,
@@ -53,18 +52,14 @@ public class NfsSetAttrRequest extends NfsRequestBase {
       throws FileNotFoundException {
     super(Nfs.RPC_PROGRAM, nfsVersion, Nfs.NFSPROC3_SETATTR, credential, fileHandle);
     _attributes = attributes;
-    if ((guardTime != null) && (!guardTime.isBareTime())) {
+    if ((guardTime != null) && !guardTime.isBareTime()) {
       throw new IllegalArgumentException("The guard time cannot be a time setting time");
     }
     _guardTime = guardTime;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsRequestBase#marshalling(com.emc.ecs.
-   * nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void marshalling(Xdr xdr) {
     super.marshalling(xdr);
     _attributes.marshalling(xdr);
@@ -76,11 +71,8 @@ public class NfsSetAttrRequest extends NfsRequestBase {
     }
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#toString()
-   */
+  /** {@inheritDoc} */
+  @Override
   public String toString() {
     return startToString("NfsSetAttrRequest")
         .append(" attributes:")

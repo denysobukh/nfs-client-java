@@ -52,7 +52,6 @@ public class NfsCommitRequest extends NfsRequestBase {
    *     offset to the end of file is done.
    * @param credential The credential used for RPC authentication.
    * @param nfsVersion The NFS version number
-   * @throws FileNotFoundException
    */
   public NfsCommitRequest(
       byte[] fileHandle,
@@ -66,23 +65,16 @@ public class NfsCommitRequest extends NfsRequestBase {
     _dataSizeToCommit = dataSizeToCommit;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsRequestBase#marshalling(com.emc.ecs.
-   * nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void marshalling(Xdr xdr) {
     super.marshalling(xdr);
     xdr.putLong(_offsetToCommit);
     xdr.putUnsignedInt(_dataSizeToCommit);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#toString()
-   */
+  /** {@inheritDoc} */
+  @Override
   public String toString() {
     return startToString("NfsCommitRequest")
         .append(" offsetToCommit:")

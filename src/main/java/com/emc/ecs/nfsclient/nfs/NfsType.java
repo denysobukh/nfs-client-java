@@ -86,9 +86,7 @@ public class NfsType {
     _value = value;
   }
 
-  /**
-   * @return The integer value used in requests and responses.
-   */
+  /** Returns the integer value used in requests and responses. */
   public int getValue() {
     return _value;
   }

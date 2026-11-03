@@ -51,7 +51,6 @@ public class RpcResponse {
    * (https://tools.ietf.org/html/rfc1831).
    *
    * @param xdr The xdr response data.
-   * @throws RpcException
    */
   public void unmarshalling(Xdr xdr) throws RpcException {
     xdr.setOffset(0);
@@ -73,8 +72,6 @@ public class RpcResponse {
   /**
    * Check whether the reply is successful. If not, log and throw exception. the function is usually
    * called after unmarshalling.
-   *
-   * @throws RpcException
    */
   private void checkRpcReply() throws RpcException {
 
@@ -103,30 +100,24 @@ public class RpcResponse {
   }
 
   /**
-   * @return The message type, as specified by RFC 1831 (https://tools.ietf.org/html/rfc1831).
-   *     Should be 1 (REPLY).
+   * Returns the message type, as specified by RFC 1831 (https://tools.ietf.org/html/rfc1831).
+   * Should be 1 (REPLY).
    */
   public int getDirection() {
     return _direction;
   }
 
-  /**
-   * @return The reply status, as specified by RFC 1831 (https://tools.ietf.org/html/rfc1831).
-   */
+  /** Returns the reply status, as specified by RFC 1831 (https://tools.ietf.org/html/rfc1831). */
   public int getReplyStatus() {
     return _replyStatus;
   }
 
-  /**
-   * @return The accept status, as specified by RFC 1831 (https://tools.ietf.org/html/rfc1831).
-   */
+  /** Returns the accept status, as specified by RFC 1831 (https://tools.ietf.org/html/rfc1831). */
   public int getAcceptStatus() {
     return _acceptStatus;
   }
 
-  /**
-   * @return The reject status, as specified by RFC 1831 (https://tools.ietf.org/html/rfc1831).
-   */
+  /** Returns the reject status, as specified by RFC 1831 (https://tools.ietf.org/html/rfc1831). */
   public int getRejectStatus() {
     return _rejectStatus;
   }

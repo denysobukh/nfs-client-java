@@ -46,7 +46,6 @@ public class Nfs3WriteRequest extends NfsWriteRequest {
    *     </ul>
    *
    * @param credential The credential used for RPC authentication.
-   * @throws FileNotFoundException
    */
   public Nfs3WriteRequest(
       byte[] fileHandle, long offset, List<ByteBuffer> payload, int syncType, Credential credential)

@@ -75,7 +75,6 @@ public class NfsAccessRequest extends NfsRequestBase {
    *
    * @param credential The credential used for RPC authentication.
    * @param nfsVersion The NFS version number
-   * @throws FileNotFoundException
    */
   public NfsAccessRequest(
       byte[] fileHandle, long accessToCheck, Credential credential, int nfsVersion)
@@ -84,22 +83,15 @@ public class NfsAccessRequest extends NfsRequestBase {
     _accessToCheck = accessToCheck;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsRequestBase#marshalling(com.emc.ecs.
-   * nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void marshalling(Xdr xdr) {
     super.marshalling(xdr);
     xdr.putUnsignedInt(_accessToCheck);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#toString()
-   */
+  /** {@inheritDoc} */
+  @Override
   public String toString() {
     return startToString("NfsAccessRequest")
         .append(" accessToCheck:")

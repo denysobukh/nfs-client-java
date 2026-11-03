@@ -96,7 +96,6 @@ public class RpcWrapper<S extends NfsRequestBase, T extends NfsResponseBase> {
    *
    * @param request The request to send.
    * @param responseHandler A response handler.
-   * @throws IOException
    */
   public void callRpcWrapped(S request, RpcResponseHandler<? extends T> responseHandler)
       throws IOException {
@@ -118,7 +117,6 @@ public class RpcWrapper<S extends NfsRequestBase, T extends NfsResponseBase> {
    * @param request The request to send.
    * @param responseHandler A response handler.
    * @param ip The IP address to use for communication.
-   * @throws IOException
    */
   public void callRpcWrapped(S request, RpcResponseHandler<? extends T> responseHandler, String ip)
       throws IOException {
@@ -138,7 +136,6 @@ public class RpcWrapper<S extends NfsRequestBase, T extends NfsResponseBase> {
    *
    * @param request The request to send.
    * @param responseHandler A response handler.
-   * @throws IOException
    */
   public void callRpcChecked(S request, RpcResponseHandler<? extends T> responseHandler)
       throws IOException {
@@ -150,7 +147,6 @@ public class RpcWrapper<S extends NfsRequestBase, T extends NfsResponseBase> {
    *
    * @param request The request to send.
    * @param response A response to hold the returned data.
-   * @throws IOException
    */
   public void callRpcNaked(S request, T response) throws IOException {
     callRpcNaked(request, response, chooseIP(request.getIpKey()));
@@ -162,7 +158,6 @@ public class RpcWrapper<S extends NfsRequestBase, T extends NfsResponseBase> {
    * @param request The request to send.
    * @param response A response to hold the returned data.
    * @param ipAddress The IP address to use for communication.
-   * @throws RpcException
    */
   public void callRpcNaked(S request, T response, String ipAddress) throws RpcException {
     Xdr xdr = new Xdr(_maximumRequestSize);
@@ -191,7 +186,6 @@ public class RpcWrapper<S extends NfsRequestBase, T extends NfsResponseBase> {
    *     </ul>
    *
    * @return The Xdr data for the response.
-   * @throws RpcException
    */
   public Xdr callRpc(String serverIP, Xdr xdrRequest, boolean usePrivilegedPort)
       throws RpcException {
@@ -205,7 +199,6 @@ public class RpcWrapper<S extends NfsRequestBase, T extends NfsResponseBase> {
    *
    * @param key The key to use when selecting an IP address.
    * @return The IP address to use for communication.
-   * @throws IOException
    */
   public String chooseIP(byte[] key) throws IOException {
     if (_ips == null || _ips.length == 0) {
@@ -231,7 +224,6 @@ public class RpcWrapper<S extends NfsRequestBase, T extends NfsResponseBase> {
    * @param request The request to send.
    * @param responseHandler A response handler.
    * @param ipAddress The IP address to use for communication.
-   * @throws IOException
    */
   private void callRpcChecked(
       S request, RpcResponseHandler<? extends T> responseHandler, String ipAddress)
@@ -280,12 +272,11 @@ public class RpcWrapper<S extends NfsRequestBase, T extends NfsResponseBase> {
    *
    * @param e The exception.
    * @param attemptNumber The number of attempts so far.
-   * @throws IOException
    */
   private void handleRpcException(RpcException e, int attemptNumber, S request) throws IOException {
     String messageStart;
 
-    if (!(e.getStatus().equals(RpcStatus.NETWORK_ERROR))) {
+    if (!e.getStatus().equals(RpcStatus.NETWORK_ERROR)) {
       messageStart = "rpc";
     } else {
       // check whether to retry

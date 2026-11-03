@@ -13,13 +13,14 @@
 package com.emc.ecs.nfsclient.rpc;
 
 /**
+ * Base implementation of RPC authentication credentials.
+ *
  * @author seibed
  */
 public class CredentialBase implements Credential {
 
-  /* (non-Javadoc)
-   * @see com.emc.ecs.nfsclient.rpc.Credential#marshalling(com.emc.ecs.nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void marshalling(Xdr xdr) {
     xdr.putInt(getCredentialFlavor()); // credential flavor
     xdr.putByteArray(getCredential()); // bytes of credentials

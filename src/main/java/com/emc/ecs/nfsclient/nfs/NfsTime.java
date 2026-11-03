@@ -98,20 +98,15 @@ public class NfsTime implements NfsRequest, NfsResponse {
     }
   }
 
-  /**
-   * @return true if this is a bare time (with no time setting type), false otherwise.
-   */
+  /** Returns true if this is a bare time (with no time setting type), false otherwise. */
   public boolean isBareTime() {
     return IS_BARE_TIME == _timeSettingType;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#toString()
-   */
+  /** {@inheritDoc} */
+  @Override
   public String toString() {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     sb.append("timeSettingType:").append(_timeSettingType);
     sb.append(", [seconds :").append(seconds);
     sb.append(" nseconds: ").append(nanoseconds);
@@ -120,9 +115,8 @@ public class NfsTime implements NfsRequest, NfsResponse {
     return sb.toString();
   }
 
-  /* (non-Javadoc)
-   * @see com.emc.ecs.nfsclient.nfs.NfsRequest#marshalling(com.emc.ecs.nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void marshalling(Xdr xdr) {
     if (!isBareTime()) {
       xdr.putInt(_timeSettingType);
@@ -133,17 +127,14 @@ public class NfsTime implements NfsRequest, NfsResponse {
     }
   }
 
-  /* (non-Javadoc)
-   * @see com.emc.ecs.nfsclient.nfs.NfsResponse#unmarshalling(com.emc.ecs.nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void unmarshalling(Xdr xdr) {
     seconds = xdr.getUnsignedInt();
     nanoseconds = xdr.getUnsignedInt();
   }
 
-  /**
-   * @return time in milliseconds, same as java.util.Calendar.
-   */
+  /** Returns time in milliseconds, same as java.util.Calendar. */
   public long getTimeInMillis() {
     return seconds * 1000 + nanoseconds / 1000000;
   }

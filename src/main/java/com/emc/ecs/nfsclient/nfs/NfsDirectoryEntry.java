@@ -45,24 +45,20 @@ public class NfsDirectoryEntry {
     _cookie = xdr.getLong();
   }
 
-  /**
-   * @return The cookie from the server, for use in future RPC calls.
-   */
+  /** Returns the cookie from the server, for use in future RPC calls. */
   public final long getCookie() {
     return _cookie;
   }
 
   /**
-   * @return A number which uniquely identifies the file within its file system (on UNIX this would
-   *     be the inumber).
+   * Returns a number which uniquely identifies the file within its file system (on UNIX this would
+   * be the inumber).
    */
   public final long getFileId() {
     return _fileId;
   }
 
-  /**
-   * @return The file name from the directory listing.
-   */
+  /** Returns the file name from the directory listing. */
   public final String getFileName() {
     return _fileName;
   }

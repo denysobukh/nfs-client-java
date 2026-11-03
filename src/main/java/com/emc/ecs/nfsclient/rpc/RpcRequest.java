@@ -86,13 +86,7 @@ public abstract class RpcRequest {
     _credential = credential;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * com.emc.ecs.nfsclient.nfs.NfsRequest#marshalling(com.emc.ecs.nfsclient.
-   * rpc.Xdr)
-   */
+  /** Writes the RPC call header and authentication credentials to the XDR buffer. */
   public void marshalling(Xdr xdr) {
     xdr.setXid(_xid);
     xdr.putInt(_xid);
@@ -105,11 +99,14 @@ public abstract class RpcRequest {
   }
 
   /**
-   * @return
-   *     <ul>
-   *       <li><code>true</code> if the client should use a privileged local port (below 1024).
-   *       <li><code>false</code> if the client should use any available local port.
-   *     </ul>
+   * Returns
+   *
+   * <ul>
+   *   <li><code>true</code> if the client should use a privileged local port (below 1024).
+   *   <li><code>false</code> if the client should use any available local port.
+   * </ul>
+   *
+   * .
    */
   public boolean isUsePrivilegedPort() {
     return _usePrivilegedPort;
@@ -129,6 +126,8 @@ public abstract class RpcRequest {
   }
 
   /**
+   * Returns the next xid, which should be unique for all rpc requests.
+   *
    * @return The next xid, which should be unique for all rpc requests
    */
   private static int nextXid() {
@@ -136,6 +135,8 @@ public abstract class RpcRequest {
   }
 
   /**
+   * Returns the first xid, based on the system time in nanoseconds (OpenSolaris approach).
+   *
    * @return The first xid, based on the system time in nanoseconds (OpenSolaris approach).
    */
   private static int initializeXid() {
@@ -151,7 +152,6 @@ public abstract class RpcRequest {
   /**
    * Start a StringBuilder for use in toString() (for logging).
    *
-   * @param requestLabel
    * @return the builder
    */
   protected StringBuilder startToString(String requestLabel) {
@@ -162,9 +162,7 @@ public abstract class RpcRequest {
     return stringBuilder;
   }
 
-  /**
-   * @return an appropriate error message
-   */
+  /** Returns an appropriate error message. */
   public abstract String getErrorMessage();
 
   /**
@@ -182,6 +180,8 @@ public abstract class RpcRequest {
   }
 
   /**
+   * Trims a file name and rejects blank names.
+   *
    * @param name The file name to trim.
    * @return The trimmed file name.
    * @throws IllegalArgumentException If the file name is blank.

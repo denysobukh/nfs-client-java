@@ -36,7 +36,6 @@ public class Nfs3RmdirRequest extends NfsRmdirRequest {
    *     removed.
    * @param name The name of the subdirectory to be removed.
    * @param credential The credential used for RPC authentication.
-   * @throws FileNotFoundException
    */
   public Nfs3RmdirRequest(byte[] fileHandle, String name, Credential credential)
       throws FileNotFoundException {

@@ -40,3 +40,9 @@ jobs:
         with:
           name: spotbugs-reports
           path: '**/build/reports/spotbugs/'
+      - name: Upload JaCoCo reports
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: jacoco-reports
+          path: '**/build/reports/jacoco/'

@@ -59,6 +59,8 @@ public class NfsSetAttributes {
   private NfsTime _mtime;
 
   /**
+   * Sets the protection mode bits to include in the request.
+   *
    * @param mode The protection mode bits, defined as follows:
    *     <ul>
    *       <li><strong>0x00800</strong> - Set user ID on execution.
@@ -83,6 +85,8 @@ public class NfsSetAttributes {
   }
 
   /**
+   * Sets the requested owner user ID.
+   *
    * @param uid the user ID of the owner of the file.
    */
   public void setUid(Long uid) {
@@ -90,6 +94,8 @@ public class NfsSetAttributes {
   }
 
   /**
+   * Sets the requested owner group ID.
+   *
    * @param gid the group ID of the group of the file.
    */
   public void setGid(Long gid) {
@@ -97,6 +103,8 @@ public class NfsSetAttributes {
   }
 
   /**
+   * Sets the requested file size in bytes.
+   *
    * @param size the size of the file in bytes.
    */
   public void setSize(Long size) {
@@ -104,6 +112,8 @@ public class NfsSetAttributes {
   }
 
   /**
+   * Sets the requested last-access time.
+   *
    * @param atime the time when the file data was last accessed.
    */
   public void setAtime(NfsTime atime) {
@@ -111,6 +121,8 @@ public class NfsSetAttributes {
   }
 
   /**
+   * Sets the requested last-modification time.
+   *
    * @param mtime the time when the file data was last modified.
    */
   public void setMtime(NfsTime mtime) {
@@ -122,29 +134,12 @@ public class NfsSetAttributes {
     this(null, null, null, null, NfsTime.DO_NOT_CHANGE, NfsTime.DO_NOT_CHANGE);
   }
 
-  /**
-   * Convenient constructor for multiple changes.
-   *
-   * @param mode
-   * @param uid
-   * @param gid
-   * @param atime
-   * @param mtime
-   */
+  /** Convenient constructor for multiple changes. */
   public NfsSetAttributes(Long mode, Long uid, Long gid, NfsTime atime, NfsTime mtime) {
     this(mode, uid, gid, null, atime, mtime);
   }
 
-  /**
-   * Convenient constructor for multiple changes.
-   *
-   * @param mode
-   * @param uid
-   * @param gid
-   * @param size
-   * @param atime
-   * @param mtime
-   */
+  /** Convenient constructor for multiple changes. */
   public NfsSetAttributes(Long mode, Long uid, Long gid, Long size, NfsTime atime, NfsTime mtime) {
     _mode = mode;
     _uid = uid;
@@ -161,11 +156,7 @@ public class NfsSetAttributes {
     return time;
   }
 
-  /**
-   * Set Xdr fields for the rpc call.
-   *
-   * @param xdr
-   */
+  /** Set Xdr fields for the rpc call. */
   public void marshalling(Xdr xdr) {
     marshalling(xdr, _mode);
     marshalling(xdr, _uid);
@@ -180,10 +171,6 @@ public class NfsSetAttributes {
     marshalling(xdr, _mtime);
   }
 
-  /**
-   * @param xdr
-   * @param nfsTime
-   */
   private void marshalling(Xdr xdr, NfsTime nfsTime) {
     if (nfsTime != null) {
       nfsTime.marshalling(xdr);
@@ -192,10 +179,6 @@ public class NfsSetAttributes {
     }
   }
 
-  /**
-   * @param xdr
-   * @param longValue
-   */
   private static void marshalling(Xdr xdr, Long longValue) {
     if (longValue != null) {
       xdr.putBoolean(true);
@@ -205,13 +188,10 @@ public class NfsSetAttributes {
     }
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#toString()
-   */
+  /** {@inheritDoc} */
+  @Override
   public String toString() {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     sb.append(" [mode :").append(_mode);
     sb.append(" uid: ").append(_uid);
     sb.append(" gid: ").append(_gid);

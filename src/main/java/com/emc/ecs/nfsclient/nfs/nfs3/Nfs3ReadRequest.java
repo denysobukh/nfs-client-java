@@ -43,7 +43,6 @@ public class Nfs3ReadRequest extends NfsReadRequest {
    *     in the FSINFO reply structure for the file system that contains file. If greater, the
    *     server may return only <code>rtmax</code> bytes, resulting in a short read.
    * @param credential The credential used for RPC authentication.
-   * @throws FileNotFoundException
    */
   public Nfs3ReadRequest(byte[] fileHandle, long offset, int size, Credential credential)
       throws FileNotFoundException {

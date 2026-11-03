@@ -96,8 +96,6 @@ public class NfsFsInfo {
   /**
    * Unmarshalls volatile file system state information, as specified by RFC 1813
    * (https://tools.ietf.org/html/rfc1813).
-   *
-   * @param xdr
    */
   public NfsFsInfo(Xdr xdr) {
     rtmax = xdr.getUnsignedInt();
@@ -112,8 +110,9 @@ public class NfsFsInfo {
     properties = xdr.getUnsignedInt();
   }
 
+  @Override
   public String toString() {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
 
     sb.append("The maximum size in bytes of a READ request supported: ");
     sb.append(String.valueOf(rtmax));

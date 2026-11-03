@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Status distinguishing accepted and denied RPC replies.
+ *
  * @author seibed
  */
 public class ReplyStatus extends RpcStatus {
@@ -59,11 +61,7 @@ public class ReplyStatus extends RpcStatus {
     }
   }
 
-  /**
-   * Create the instance from the int status value.
-   *
-   * @param value
-   */
+  /** Create the instance from the int status value. */
   private final String _name;
 
   private ReplyStatus(int value) {

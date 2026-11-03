@@ -65,8 +65,6 @@ public class NfsFsStat {
   /**
    * Unmarshalls volatile file system state information, as specified by RFC 1813
    * (https://tools.ietf.org/html/rfc1813).
-   *
-   * @param xdr
    */
   public NfsFsStat(Xdr xdr) {
     tbytes = xdr.getLong();
@@ -78,8 +76,9 @@ public class NfsFsStat {
     invarsec = xdr.getUnsignedInt();
   }
 
+  @Override
   public String toString() {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
 
     sb.append(" total size:");
     sb.append(String.valueOf(tbytes));

@@ -52,7 +52,6 @@ public class NfsRenameRequest extends NfsRequestBase {
    * @param toName The new name for the object.
    * @param credential The credential used for RPC authentication.
    * @param nfsVersion The NFS version number
-   * @throws FileNotFoundException
    */
   public NfsRenameRequest(
       byte[] fileHandle,
@@ -68,12 +67,8 @@ public class NfsRenameRequest extends NfsRequestBase {
     _toName = trimFileName(toName);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsRequestBase#marshalling(com.emc.ecs.
-   * nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void marshalling(Xdr xdr) {
     super.marshalling(xdr);
     xdr.putString(_name);
@@ -81,11 +76,8 @@ public class NfsRenameRequest extends NfsRequestBase {
     xdr.putString(_toName);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#toString()
-   */
+  /** {@inheritDoc} */
+  @Override
   public String toString() {
     return startToString("NfsRenameRequest")
         .append(" name:")

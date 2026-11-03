@@ -39,12 +39,8 @@ public class NfsFsStatResponse extends NfsResponseBase {
     super();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsResponseBase#unmarshalling(com.emc.ecs.
-   * nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void unmarshalling(Xdr xdr) throws RpcException {
     super.unmarshalling(xdr);
     unmarshallingAttributes(xdr);
@@ -53,9 +49,7 @@ public class NfsFsStatResponse extends NfsResponseBase {
     }
   }
 
-  /**
-   * @return The volatile file system state information.
-   */
+  /** Returns the volatile file system state information. */
   public NfsFsStat getFsStat() {
     return _fsStat;
   }

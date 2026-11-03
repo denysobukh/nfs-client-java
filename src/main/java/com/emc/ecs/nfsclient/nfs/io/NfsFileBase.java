@@ -66,7 +66,6 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
    * @param path The full path of the file, starting with the mount point.
    * @param linkTracker The tracker to use. This must be passed so that monitoring is continued
    *     until the link resolves to a file that is not a symbolic link.
-   * @throws IOException
    */
   public NfsFileBase(N nfs, String path, LinkTracker<N, F> linkTracker) throws IOException {
     if (nfs == null) {
@@ -83,17 +82,13 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
    *
    * @param parentFile The parent file, stored to reduce lookup overhead
    * @param childName The short name of the file, starting from the parent path.
-   * @throws IOException
    */
   public NfsFileBase(F parentFile, String childName) throws IOException {
     _nfs = parentFile.getNfs();
     setParentFileAndName(parentFile, childName, null);
   }
 
-  /**
-   * @param path
-   * @return Everything up to and including the first separator character before the final name.
-   */
+  /** Returns everything up to and including the first separator character before the final name. */
   public static String makeParentPath(String path) {
     int firstParentSeparatorIndex = getParentSeparatorIndex(path);
     while ((firstParentSeparatorIndex > 0)
@@ -104,10 +99,7 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
     return path.substring(0, lengthOfParentName);
   }
 
-  /**
-   * @param path
-   * @return Everything after the last separator character.
-   */
+  /** Returns everything after the last separator character. */
   public static String makeName(String path) {
     int nameStartIndex = getParentSeparatorIndex(path) + 1;
     int endOfNameIndex = path.indexOf(separatorChar, nameStartIndex);
@@ -117,11 +109,7 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
     return path.substring(nameStartIndex, endOfNameIndex);
   }
 
-  /**
-   * @param parent
-   * @param child
-   * @return the full child path
-   */
+  /** Returns the full child path. */
   public static String makeChildPath(String parent, String child) {
     StringBuilder stringBuilder = new StringBuilder(parent.replaceAll("/+", separator));
     if (!parent.endsWith(separator)) {
@@ -131,7 +119,8 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
   }
 
   /**
-   * @param path
+   * Returns the separator index.
+   *
    * @return the separator index
    */
   private static int getParentSeparatorIndex(String path) {
@@ -143,65 +132,44 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
     return path.lastIndexOf(separatorChar, firstTerminalSeparatorIndex);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#canDelete()
-   */
+  /** {@inheritDoc} */
+  @Override
   public boolean canDelete() throws IOException {
     return canAccess(Nfs.ACCESS3_DELETE);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#canExecute()
-   */
+  /** {@inheritDoc} */
+  @Override
   public boolean canExecute() throws IOException {
     return canAccess(Nfs.ACCESS3_EXECUTE);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#canExtend()
-   */
+  /** {@inheritDoc} */
+  @Override
   public boolean canExtend() throws IOException {
     return canAccess(Nfs.ACCESS3_EXTEND);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#canLookup()
-   */
+  /** {@inheritDoc} */
+  @Override
   public boolean canLookup() throws IOException {
     return canAccess(Nfs.ACCESS3_LOOKUP);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#canModify()
-   */
+  /** {@inheritDoc} */
+  @Override
   public boolean canModify() throws IOException {
     return canAccess(Nfs.ACCESS3_MODIFY);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#canRead()
-   */
+  /** {@inheritDoc} */
+  @Override
   public boolean canRead() throws IOException {
     return canAccess(Nfs.ACCESS3_READ);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Comparable#compareTo(java.lang.Object)
-   */
+  /** {@inheritDoc} */
+  @Override
   public final int compareTo(F o) {
     if (o == null) {
       return 1;
@@ -210,11 +178,10 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
     return getAbsolutePath().compareTo(o.getAbsolutePath());
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.util.NfsFile#createNewFile()
-   */
+  /** {@inheritDoc} */
+  @Override
+  // Known NFS file types are canonical enum-style instances; identity is intentional.
+  @SuppressWarnings("ReferenceEquality")
   public boolean createNewFile() throws IOException {
     try {
       create(NfsCreateMode.GUARDED, new NfsSetAttributes(), null);
@@ -227,11 +194,10 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
     return true;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#delete()
-   */
+  /** {@inheritDoc} */
+  @Override
+  // Known NFS file types are canonical enum-style instances; identity is intentional.
+  @SuppressWarnings("ReferenceEquality")
   public void delete() throws IOException {
     if (isDirectory()) {
       rmdir();
@@ -240,11 +206,8 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
     }
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
+  /** {@inheritDoc} */
+  @Override
   public final boolean equals(Object obj) {
     if (!(obj instanceof NfsFile)) {
       return false;
@@ -252,11 +215,8 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
     return getAbsolutePath().equals(((NfsFile<?, ?>) obj).getAbsolutePath());
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.util.NfsFile#exists()
-   */
+  /** {@inheritDoc} */
+  @Override
   public boolean exists() throws IOException {
     boolean exists = false;
     try {
@@ -269,23 +229,16 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
     return exists;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.io.NfsFile#followLinks()
-   */
+  /** {@inheritDoc} */
+  @Override
   public F followLinks() throws IOException {
     return followLinks(null);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * com.emc.ecs.nfsclient.nfs.io.NfsFile#followLinks(com.emc.ecs.nfsclient.
-   * nfs.io.LinkTracker)
-   */
-  @SuppressWarnings("unchecked")
+  /** {@inheritDoc} */
+  @Override
+  // Known NFS file types are canonical enum-style instances; identity is intentional.
+  @SuppressWarnings({"unchecked", "ReferenceEquality"})
   public F followLinks(LinkTracker<N, F> linkTracker) throws IOException {
     if (_backingFile == null) {
       F backingFile = (F) this;
@@ -312,6 +265,8 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
   }
 
   /**
+   * Returns the attributes, or empty attributes if they cannot be read.
+   *
    * @param file The file for which the attributes are wanted.
    * @return The attributes, or empty attributes if they cannot be read.
    */
@@ -330,6 +285,8 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
   }
 
   /**
+   * Returns the file (which may itself be a link) corresponding to that path.
+   *
    * @param target The symbolic link data
    * @param linkTracker The tracker to use. This must be passed so that monitoring is continued
    *     until the link resolves to a file that is not a symbolic link.
@@ -366,47 +323,32 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
     }
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.util.NfsFile#getAbsolutePath()
-   */
+  /** {@inheritDoc} */
+  @Override
   public final String getAbsolutePath() {
     return _absolutePath;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#hasAccess(long)
-   */
+  /** {@inheritDoc} */
+  @Override
   public long getAccess(long accessToCheck) throws IOException {
     return access(accessToCheck).getAccess();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.util.NfsFile#getAttributes()
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsGetAttributes getAttributes() throws IOException {
     return getNfs().wrapped_getAttr(getNfs().makeGetAttrRequest(getFileHandle())).getAttributes();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.util.NfsFile#getChildFile(java.lang.String)
-   */
+  /** {@inheritDoc} */
+  @Override
   public F getChildFile(String childName) throws IOException {
     return newChildFile(childName);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.util.NfsFile#getFileHandle()
-   */
+  /** {@inheritDoc} */
+  @Override
   public byte[] getFileHandle() throws IOException {
     if (_isRootFile) {
       return getNfs().getRootFileHandle();
@@ -417,137 +359,96 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
     return (_fileHandle == null) ? null : _fileHandle.clone();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#getFreeSpace()
-   */
+  /** {@inheritDoc} */
+  @Override
   public long getFreeSpace() throws IOException {
     return fsstat().getFsStat().fbytes;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#getMode()
-   */
+  /** {@inheritDoc} */
+  @Override
   public long getMode() throws IOException {
     return getAttributes().getMode();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.util.NfsFile#getName()
-   */
+  /** {@inheritDoc} */
+  @Override
   public final String getName() {
     return _name;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.util.NfsFile#getNfs()
-   */
+  /** {@inheritDoc} */
+  @Override
   public final N getNfs() {
     return _nfs;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.util.NfsFile#getParent()
-   */
+  /** {@inheritDoc} */
+  @Override
   public final String getParent() {
     return _parent;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.util.NfsFile#getParentFile()
-   */
+  /** {@inheritDoc} */
+  @Override
   public F getParentFile() {
     return _parentFile;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.util.NfsFile#getPath()
-   */
+  /** {@inheritDoc} */
+  @Override
   public final String getPath() {
     return _path;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#getTotalSpace()
-   */
+  /** {@inheritDoc} */
+  @Override
   public long getTotalSpace() throws IOException {
     return fsstat().getFsStat().tbytes;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#getUsableSpace()
-   */
+  /** {@inheritDoc} */
+  @Override
   public long getUsableSpace() throws IOException {
     return fsstat().getFsStat().bytes;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#hashCode()
-   */
+  /** {@inheritDoc} */
+  @Override
   public final int hashCode() {
     return getAbsolutePath().hashCode();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.util.NfsFile#isDirectory()
-   */
+  /** {@inheritDoc} */
+  @Override
+  // Known NFS file types are canonical enum-style instances; identity is intentional.
+  @SuppressWarnings("ReferenceEquality")
   public boolean isDirectory() throws IOException {
     return getAttributes().getType() == NfsType.NFS_DIR;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.util.NfsFile#isFile()
-   */
+  /** {@inheritDoc} */
+  @Override
+  // Known NFS file types are canonical enum-style instances; identity is intentional.
+  @SuppressWarnings("ReferenceEquality")
   public boolean isFile() throws IOException {
     return getAttributes().getType() == NfsType.NFS_REG;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.io.NfsFile#isRootFile()
-   */
+  /** {@inheritDoc} */
+  @Override
   public boolean isRootFile() throws IOException {
     return _isRootFile;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.util.NfsFile#lastModified()
-   */
+  /** {@inheritDoc} */
+  @Override
   public long lastModified() throws IOException {
     return getAttributes().getMtime().getTimeInMillis();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.util.NfsFile#length()
-   */
+  /** {@inheritDoc} */
+  @Override
   public long length() {
     try {
       return lengthEx();
@@ -557,20 +458,14 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
     }
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.util.NfsFile#lengthEx()
-   */
+  /** {@inheritDoc} */
+  @Override
   public long lengthEx() throws IOException {
     return getAttributes().getSize();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#list()
-   */
+  /** {@inheritDoc} */
+  @Override
   public List<String> list() throws IOException {
     boolean eof = false;
     long cookie = 0;
@@ -592,12 +487,8 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
     return children;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.util.NfsFile#list(com.emc.ecs.nfsclient.util.
-   * NfsFilenameFilter)
-   */
+  /** {@inheritDoc} */
+  @Override
   public List<String> list(NfsFilenameFilter filter) throws IOException {
     List<String> children = list();
     if ((children == null) || (children.size() == 0) || (filter == null)) {
@@ -612,33 +503,20 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
     return filteredChildren;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.util.NfsFile#listFiles()
-   */
+  /** {@inheritDoc} */
+  @Override
   public List<F> listFiles() throws IOException {
     return getChildFiles(list());
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * com.emc.ecs.nfsclient.util.NfsFile#listFiles(com.emc.ecs.nfsclient.util.
-   * NfsFilenameFilter)
-   */
+  /** {@inheritDoc} */
+  @Override
   public List<F> listFiles(NfsFilenameFilter filter) throws IOException {
     return getChildFiles(list(filter));
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * com.emc.ecs.nfsclient.util.NfsFile#listFiles(com.emc.ecs.nfsclient.util.
-   * NfsFileFilter)
-   */
+  /** {@inheritDoc} */
+  @Override
   public List<F> listFiles(NfsFileFilter filter) throws IOException {
     List<F> childFiles = listFiles();
     if ((childFiles == null) || (childFiles.size() == 0) || (filter == null)) {
@@ -653,230 +531,152 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
     return filteredFiles;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.util.NfsFile#mkdir()
-   */
+  /** {@inheritDoc} */
+  @Override
   public void mkdir() throws IOException {
     mkdir(new NfsSetAttributes());
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.util.NfsFile#mkdirs()
-   */
+  /** {@inheritDoc} */
+  @Override
   public void mkdirs() throws IOException {
-    if ((!getParent().equals(separator)) && (!getParentFile().exists())) {
+    if (!getParent().equals(separator) && !getParentFile().exists()) {
       getParentFile().mkdirs();
     }
     mkdir();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * com.emc.ecs.nfsclient.nfs.NfsFile#renameTo(com.emc.ecs.nfsclient.nfs.
-   * NfsFile)
-   */
+  /** {@inheritDoc} */
+  @Override
   public boolean renameTo(F destination) throws IOException {
     return rename(destination).stateIsOk();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.util.NfsFile#setLastModified(long)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void setLastModified(long millis) throws IOException {
     setAttributes(
         new NfsSetAttributes(null, null, null, NfsTime.DO_NOT_CHANGE, new NfsTime(millis)));
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#toString()
-   */
+  /** {@inheritDoc} */
+  @Override
   public final String toString() {
     return getAbsolutePath();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * com.emc.ecs.nfsclient.nfs.io.NfsFile#setAttributes(com.emc.ecs.nfsclient.
-   * nfs.NfsSetAttributes)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void setAttributes(NfsSetAttributes nfsSetAttr) throws IOException {
     setattr(nfsSetAttr, null);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.util.NfsFile#changeMode(long)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void setMode(long mode) throws IOException {
     setAttributes(
         new NfsSetAttributes(
             Long.valueOf(mode), null, null, NfsTime.DO_NOT_CHANGE, NfsTime.DO_NOT_CHANGE));
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#readlink()
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsGetAttrResponse getattr() throws IOException {
     return getNfs().wrapped_getAttr(makeGetAttrRequest());
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#makeGetAttrRequest()
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsGetAttrRequest makeGetAttrRequest() throws IOException {
     return getNfs().makeGetAttrRequest(getFileHandle());
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#setattr(com.emc.ecs.nfsclient.nfs.
-   * NfsSetAttributes, com.emc.ecs.nfsclient.nfs.NfsTime)
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsSetAttrResponse setattr(NfsSetAttributes attributes, NfsTime guardTime)
       throws IOException {
     return getNfs().wrapped_setAttr(makeSetAttrRequest(attributes, guardTime));
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#makeSetAttrRequest(com.emc.ecs.
-   * nfsclient.nfs.NfsSetAttributes, com.emc.ecs.nfsclient.nfs.NfsTime)
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsSetAttrRequest makeSetAttrRequest(NfsSetAttributes attributes, NfsTime guardTime)
       throws IOException {
     return getNfs().makeSetAttrRequest(getFileHandle(), attributes, guardTime);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#lookup()
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsLookupResponse lookup() throws IOException {
     return getNfs().wrapped_getLookup(makeLookupRequest());
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#makeLookupRequest()
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsLookupRequest makeLookupRequest() throws IOException {
     return getNfs().makeLookupRequest(getParentFile().getFileHandle(), getName());
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#access(long)
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsAccessResponse access(long accessToCheck) throws IOException {
     return getNfs().wrapped_getAccess(makeAccessRequest(accessToCheck));
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#makeAccessRequest(long)
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsAccessRequest makeAccessRequest(long accessToCheck) throws IOException {
     return getNfs().makeAccessRequest(getFileHandle(), accessToCheck);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#readlink()
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsReadlinkResponse readlink() throws IOException {
     return getNfs().wrapped_getReadlink(makeReadlinkRequest());
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#makeReadlinkRequest()
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsReadlinkRequest makeReadlinkRequest() throws IOException {
     return getNfs().makeReadlinkRequest(getFileHandle());
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#read(long, int, byte[], int)
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsReadResponse read(long offset, int size, byte[] bytes, int position)
       throws IOException {
     return getNfs().wrapped_getRead(makeReadRequest(offset, size), bytes, position);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#makeReadRequest(long, int)
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsReadRequest makeReadRequest(long offset, int size) throws IOException {
     return getNfs().makeReadRequest(getFileHandle(), offset, size);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#write(long, java.util.List, int)
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsWriteResponse write(long offset, List<ByteBuffer> payload, int syncType)
       throws IOException {
     return getNfs().wrapped_sendWrite(makeWriteRequest(offset, payload, syncType));
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#write(long, java.util.List, int,
-   * java.lang.Long)
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsWriteResponse write(long offset, List<ByteBuffer> payload, int syncType, Long verifier)
       throws IOException {
     return getNfs().wrapped_sendWrite(makeWriteRequest(offset, payload, syncType), verifier);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#makeWriteRequest(long,
-   * java.util.List, int)
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsWriteRequest makeWriteRequest(long offset, List<ByteBuffer> payload, int syncType)
       throws IOException {
     return getNfs().makeWriteRequest(getFileHandle(), offset, payload, syncType);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#create(com.emc.ecs.nfsclient.nfs.
-   * NfsCreateMode, com.emc.ecs.nfsclient.nfs.NfsSetAttributes)
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsCreateResponse create(
       NfsCreateMode createMode, NfsSetAttributes attributes, byte[] verifier) throws IOException {
     NfsCreateResponse response =
@@ -893,13 +693,8 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
     return response;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * com.emc.ecs.nfsclient.nfs.NfsFile#makeCreateRequest(com.emc.ecs.nfsclient
-   * .nfs.NfsCreateMode, com.emc.ecs.nfsclient.nfs.NfsSetAttributes)
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsCreateRequest makeCreateRequest(
       NfsCreateMode createMode, NfsSetAttributes attributes, byte[] verifier) throws IOException {
     return getNfs()
@@ -907,35 +702,22 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
             createMode, getParentFile().getFileHandle(), getName(), attributes, verifier);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#mkdir(com.emc.ecs.nfsclient.nfs.
-   * NfsSetAttributes)
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsMkdirResponse mkdir(NfsSetAttributes attributes) throws IOException {
     NfsMkdirResponse response = getNfs().wrapped_sendMkdir(makeMkdirRequest(attributes));
     setFileHandle(response.getFileHandle());
     return response;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * com.emc.ecs.nfsclient.nfs.NfsFile#makeMkdirRequest(com.emc.ecs.nfsclient.
-   * nfs.NfsSetAttributes)
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsMkdirRequest makeMkdirRequest(NfsSetAttributes attributes) throws IOException {
     return getNfs().makeMkdirRequest(getParentFile().getFileHandle(), getName(), attributes);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#symlink(java.lang.String,
-   * com.emc.ecs.nfsclient.nfs.NfsSetAttributes)
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsSymlinkResponse symlink(String symbolicLinkData, NfsSetAttributes attributes)
       throws IOException {
     NfsSymlinkResponse response =
@@ -944,13 +726,8 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
     return response;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * com.emc.ecs.nfsclient.nfs.NfsFile#makeSymlinkRequest(java.lang.String,
-   * com.emc.ecs.nfsclient.nfs.NfsSetAttributes)
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsSymlinkRequest makeSymlinkRequest(String symbolicLinkData, NfsSetAttributes attributes)
       throws IOException {
     return getNfs()
@@ -958,12 +735,8 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
             symbolicLinkData, getParentFile().getFileHandle(), getName(), attributes);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#mknod(com.emc.ecs.nfsclient.nfs.
-   * NfsType, com.emc.ecs.nfsclient.nfs.NfsSetAttributes, long[])
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsMknodResponse mknod(NfsType type, NfsSetAttributes attributes, long[] rdev)
       throws IOException {
     NfsMknodResponse response =
@@ -972,65 +745,44 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
     return response;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * com.emc.ecs.nfsclient.nfs.NfsFile#makeMknodRequest(com.emc.ecs.nfsclient.
-   * nfs.NfsType, com.emc.ecs.nfsclient.nfs.NfsSetAttributes, long[])
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsMknodRequest makeMknodRequest(NfsType type, NfsSetAttributes attributes, long[] rdev)
       throws IOException {
     return getNfs()
         .makeMknodRequest(getParentFile().getFileHandle(), getName(), type, attributes, rdev);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#remove()
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsRemoveResponse remove() throws IOException {
     NfsRemoveResponse response = getNfs().wrapped_sendRemove(makeRemoveRequest());
     setFileHandle(null);
     return response;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#makeRemoveRequest()
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsRemoveRequest makeRemoveRequest() throws IOException {
     return getNfs().makeRemoveRequest(getParentFile().getFileHandle(), getName());
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#rmdir()
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsRmdirResponse rmdir() throws IOException {
     NfsRmdirResponse response = getNfs().wrapped_sendRmdir(makeRmdirRequest());
     setFileHandle(null);
     return response;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#makeRmdirRequest()
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsRmdirRequest makeRmdirRequest() throws IOException {
     return getNfs().makeRmdirRequest(getParentFile().getFileHandle(), getName());
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#rename(com.emc.ecs.nfsclient.nfs.
-   * NfsFile)
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsRenameResponse rename(F toFile) throws IOException {
     NfsRenameResponse response = getNfs().wrapped_sendRename(makeRenameRequest(toFile));
     if (response.stateIsOk()) {
@@ -1039,13 +791,8 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
     return response;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * com.emc.ecs.nfsclient.nfs.NfsFile#makeRenameRequest(com.emc.ecs.nfsclient
-   * .nfs.NfsFile)
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsRenameRequest makeRenameRequest(F toFile) throws IOException {
     return getNfs()
         .makeRenameRequest(
@@ -1055,78 +802,51 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
             toFile.getName());
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * com.emc.ecs.nfsclient.nfs.NfsFile#link(com.emc.ecs.nfsclient.nfs.NfsFile)
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsLinkResponse link(F source) throws IOException {
     NfsLinkResponse response = getNfs().wrapped_sendLink(makeLinkRequest(source));
     setFileHandle(source.getFileHandle());
     return response;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * com.emc.ecs.nfsclient.nfs.NfsFile#makeLinkRequest(com.emc.ecs.nfsclient.
-   * nfs.NfsFile)
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsLinkRequest makeLinkRequest(F source) throws IOException {
     return getNfs()
         .makeLinkRequest(source.getFileHandle(), getParentFile().getFileHandle(), getName());
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#readdir(long, long, int)
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsReaddirResponse readdir(long cookie, long cookieverf, int count) throws IOException {
     return getNfs().wrapped_getReaddir(makeReaddirRequest(cookie, cookieverf, count));
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#readdir(long, long, int,
-   * java.util.List)
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsReaddirResponse readdir(
       long cookie, long cookieverf, int count, List<NfsDirectoryEntry> entries) throws IOException {
     return getNfs().wrapped_getReaddir(makeReaddirRequest(cookie, cookieverf, count), entries);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#makeReaddirRequest(long, long,
-   * int)
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsReaddirRequest makeReaddirRequest(long cookie, long cookieverf, int count)
       throws IOException {
     return getNfs().makeReaddirRequest(followLinks().getFileHandle(), cookie, cookieverf, count);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#readdirplus(long, long, int, int)
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsReaddirplusResponse readdirplus(
       long cookie, long cookieverf, int dircount, int maxcount) throws IOException {
     return getNfs()
         .wrapped_getReaddirplus(makeReaddirplusRequest(cookie, cookieverf, dircount, maxcount));
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#readdirplus(long, long, int, int,
-   * java.util.List)
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsReaddirplusResponse readdirplus(
       long cookie, long cookieverf, int dircount, int maxcount, List<NfsDirectoryPlusEntry> entries)
       throws IOException {
@@ -1135,12 +855,8 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
             makeReaddirplusRequest(cookie, cookieverf, dircount, maxcount), entries);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#makeReaddirplusRequest(long, long,
-   * int, int)
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsReaddirplusRequest makeReaddirplusRequest(
       long cookie, long cookieverf, int dircount, int maxcount) throws IOException {
     return getNfs()
@@ -1148,74 +864,50 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
             followLinks().getFileHandle(), cookie, cookieverf, dircount, maxcount);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#fsstat()
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsFsStatResponse fsstat() throws IOException {
     return getNfs().wrapped_getFsStat(getNfs().makeFsStatRequest());
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#makeFsStatRequest()
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsFsStatRequest makeFsStatRequest() throws IOException {
     return getNfs().makeFsStatRequest(getFileHandle());
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#fsinfo()
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsFsInfoResponse fsinfo() throws IOException {
     return getNfs().wrapped_getFsInfo(getNfs().makeFsInfoRequest());
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#makeFsInfoRequest()
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsFsInfoRequest makeFsInfoRequest() throws IOException {
     return getNfs().makeFsInfoRequest(getFileHandle());
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#pathconf()
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsPathconfResponse pathconf() throws IOException {
     return getNfs().wrapped_getPathconf(makePathconfRequest());
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#makePathconfRequest()
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsPathconfRequest makePathconfRequest() throws IOException {
     return getNfs().makePathconfRequest(getFileHandle());
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#commit(long, int)
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsCommitResponse commit(long offsetToCommit, int dataSizeToCommit) throws IOException {
     return getNfs().wrapped_sendCommit(makeCommitRequest(offsetToCommit, dataSizeToCommit));
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsFile#makeCommitRequest(long, int)
-   */
+  /** {@inheritDoc} */
+  @Override
   public NfsCommitRequest makeCommitRequest(long offsetToCommit, int dataSizeToCommit)
       throws IOException {
     return getNfs().makeCommitRequest(getFileHandle(), offsetToCommit, dataSizeToCommit);
@@ -1226,7 +918,6 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
    *
    * @param childNames A list of child names.
    * @return The list of child files, one for each name.
-   * @throws IOException
    */
   protected List<F> getChildFiles(List<String> childNames) throws IOException {
     if (childNames == null) {
@@ -1240,15 +931,15 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
   }
 
   /**
+   * Returns true if it is, false if it is not.
+   *
    * @return true if it is, false if it is not
    */
   private final boolean isRootPath(String path) {
     return (path == null) || "".equals(path) || separator.equals(path);
   }
 
-  /**
-   * @param fileHandle
-   */
+  /** Sets the current NFS file handle. */
   protected final void setFileHandle(byte[] fileHandle) {
     _fileHandle = fileHandle;
   }
@@ -1258,7 +949,6 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
    *
    * @param path the absolute path from the mount point.
    * @return the new nfs file.
-   * @throws IOException
    */
   protected final F newFile(String path) throws IOException {
     return newFile(path, null);
@@ -1313,7 +1003,7 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
     setPathFields();
   }
 
-  /** */
+  /** Copies the path fields from another file. */
   private void setPathFields() {
     if (_parentFile == null) {
       _parent = separator;
@@ -1347,9 +1037,7 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
     }
   }
 
-  /**
-   * @param toFile
-   */
+  /** Copies the path fields from another file. */
   protected final void setPathFields(F toFile) {
     _parentFile = toFile.getParentFile();
     _parent = toFile.getParent();
@@ -1359,9 +1047,9 @@ public abstract class NfsFileBase<N extends Nfs<F>, F extends NfsFile<N, F>>
   }
 
   /**
-   * @param accessToCheck
+   * Returns <code>true</code> if the access is allowed, <code>false</code> if it is not.
+   *
    * @return <code>true</code> if the access is allowed, <code>false</code> if it is not
-   * @throws IOException
    */
   private boolean canAccess(long accessToCheck) throws IOException {
     return (accessToCheck & getAccess(accessToCheck)) != 0;

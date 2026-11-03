@@ -98,10 +98,12 @@ public class Test_RpcDiagnostics {
   @Test
   public void missingFileRemainsFileNotFoundExceptionWithEndpoint() throws Exception {
     ScriptedWrapper wrapper = new ScriptedWrapper(3, null, 2);
+    Nfs3GetAttrRequest request = request();
+    NfsResponseHandler<Nfs3GetAttrResponse> handler = handler();
     FileNotFoundException error =
         assertThrows(
             FileNotFoundException.class,
-            () -> wrapper.callRpcWrapped(request(), handler(), "192.0.2.123"));
+            () -> wrapper.callRpcWrapped(request, handler, "192.0.2.123"));
     assertEquals(1, wrapper.calls);
     assertTrue(error.getCause() instanceof FileNotFoundException);
     assertContains(error.getMessage(), "remote=192.0.2.123:2049", "NFS3ERR_NOENT(2)");

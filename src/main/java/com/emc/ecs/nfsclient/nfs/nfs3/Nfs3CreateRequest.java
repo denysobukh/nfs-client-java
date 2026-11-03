@@ -49,7 +49,6 @@ public class Nfs3CreateRequest extends NfsCreateRequest {
    * @param verifier A unique identifier to ensure exclusive creation of the new file. If no value
    *     is provided for exclusive creation, this is generated.
    * @param credential The credential to use for the request
-   * @throws FileNotFoundException
    */
   public Nfs3CreateRequest(
       NfsCreateMode createMode,

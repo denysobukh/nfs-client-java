@@ -12,13 +12,14 @@
  */
 package com.emc.ecs.nfsclient.nfs.io;
 
-import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 
 /**
  * @author seibed
  */
-public class Test_NfsFileBase extends Assert {
+public class Test_NfsFileBase {
 
   @Test
   public void testMakeName() {

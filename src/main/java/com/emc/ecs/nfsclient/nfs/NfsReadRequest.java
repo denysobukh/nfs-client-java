@@ -61,7 +61,6 @@ public class NfsReadRequest extends NfsRequestBase {
    *     server may return only <code>rtmax</code> bytes, resulting in a short read.
    * @param credential The credential used for RPC authentication.
    * @param nfsVersion The NFS version number
-   * @throws FileNotFoundException
    */
   public NfsReadRequest(
       byte[] fileHandle, long offset, int size, Credential credential, int nfsVersion)
@@ -71,23 +70,16 @@ public class NfsReadRequest extends NfsRequestBase {
     _size = size;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsRequestBase#marshalling(com.emc.ecs.
-   * nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void marshalling(Xdr xdr) {
     super.marshalling(xdr);
     xdr.putLong(_offset);
     xdr.putUnsignedInt(_size);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#toString()
-   */
+  /** {@inheritDoc} */
+  @Override
   public String toString() {
     return startToString("NfsReadRequest")
         .append(" offset:")

@@ -97,7 +97,6 @@ public class NfsWriteRequest extends NfsRequestBase {
    *
    * @param credential The credential used for RPC authentication.
    * @param nfsVersion The NFS version number
-   * @throws FileNotFoundException
    */
   public NfsWriteRequest(
       byte[] fileHandle,
@@ -124,12 +123,8 @@ public class NfsWriteRequest extends NfsRequestBase {
     _size = payload_size;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsRequestBase#marshalling(com.emc.ecs.
-   * nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void marshalling(Xdr xdr) {
     super.marshalling(xdr);
     xdr.putLong(_offset);
@@ -142,11 +137,8 @@ public class NfsWriteRequest extends NfsRequestBase {
     }
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#toString()
-   */
+  /** {@inheritDoc} */
+  @Override
   public String toString() {
     return startToString("NfsWriteRequest")
         .append(" offset:")
@@ -159,23 +151,26 @@ public class NfsWriteRequest extends NfsRequestBase {
   }
 
   /**
-   * @return The number of bytes of data to be written (calculated from the <code>payload</code>).
-   *     If <code>size</code> is 0, the WRITE will succeed and return a <code>count</code> of 0,
-   *     barring errors due to permissions checking. The <code>size</code> of data must be less than
-   *     or equal to the value of the <code>wtmax</code> field in the FSINFO reply structure for the
-   *     file system that contains file. If greater, the server may write only <code>wtmax</code>
-   *     bytes, resulting in a short write.
+   * Returns the number of bytes of data to be written (calculated from the <code>payload</code>).
+   * If <code>size</code> is 0, the WRITE will succeed and return a <code>count</code> of 0, barring
+   * errors due to permissions checking. The <code>size</code> of data must be less than or equal to
+   * the value of the <code>wtmax</code> field in the FSINFO reply structure for the file system
+   * that contains file. If greater, the server may write only <code>wtmax</code> bytes, resulting
+   * in a short write.
    */
   public int getSize() {
     return _size;
   }
 
   /**
-   * @return
-   *     <ul>
-   *       <li><code>true</code> if data is synced
-   *       <li><code>false</code> if it is not.
-   *     </ul>
+   * Returns
+   *
+   * <ul>
+   *   <li><code>true</code> if data is synced
+   *   <li><code>false</code> if it is not.
+   * </ul>
+   *
+   * .
    */
   public boolean isSync() {
     return _syncType == FILE_SYNC;

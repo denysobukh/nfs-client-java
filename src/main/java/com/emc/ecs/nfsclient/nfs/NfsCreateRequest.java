@@ -77,8 +77,9 @@ public class NfsCreateRequest extends NfsRequestBase {
    *     is provided for exclusive creation, this is generated.
    * @param credential The credential used for RPC authentication.
    * @param nfsVersion The NFS version number
-   * @throws FileNotFoundException
    */
+  // Known creation modes are canonical enum-style instances; identity is intentional.
+  @SuppressWarnings("ReferenceEquality")
   public NfsCreateRequest(
       NfsCreateMode createMode,
       byte[] parentDirectoryFileHandle,
@@ -102,12 +103,10 @@ public class NfsCreateRequest extends NfsRequestBase {
     }
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsRequestBase#marshalling(com.emc.ecs.
-   * nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
+  // Known creation modes are canonical enum-style instances; identity is intentional.
+  @SuppressWarnings("ReferenceEquality")
   public void marshalling(Xdr xdr) {
     super.marshalling(xdr);
     xdr.putString(_name);
@@ -119,18 +118,15 @@ public class NfsCreateRequest extends NfsRequestBase {
     }
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#toString()
-   */
+  /** {@inheritDoc} */
+  @Override
   public String toString() {
     return startToString("NfsCreateRequest").append(" name:").append(_name).toString();
   }
 
   /**
-   * @return A unique identifier to ensure exclusive creation of the new file. If no value was
-   *     provided for exclusive creation, this was generated.
+   * Returns a unique identifier to ensure exclusive creation of the new file. If no value was
+   * provided for exclusive creation, this was generated.
    */
   public byte[] getVerifier() {
     return _verifier == null ? null : _verifier.clone();

@@ -29,20 +29,14 @@ public class Test_StreamDiagnostics {
                 NfsFile.class.getClassLoader(),
                 new Class<?>[] {NfsFile.class},
                 (proxy, method, args) -> {
-                  switch (method.getName()) {
-                    case "exists":
-                    case "canExtend":
-                    case "canModify":
-                      return true;
-                    case "getAbsolutePath":
-                      return "server:/export/test.bin";
-                    case "fsinfo":
-                      return fsInfo;
-                    case "write":
-                      throw failure;
-                    default:
-                      throw new AssertionError("Unexpected file operation: " + method.getName());
-                  }
+                  return switch (method.getName()) {
+                    case "exists", "canExtend", "canModify" -> true;
+                    case "getAbsolutePath" -> "server:/export/test.bin";
+                    case "fsinfo" -> fsInfo;
+                    case "write" -> throw failure;
+                    default ->
+                        throw new AssertionError("Unexpected file operation: " + method.getName());
+                  };
                 });
     try (NfsFileOutputStream stream = new NfsFileOutputStream(file)) {
       stream.write(new byte[] {1, 2, 3});

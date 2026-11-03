@@ -84,12 +84,8 @@ public class NfsReaddirplusResponse extends NfsResponseBase {
     _entries = entries;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsResponseBase#unmarshalling(com.emc.ecs.
-   * nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void unmarshalling(Xdr xdr) throws RpcException {
     super.unmarshalling(xdr);
     unmarshallingAttributes(xdr);
@@ -108,33 +104,30 @@ public class NfsReaddirplusResponse extends NfsResponseBase {
     }
   }
 
-  /**
-   * @return The last <code>cookie</code> from the server, for use in the next request
-   */
+  /** Returns the last <code>cookie</code> from the server, for use in the next request. */
   public long getCookie() {
     return _cookie;
   }
 
-  /**
-   * @return The <code>cookieverf</code> from the server, for use in the next request
-   */
+  /** Returns the <code>cookieverf</code> from the server, for use in the next request. */
   public long getCookieverf() {
     return _cookieverf;
   }
 
-  /**
-   * @return The list of entries
-   */
+  /** Returns the list of entries. */
   public List<NfsDirectoryPlusEntry> getEntries() {
     return _entries;
   }
 
   /**
-   * @return
-   *     <ul>
-   *       <li><code>true</code> if the end of file is reached.
-   *       <li><code>false</code> otherwise.
-   *     </ul>
+   * Returns
+   *
+   * <ul>
+   *   <li><code>true</code> if the end of file is reached.
+   *   <li><code>false</code> otherwise.
+   * </ul>
+   *
+   * .
    */
   public boolean isEof() {
     return _eof;

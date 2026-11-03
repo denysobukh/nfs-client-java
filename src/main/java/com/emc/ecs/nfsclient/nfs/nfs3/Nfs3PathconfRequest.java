@@ -38,7 +38,6 @@ public class Nfs3PathconfRequest extends NfsPathconfRequest {
    *
    * @param fileHandle The file handle for the file system object.
    * @param credential The credential used for RPC authentication.
-   * @throws FileNotFoundException
    */
   public Nfs3PathconfRequest(byte[] fileHandle, Credential credential)
       throws FileNotFoundException {

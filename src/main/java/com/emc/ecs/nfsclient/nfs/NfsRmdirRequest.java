@@ -40,7 +40,6 @@ public class NfsRmdirRequest extends NfsRequestBase {
    * @param name The name of the subdirectory to be removed.
    * @param credential The credential used for RPC authentication.
    * @param nfsVersion The NFS version number
-   * @throws FileNotFoundException
    */
   public NfsRmdirRequest(byte[] fileHandle, String name, Credential credential, int nfsVersion)
       throws FileNotFoundException {
@@ -48,22 +47,15 @@ public class NfsRmdirRequest extends NfsRequestBase {
     _name = trimFileName(name);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsRequestBase#marshalling(com.emc.ecs.
-   * nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void marshalling(Xdr xdr) {
     super.marshalling(xdr);
     xdr.putString(_name);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#toString()
-   */
+  /** {@inheritDoc} */
+  @Override
   public String toString() {
     return startToString("NfsRmdirRequest").append(" name").append(_name).toString();
   }

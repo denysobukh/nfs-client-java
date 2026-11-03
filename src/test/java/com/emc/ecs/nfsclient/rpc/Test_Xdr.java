@@ -12,16 +12,19 @@
  */
 package com.emc.ecs.nfsclient.rpc;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Assert;
 import org.junit.Test;
 
 /**
  * @author seibed
  */
-public class Test_Xdr extends Assert {
+public class Test_Xdr {
 
   @Test
   public void payloadListOwnershipDoesNotAffectCallerOrWireLength() {
@@ -123,7 +126,6 @@ public class Test_Xdr extends Assert {
   }
 
   /**
-   * @param payloadNumber
    * @return a 1-byte payload with the payload number
    */
   private List<ByteBuffer> getPayload(int payloadNumber) {

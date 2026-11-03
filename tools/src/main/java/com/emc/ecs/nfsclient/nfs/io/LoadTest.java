@@ -22,10 +22,20 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 /**
+ * Command-line benchmark for concurrent reads from an NFS export.
+ *
  * @author seibed
  */
 public class LoadTest {
 
+  /** Creates an instance of this command-line utility. */
+  public LoadTest() {}
+
+  /**
+   * Runs the NFS benchmark with the supplied command-line arguments.
+   *
+   * @param args export path, file name, and benchmark options
+   */
   public static void main(String[] args) {
     String export = args[0];
     String fileName = args[1];
@@ -41,6 +51,17 @@ public class LoadTest {
     }
   }
 
+  /**
+   * Creates a test file and measures reads with increasing thread counts.
+   *
+   * @param export NFS server and export path
+   * @param fileName path of the temporary test file
+   * @param fileSizeInKiloBytes requested test-file size in kilobytes
+   * @param maximumNumberOfThreads maximum number of reader threads
+   * @param megaBytesToRead amount each benchmark iteration reads
+   * @throws IOException if a file operation fails
+   * @throws InterruptedException if the benchmark is interrupted
+   */
   public static void testThreadedReadingPerformance(
       String export,
       String fileName,
@@ -58,12 +79,6 @@ public class LoadTest {
     new Nfs3File(nfs3, fileName).delete();
   }
 
-  /**
-   * @param string
-   * @param fileSizeInKiloBytes
-   * @return
-   * @throws IOException
-   */
   private static int writeFile(Nfs3 nfs3, String fileName, int fileSizeInKiloBytes)
       throws IOException {
     Nfs3File test = new Nfs3File(nfs3, fileName);
@@ -178,11 +193,11 @@ public class LoadTest {
 
     int numberOfReadingThreadsCompleted = 0;
 
-    public synchronized int getNumberOfReadingThreadsCompleted() {
+    synchronized int getNumberOfReadingThreadsCompleted() {
       return numberOfReadingThreadsCompleted;
     }
 
-    public synchronized void incrementNumberOfReadingThreadsCompleted() {
+    synchronized void incrementNumberOfReadingThreadsCompleted() {
       ++numberOfReadingThreadsCompleted;
     }
   }

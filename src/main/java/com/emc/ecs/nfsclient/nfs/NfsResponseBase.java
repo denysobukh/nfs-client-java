@@ -48,33 +48,25 @@ public abstract class NfsResponseBase extends RpcResponse {
    */
   private int _state;
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * com.emc.ecs.nfsclient.rpc.RpcResponse#unmarshalling(com.emc.ecs.nfsclient
-   * .rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void unmarshalling(Xdr xdr) throws RpcException {
     super.unmarshalling(xdr);
     _state = xdr.getInt();
   }
 
   /**
-   * @return The state returned in the response. For details, see RFC 1813
-   *     (https://tools.ietf.org/html/rfc1813).
+   * Returns the state returned in the response. For details, see RFC 1813
+   * (https://tools.ietf.org/html/rfc1813).
    */
   public int getState() {
     return _state;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#toString()
-   */
+  /** {@inheritDoc} */
+  @Override
   public String toString() {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     sb.append("response");
     sb.append(" xid:");
     sb.append(String.valueOf(_xid));
@@ -84,18 +76,18 @@ public abstract class NfsResponseBase extends RpcResponse {
   }
 
   /**
-   * @return File system object post-operation attributes. These are provided for many calls. For
-   *     information on the object to which the attributes refer, or for other details, see RFC 1813
-   *     (https://tools.ietf.org/html/rfc1813).
+   * Returns file system object post-operation attributes. These are provided for many calls. For
+   * information on the object to which the attributes refer, or for other details, see RFC 1813
+   * (https://tools.ietf.org/html/rfc1813).
    */
   public final NfsGetAttributes getAttributes() {
     return _attributes;
   }
 
   /**
-   * @return The file handle for the system object that was created for a successful CREATE, MKDIR,
-   *     MKNOD, or SYMLINK request, or looked up for a LOOKUP request. This is null for all other
-   *     requests, and also for failed requests.
+   * Returns the file handle for the system object that was created for a successful CREATE, MKDIR,
+   * MKNOD, or SYMLINK request, or looked up for a LOOKUP request. This is null for all other
+   * requests, and also for failed requests.
    */
   public final byte[] getFileHandle() {
     return (_fileHandle == null) ? null : _fileHandle.clone();
@@ -111,11 +103,7 @@ public abstract class NfsResponseBase extends RpcResponse {
     return _state == NfsStatus.NFS3_OK.getValue();
   }
 
-  /**
-   * Unmarshall the object if it is there. Convenience method for use in subclasses.
-   *
-   * @param xdr
-   */
+  /** Unmarshall the object if it is there. Convenience method for use in subclasses. */
   protected void unmarshallingAttributes(Xdr xdr) {
     unmarshallingAttributes(xdr, false);
   }
@@ -124,18 +112,13 @@ public abstract class NfsResponseBase extends RpcResponse {
    * Unmarshall the object if it is there, or skip the existence check if <code>force</code> is
    * <code>true</code>. Convenience method for use in subclasses.
    *
-   * @param xdr
    * @param force do not check whether it is there
    */
   protected void unmarshallingAttributes(Xdr xdr, boolean force) {
     _attributes = makeNfsGetAttributes(xdr, force);
   }
 
-  /**
-   * Unmarshall the object if it is there. Convenience method for use in subclasses.
-   *
-   * @param xdr
-   */
+  /** Unmarshall the object if it is there. Convenience method for use in subclasses. */
   protected void unmarshallingFileHandle(Xdr xdr) {
     unmarshallingFileHandle(xdr, false);
   }
@@ -143,9 +126,6 @@ public abstract class NfsResponseBase extends RpcResponse {
   /**
    * Unmarshall the object if it is there, or skip the existence check if <code>force</code> is
    * <code>true</code>. Convenience method for use in subclasses.
-   *
-   * @param xdr
-   * @param force
    */
   protected void unmarshallingFileHandle(Xdr xdr, boolean force) {
     if (force || xdr.getBoolean()) {
@@ -157,7 +137,6 @@ public abstract class NfsResponseBase extends RpcResponse {
    * Create the object if it is there, return null if it is not. Convenience method for use in
    * subclasses.
    *
-   * @param xdr
    * @return the created object or null
    */
   protected static NfsGetAttributes makeNfsGetAttributes(Xdr xdr) {
@@ -168,7 +147,6 @@ public abstract class NfsResponseBase extends RpcResponse {
    * Create the object if it is there, or skip the existence check if <code>force</code> is <code>
    * true</code>. Convenience method for use in subclasses.
    *
-   * @param xdr
    * @param force do not check whether it is there
    * @return the created object
    */

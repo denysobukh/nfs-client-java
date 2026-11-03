@@ -57,12 +57,8 @@ public class NfsReadResponse extends NfsResponseBase {
     _position = position;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsResponseBase#unmarshalling(com.emc.ecs.
-   * nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
   public void unmarshalling(Xdr xdr) throws RpcException {
     super.unmarshalling(xdr);
     unmarshallingAttributes(xdr);
@@ -77,34 +73,33 @@ public class NfsReadResponse extends NfsResponseBase {
     }
   }
 
-  /**
-   * @return The number read.
-   */
+  /** Returns the number read. */
   public int getBytesRead() {
     return _bytesRead;
   }
 
   /**
-   * @return
-   *     <ul>
-   *       <li><code>true</code> if the end of file is reached.
-   *       <li><code>false</code> otherwise.
-   *     </ul>
+   * Returns
+   *
+   * <ul>
+   *   <li><code>true</code> if the end of file is reached.
+   *   <li><code>false</code> otherwise.
+   * </ul>
+   *
+   * .
    */
   public boolean isEof() {
     return _eof;
   }
 
-  /**
-   * @return The buffer, or null if there was none.
-   */
+  /** Returns the buffer, or null if there was none. */
   public byte[] getBytes() {
     return (_bytes == null) ? null : _bytes.clone();
   }
 
   @Override
   public String toString() {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     sb.append("read-response");
     sb.append(" bytes-read:");
     sb.append(String.valueOf(_bytesRead));

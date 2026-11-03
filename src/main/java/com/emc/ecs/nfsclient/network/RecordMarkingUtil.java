@@ -18,7 +18,6 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import org.apache.commons.lang3.NotImplementedException;
 
@@ -60,7 +59,7 @@ public final class RecordMarkingUtil {
    */
   static void putRecordMarkingAndSend(Channel channel, Xdr rpcRequest) {
     // XDR header buffer
-    List<ByteBuffer> buffers = new LinkedList<>();
+    List<ByteBuffer> buffers = new ArrayList<>();
     buffers.add(ByteBuffer.wrap(rpcRequest.getBuffer(), 0, rpcRequest.getOffset()));
 
     // payload buffer
@@ -138,12 +137,6 @@ public final class RecordMarkingUtil {
     return toReturn;
   }
 
-  /**
-   * @param channel
-   * @param bytesToWrite
-   * @param outBuffers
-   * @param isLast
-   */
   private static void sendBuffers(
       Channel channel, int bytesToWrite, List<ByteBuffer> outBuffers, boolean isLast) {
     ByteBuffer recSizeBuf = ByteBuffer.allocate(4);
@@ -164,18 +157,20 @@ public final class RecordMarkingUtil {
   }
 
   /**
+   * Returns <code>true</code> if it is, <code>false</code> if it is not.
+   *
    * @param fragmentSize A long that contains either the int number of bytes in the fragment, or a
    *     special value if this is the last fragment.
-   * @return <code>true</code> if it is, <code>false</code> if it is not.
    */
   static boolean isLastFragment(long fragmentSize) {
     return ((fragmentSize & LAST_FRAG) != 0);
   }
 
   /**
+   * Returns the masked fragment size, which is the real size of the fragment.
+   *
    * @param fragmentSize A long that contains either the int number of bytes in the fragment, or a
    *     special value if this is the last fragment.
-   * @return The masked fragment size, which is the real size of the fragment.
    */
   static long maskFragmentSize(long fragmentSize) {
     return fragmentSize & SIZE_MASK;

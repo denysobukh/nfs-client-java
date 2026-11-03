@@ -21,8 +21,8 @@ import com.emc.ecs.nfsclient.nfs.nfs3.Nfs3;
 import com.emc.ecs.nfsclient.rpc.CredentialUnix;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import org.junit.Test;
 
@@ -31,9 +31,6 @@ import org.junit.Test;
  */
 public class Test_Nfs3File extends NfsTestBase {
 
-  /**
-   * @throws IOException
-   */
   public Test_Nfs3File() throws IOException {
     super();
   }
@@ -165,6 +162,7 @@ public class Test_Nfs3File extends NfsTestBase {
         test.list(
                 new NfsFilenameFilter() {
 
+                  @Override
                   public boolean accept(NfsFile<?, ?> dir, String name) {
                     return ".".equals(name);
                   }
@@ -176,6 +174,7 @@ public class Test_Nfs3File extends NfsTestBase {
         test.list(
                 new NfsFilenameFilter() {
 
+                  @Override
                   public boolean accept(NfsFile<?, ?> dir, String name) {
                     return "dummy2".equals(name);
                   }
@@ -187,6 +186,7 @@ public class Test_Nfs3File extends NfsTestBase {
         test.list(
                 new NfsFilenameFilter() {
 
+                  @Override
                   public boolean accept(NfsFile<?, ?> dir, String name) {
                     return !".".equals(name);
                   }
@@ -198,6 +198,7 @@ public class Test_Nfs3File extends NfsTestBase {
         test.listFiles(
                 new NfsFilenameFilter() {
 
+                  @Override
                   public boolean accept(NfsFile<?, ?> dir, String name) {
                     return ".".equals(name);
                   }
@@ -209,6 +210,7 @@ public class Test_Nfs3File extends NfsTestBase {
         test.listFiles(
                 new NfsFilenameFilter() {
 
+                  @Override
                   public boolean accept(NfsFile<?, ?> dir, String name) {
                     return "dummy2".equals(name);
                   }
@@ -220,6 +222,7 @@ public class Test_Nfs3File extends NfsTestBase {
         test.listFiles(
                 new NfsFilenameFilter() {
 
+                  @Override
                   public boolean accept(NfsFile<?, ?> dir, String name) {
                     return !".".equals(name);
                   }
@@ -231,6 +234,7 @@ public class Test_Nfs3File extends NfsTestBase {
         test.listFiles(
                 new NfsFileFilter() {
 
+                  @Override
                   public boolean accept(NfsFile<?, ?> pathName) {
                     return ".".equals(pathName.getName());
                   }
@@ -242,6 +246,7 @@ public class Test_Nfs3File extends NfsTestBase {
         test.listFiles(
                 new NfsFileFilter() {
 
+                  @Override
                   public boolean accept(NfsFile<?, ?> pathName) {
                     return "dummy2".equals(pathName.getName());
                   }
@@ -253,6 +258,7 @@ public class Test_Nfs3File extends NfsTestBase {
         test.listFiles(
                 new NfsFileFilter() {
 
+                  @Override
                   public boolean accept(NfsFile<?, ?> pathName) {
                     return test2.equals(pathName);
                   }
@@ -264,6 +270,7 @@ public class Test_Nfs3File extends NfsTestBase {
         test.listFiles(
                 new NfsFileFilter() {
 
+                  @Override
                   public boolean accept(NfsFile<?, ?> pathName) {
                     return !".".equals(pathName.getName());
                   }
@@ -309,7 +316,7 @@ public class Test_Nfs3File extends NfsTestBase {
     Nfs3 nfs3 = new Nfs3(getAbsolutePath(), new CredentialUnix(0, 0, null), 3);
     Nfs3File test = new Nfs3File(nfs3, "/test3");
     test.mkdir();
-    long millis = new Date().getTime() - 20000;
+    long millis = System.currentTimeMillis() - 20000;
     boolean timeInSeconds = (0 == test.fsinfo().getFsInfo().time_delta.getTimeInMillis());
     if (timeInSeconds) {
       millis = 1000 * (millis / 1000);
@@ -330,7 +337,7 @@ public class Test_Nfs3File extends NfsTestBase {
     assertNotNull(test.getParent());
     assertNotNull(test.getName());
     try {
-      assertNotNull(new Date(test.lastModified()));
+      assertNotNull(Instant.ofEpochMilli(test.lastModified()));
       fail("This should have thrown a FileNotFoundException.");
     } catch (FileNotFoundException e) {
       // Ignore, this is expected.
@@ -338,7 +345,7 @@ public class Test_Nfs3File extends NfsTestBase {
 
     test = new Nfs3File(nfs3, "/test3");
     test.mkdir();
-    millis = new Date().getTime() - 20000;
+    millis = System.currentTimeMillis() - 20000;
     if (timeInSeconds) {
       millis = 1000 * (millis / 1000);
     }
@@ -355,7 +362,7 @@ public class Test_Nfs3File extends NfsTestBase {
     assertFalse(test2.exists());
 
     test.createNewFile();
-    millis = new Date().getTime() - 20000;
+    millis = System.currentTimeMillis() - 20000;
     if (timeInSeconds) {
       millis = 1000 * (millis / 1000);
     }
@@ -380,11 +387,7 @@ public class Test_Nfs3File extends NfsTestBase {
     assertFalse(test2.exists());
   }
 
-  /**
-   * Link handling tests
-   *
-   * @throws Exception
-   */
+  /** Link handling tests */
   @Test
   public void testLinkHandling() throws Exception {
     Nfs3 nfs3 = new Nfs3(getAbsolutePath(), new CredentialUnix(0, 0, null), 3);
@@ -495,11 +498,7 @@ public class Test_Nfs3File extends NfsTestBase {
     assertFalse(links.exists());
   }
 
-  /**
-   * Special file handling tests
-   *
-   * @throws Exception
-   */
+  /** Special file handling tests */
   @Test
   public void testSpecialHandling() throws Exception {
     Nfs3 nfs3 = new Nfs3(getAbsolutePath(), new CredentialUnix(0, 0, null), 3);
@@ -556,11 +555,6 @@ public class Test_Nfs3File extends NfsTestBase {
     assertFalse(chr.exists());
   }
 
-  /**
-   * @param directory
-   * @param linkName
-   * @throws IOException
-   */
   private void testBadLink(Nfs3File directory, String linkName) throws IOException {
     Nfs3File link = directory.newChildFile(linkName);
     assertTrue(link.exists());
@@ -572,13 +566,6 @@ public class Test_Nfs3File extends NfsTestBase {
     }
   }
 
-  /**
-   * @param directory
-   * @param linkName
-   * @param expectedPath
-   * @param shouldExist
-   * @throws IOException
-   */
   private void testGoodLink(
       Nfs3File directory, String linkName, String expectedPath, boolean shouldExist)
       throws IOException {

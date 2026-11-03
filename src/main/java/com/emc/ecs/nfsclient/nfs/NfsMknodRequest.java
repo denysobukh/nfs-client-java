@@ -57,7 +57,6 @@ public class NfsMknodRequest extends NfsRequestBase {
    *     is the major number and <code>rdev[1]</code> is the minor number.
    * @param credential The credential used for RPC authentication.
    * @param nfsVersion The NFS version number
-   * @throws FileNotFoundException
    */
   public NfsMknodRequest(
       byte[] fileHandle,
@@ -75,12 +74,10 @@ public class NfsMknodRequest extends NfsRequestBase {
     _rdev = (rdev == null) ? null : rdev.clone();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see com.emc.ecs.nfsclient.nfs.NfsRequestBase#marshalling(com.emc.ecs.
-   * nfsclient.rpc.Xdr)
-   */
+  /** {@inheritDoc} */
+  @Override
+  // NfsType.fromValue returns canonical instances for every known RFC file type.
+  @SuppressWarnings("ReferenceEquality")
   public void marshalling(Xdr xdr) {
     super.marshalling(xdr);
     xdr.putString(_name);
@@ -94,11 +91,8 @@ public class NfsMknodRequest extends NfsRequestBase {
     }
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#toString()
-   */
+  /** {@inheritDoc} */
+  @Override
   public String toString() {
     return startToString("NfsMknodRequest")
         .append(" name:")

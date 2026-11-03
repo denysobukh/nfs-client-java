@@ -45,6 +45,8 @@ public class ClientIOHandler extends SimpleChannelInboundHandler<byte[]> {
   }
 
   @Override
+  // The channel failure was already logged and delivered to pending RPCs; close is cleanup.
+  @SuppressWarnings("FutureReturnValueIgnored")
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
     if (cause instanceof java.net.BindException) {
       // Privileged-port probing handles bind failures and reports exhaustion itself.

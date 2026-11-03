@@ -181,11 +181,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
 
   // Basic API calls for managing the client and NFS connection
 
-  /**
-   * Return to the default Credential.
-   *
-   * @throws IOException
-   */
+  /** Return to the default Credential. */
   void disableSudo() throws IOException;
 
   /**
@@ -196,24 +192,18 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    */
   void enableSudo(int uid, int gid);
 
-  /**
-   * @return The Credential used for RPC calls.
-   */
+  /** Returns the Credential used for RPC calls. */
   Credential getCredential();
 
-  /**
-   * @return The path on the filesystem that is exported by the NFS server.
-   */
+  /** Returns the path on the filesystem that is exported by the NFS server. */
   String getExportedPath();
 
-  /**
-   * @return The root file handle of the exported filesystem, for debugging and naked API calls
-   */
+  /** Returns the root file handle of the exported filesystem, for debugging and naked API calls. */
   byte[] getRootFileHandle();
 
   /**
-   * @return The TCP destination port being used for the NFS server, whether explicitly configured
-   *     or discovered through portmapper
+   * Returns the TCP destination port being used for the NFS server, whether explicitly configured
+   * or discovered through portmapper.
    */
   int getPort();
 
@@ -229,9 +219,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
     return 0;
   }
 
-  /**
-   * @return The address of the machine hosting the NFS server.
-   */
+  /** Returns the address of the machine hosting the NFS server. */
   String getServer();
 
   /**
@@ -239,7 +227,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    *
    * @param path The file's path from the mount point.
    * @return the nfs file object
-   * @throws IOException
    */
   F newFile(String path) throws IOException;
 
@@ -250,7 +237,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * timing. For details, see RFC 1813 (https://tools.ietf.org/html/rfc1813).
    *
    * @return the returned Xdr
-   * @throws IOException
    */
   Xdr nullCall() throws IOException;
 
@@ -265,7 +251,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    *
    * @param fileHandle The file handle of an object whose attributes are to be retrieved.
    * @return the request
-   * @throws FileNotFoundException
    */
   NfsGetAttrRequest makeGetAttrRequest(byte[] fileHandle) throws FileNotFoundException;
 
@@ -278,9 +263,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * CREATE, MKDIR, SYMLINK, MKNOD, or READDIRPLUS procedure (or from the MOUNT service, described
    * elsewhere).
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsGetAttrResponse getAttr(NfsGetAttrRequest request) throws IOException;
 
@@ -293,9 +276,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * CREATE, MKDIR, SYMLINK, MKNOD, or READDIRPLUS procedure (or from the MOUNT service, described
    * elsewhere).
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsGetAttrResponse wrapped_getAttr(NfsGetAttrRequest request) throws IOException;
 
@@ -312,7 +293,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    *     <code>guardTime</code> to the current ctime of the object. If the values are different, the
    *     server must preserve the object attributes and must return a status of NFS3ERR_NOT_SYNC.
    * @return the request
-   * @throws FileNotFoundException
    */
   NfsSetAttrRequest makeSetAttrRequest(
       byte[] fileHandle, NfsSetAttributes attributes, NfsTime guardTime)
@@ -325,9 +305,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * <p>Procedure SETATTR changes one or more of the attributes of a file system object on the
    * server.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsSetAttrResponse setAttr(NfsSetAttrRequest request) throws IOException;
 
@@ -338,9 +316,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * <p>Procedure SETATTR changes one or more of the attributes of a file system object on the
    * server.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsSetAttrResponse wrapped_setAttr(NfsSetAttrRequest request) throws IOException;
 
@@ -354,7 +330,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * @param fileHandle The file handle for the directory to search.
    * @param name The filename to be searched for.
    * @return the request
-   * @throws FileNotFoundException
    */
   NfsLookupRequest makeLookupRequest(byte[] fileHandle, String name) throws FileNotFoundException;
 
@@ -365,9 +340,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * <p>Procedure LOOKUP searches a directory for a specific name and returns the file handle for
    * the corresponding file system object.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsLookupResponse getLookup(NfsLookupRequest request) throws IOException;
 
@@ -378,9 +351,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * <p>Procedure LOOKUP searches a directory for a specific name and returns the file handle for
    * the corresponding file system object.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsLookupResponse wrapped_getLookup(NfsLookupRequest request) throws IOException;
 
@@ -410,7 +381,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    *            </pre>
    *
    * @return the request
-   * @throws FileNotFoundException
    */
   NfsAccessRequest makeAccessRequest(byte[] fileHandle, long accessToCheck)
       throws FileNotFoundException;
@@ -430,9 +400,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * allowed to the file system object in the future, as access rights can be revoked by the server
    * at any time.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsAccessResponse getAccess(NfsAccessRequest request) throws IOException;
 
@@ -451,9 +419,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * allowed to the file system object in the future, as access rights can be revoked by the server
    * at any time.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsAccessResponse wrapped_getAccess(NfsAccessRequest request) throws IOException;
 
@@ -475,7 +441,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    *
    * @param fileHandle the fileHandle for the symbolic link
    * @return the request
-   * @throws FileNotFoundException
    */
   NfsReadlinkRequest makeReadlinkRequest(byte[] fileHandle) throws FileNotFoundException;
 
@@ -495,9 +460,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * implementations want to share access to symbolic links, then they must agree on the
    * interpretation of the data in the symbolic link.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsReadlinkResponse getReadlink(NfsReadlinkRequest request) throws IOException;
 
@@ -517,9 +480,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * implementations want to share access to symbolic links, then they must agree on the
    * interpretation of the data in the symbolic link.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsReadlinkResponse wrapped_getReadlink(NfsReadlinkRequest request) throws IOException;
 
@@ -542,7 +503,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    *     in the FSINFO reply structure for the file system that contains file. If greater, the
    *     server may return only <code>rtmax</code> bytes, resulting in a short read.
    * @return the request
-   * @throws FileNotFoundException
    */
   NfsReadRequest makeReadRequest(byte[] fileHandle, long offset, int size)
       throws FileNotFoundException;
@@ -553,12 +513,10 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    *
    * <p>Procedure READ reads data from a file.
    *
-   * @param request
    * @param bytes optional externally provided buffer - if not provided, the method will create a
    *     new, empty buffer for receiving the data.
    * @param position position to start writing, defaults to 0 if buffer is null
    * @return the response
-   * @throws IOException
    */
   NfsReadResponse getRead(NfsReadRequest request, byte[] bytes, int position) throws IOException;
 
@@ -568,12 +526,10 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    *
    * <p>Procedure READ reads data from a file.
    *
-   * @param request
    * @param bytes optional externally provided buffer - if not provided, the method will create a
    *     new, empty buffer for receiving the data.
    * @param position position to start writing, defaults to 0 if buffer is null
    * @return the response
-   * @throws IOException
    */
   NfsReadResponse wrapped_getRead(NfsReadRequest request, byte[] bytes, int position)
       throws IOException;
@@ -598,7 +554,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    *     </ul>
    *
    * @return the request
-   * @throws FileNotFoundException
    */
   NfsWriteRequest makeWriteRequest(
       byte[] fileHandle, long offset, List<ByteBuffer> payload, int syncType)
@@ -610,9 +565,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    *
    * <p>Procedure WRITE writes data to a file.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsWriteResponse sendWrite(NfsWriteRequest request) throws IOException;
 
@@ -622,9 +575,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    *
    * <p>Procedure WRITE writes data to a file.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsWriteResponse wrapped_sendWrite(NfsWriteRequest request) throws IOException;
 
@@ -634,12 +585,10 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    *
    * <p>Procedure WRITE writes data to a file.
    *
-   * @param request
    * @param verifier This is a cookie, previously returned from the server, that the client can use
    *     to determine whether the server has changed state between a call to WRITE and a subsequent
    *     call to either WRITE or COMMIT.
    * @return the response
-   * @throws IOException
    */
   NfsWriteResponse wrapped_sendWrite(NfsWriteRequest request, Long verifier) throws IOException;
 
@@ -666,7 +615,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * @param verifier A unique identifier to ensure exclusive creation of the new file. If no value
    *     is provided for exclusive creation, this is generated.
    * @return the request
-   * @throws FileNotFoundException
    */
   NfsCreateRequest makeCreateRequest(
       NfsCreateMode createMode,
@@ -682,9 +630,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    *
    * <p>Procedure CREATE creates a regular file.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsCreateResponse sendCreate(NfsCreateRequest request) throws IOException;
 
@@ -694,9 +640,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    *
    * <p>Procedure CREATE creates a regular file.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsCreateResponse wrapped_sendCreate(NfsCreateRequest request) throws IOException;
 
@@ -710,7 +654,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * @param name The name that is to be associated with the created subdirectory.
    * @param attributes The initial attributes for the subdirectory.
    * @return the request
-   * @throws FileNotFoundException
    */
   NfsMkdirRequest makeMkdirRequest(byte[] fileHandle, String name, NfsSetAttributes attributes)
       throws FileNotFoundException;
@@ -721,9 +664,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    *
    * <p>Procedure MKDIR creates a new subdirectory.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsMkdirResponse sendMkdir(NfsMkdirRequest request) throws IOException;
 
@@ -733,9 +674,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    *
    * <p>Procedure MKDIR creates a new subdirectory.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsMkdirResponse wrapped_sendMkdir(NfsMkdirRequest request) throws IOException;
 
@@ -751,7 +690,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * @param name The name that is to be associated with the created symbolic link.
    * @param attributes The initial attributes for the symbolic link.
    * @return the request
-   * @throws FileNotFoundException
    */
   NfsSymlinkRequest makeSymlinkRequest(
       String symbolicLinkData, byte[] fileHandle, String name, NfsSetAttributes attributes)
@@ -763,9 +701,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    *
    * <p>Procedure SYMLINK creates a new symbolic link.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsSymlinkResponse sendSymlink(NfsSymlinkRequest request) throws IOException;
 
@@ -775,9 +711,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    *
    * <p>Procedure SYMLINK creates a new symbolic link.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsSymlinkResponse wrapped_sendSymlink(NfsSymlinkRequest request) throws IOException;
 
@@ -796,7 +730,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    *     or a block special file ( <code>type</code> is <code>NF3BLK</code>), <code>rdev[0]</code>
    *     is the major number and <code>rdev[1]</code> is the minor number.
    * @return the request
-   * @throws FileNotFoundException
    */
   NfsMknodRequest makeMknodRequest(
       byte[] fileHandle, String name, NfsType type, NfsSetAttributes attributes, long[] rdev)
@@ -809,9 +742,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * <p>Procedure MKNOD creates a new special file of the type, <code>type</code> . Special files
    * can be device files or named pipes.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsMknodResponse sendMknod(NfsMknodRequest request) throws IOException;
 
@@ -822,9 +753,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * <p>Procedure MKNOD creates a new special file of the type, <code>type</code> . Special files
    * can be device files or named pipes.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsMknodResponse wrapped_sendMknod(NfsMknodRequest request) throws IOException;
 
@@ -838,7 +767,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * @param fileHandle The file handle for the directory from which the entry is to be removed.
    * @param name The name of the entry to be removed.
    * @return the request
-   * @throws FileNotFoundException
    */
   NfsRemoveRequest makeRemoveRequest(byte[] fileHandle, String name) throws FileNotFoundException;
 
@@ -849,9 +777,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * <p>Procedure REMOVE removes (deletes) an entry from a directory. If the entry in the directory
    * was the last reference to the corresponding file system object, the object may be destroyed.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsRemoveResponse sendRemove(NfsRemoveRequest request) throws IOException;
 
@@ -862,9 +788,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * <p>Procedure REMOVE removes (deletes) an entry from a directory. If the entry in the directory
    * was the last reference to the corresponding file system object, the object may be destroyed.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsRemoveResponse wrapped_sendRemove(NfsRemoveRequest request) throws IOException;
 
@@ -879,7 +803,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    *     removed.
    * @param name The name of the subdirectory to be removed.
    * @return the request
-   * @throws FileNotFoundException
    */
   NfsRmdirRequest makeRmdirRequest(byte[] fileHandle, String name) throws FileNotFoundException;
 
@@ -890,9 +813,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * <p>Procedure RMDIR removes (deletes) a subdirectory from a directory. If the directory entry of
    * the subdirectory is the last reference to the subdirectory, the subdirectory may be destroyed.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsRmdirResponse sendRmdir(NfsRmdirRequest request) throws IOException;
 
@@ -903,9 +824,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * <p>Procedure RMDIR removes (deletes) a subdirectory from a directory. If the directory entry of
    * the subdirectory is the last reference to the subdirectory, the subdirectory may be destroyed.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsRmdirResponse wrapped_sendRmdir(NfsRmdirRequest request) throws IOException;
 
@@ -923,7 +842,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * @param toFileHandle The file handle for the directory to which the object is to be renamed.
    * @param toName The new name for the object.
    * @return the request
-   * @throws FileNotFoundException
    */
   NfsRenameRequest makeRenameRequest(
       byte[] fileHandle, String name, byte[] toFileHandle, String toName)
@@ -938,9 +856,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * operation is required to be atomic to the client. <code>toFileHandle</code> and <code>
    * fileHandle</code> must reside on the same file system and server.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsRenameResponse sendRename(NfsRenameRequest request) throws IOException;
 
@@ -953,9 +869,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * operation is required to be atomic to the client. <code>toFileHandle</code> and <code>
    * fileHandle</code> must reside on the same file system and server.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsRenameResponse wrapped_sendRename(NfsRenameRequest request) throws IOException;
 
@@ -972,7 +886,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    *     created.
    * @param name The name that is to be associated with the created link.
    * @return the request
-   * @throws FileNotFoundException
    */
   NfsLinkRequest makeLinkRequest(byte[] fileHandle, byte[] parentDirectoryFileHandle, String name)
       throws FileNotFoundException;
@@ -985,9 +898,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * directory, <code>parentDirectoryFileHandle</code>. <code>fileHandle</code> and <code>
    * parentDirectoryFileHandle</code> must reside on the same file system and server.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsLinkResponse sendLink(NfsLinkRequest request) throws IOException;
 
@@ -999,9 +910,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * directory, <code>parentDirectoryFileHandle</code>. <code>fileHandle</code> and <code>
    * parentDirectoryFileHandle</code> must reside on the same file system and server.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsLinkResponse wrapped_sendLink(NfsLinkRequest request) throws IOException;
 
@@ -1023,7 +932,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * @param count The maximum size of the READDIR3resok structure, in bytes. The size must include
    *     all XDR overhead. The server is free to return less than count bytes of data.
    * @return the request
-   * @throws FileNotFoundException
    */
   NfsReaddirRequest makeReaddirRequest(byte[] fileHandle, long cookie, long cookieverf, int count)
       throws FileNotFoundException;
@@ -1036,9 +944,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * returns the name and file identifier for each, with information to allow the client to request
    * additional directory entries in a subsequent READDIR request.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsReaddirResponse getReaddir(NfsReaddirRequest request) throws IOException;
 
@@ -1050,9 +956,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * returns the name and file identifier for each, with information to allow the client to request
    * additional directory entries in a subsequent READDIR request.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsReaddirResponse wrapped_getReaddir(NfsReaddirRequest request) throws IOException;
 
@@ -1064,7 +968,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * returns the name and file identifier for each, with information to allow the client to request
    * additional directory entries in a subsequent READDIR request.
    *
-   * @param request
    * @param entries A list of entries to which the returned entries should be appended.
    * @return the response
    */
@@ -1095,7 +998,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    *     include all XDR overhead. The server is free to return less than <code>maxcount</code>
    *     bytes of data.
    * @return the request
-   * @throws FileNotFoundException
    */
   NfsReaddirplusRequest makeReaddirplusRequest(
       byte[] fileHandle, long cookie, long cookieverf, int dircount, int maxcount)
@@ -1112,9 +1014,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * returns the filename and the fileid. In READDIRPLUS, each entry returns the name, the fileid,
    * attributes (including the fileid), and file handle.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsReaddirplusResponse getReaddirplus(NfsReaddirplusRequest request) throws IOException;
 
@@ -1129,9 +1029,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * returns the filename and the fileid. In READDIRPLUS, each entry returns the name, the fileid,
    * attributes (including the fileid), and file handle.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsReaddirplusResponse wrapped_getReaddirplus(NfsReaddirplusRequest request) throws IOException;
 
@@ -1146,7 +1044,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * returns the filename and the fileid. In READDIRPLUS, each entry returns the name, the fileid,
    * attributes (including the fileid), and file handle.
    *
-   * @param request
    * @param entries A list of entries to which the returned entries should be appended.
    * @return the response
    */
@@ -1158,7 +1055,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * (https://tools.ietf.org/html/rfc1813), using the root handle for the exported filesystem.
    *
    * @return the data
-   * @throws IOException
    */
   NfsFsStat getNfsFsStat() throws IOException;
 
@@ -1172,7 +1068,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    *     file handle for a mount point for a file system, as originally obtained from the MOUNT
    *     service on the server.
    * @return the request
-   * @throws FileNotFoundException
    */
   NfsFsStatRequest makeFsStatRequest(byte[] fileHandle) throws FileNotFoundException;
 
@@ -1183,7 +1078,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * <p>Procedure FSSTAT retrieves volatile file system state information.
    *
    * @return the request
-   * @throws FileNotFoundException
    */
   NfsFsStatRequest makeFsStatRequest() throws FileNotFoundException;
 
@@ -1193,9 +1087,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    *
    * <p>Procedure FSSTAT retrieves volatile file system state information.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsFsStatResponse getFsStat(NfsFsStatRequest request) throws IOException;
 
@@ -1205,9 +1097,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    *
    * <p>Procedure FSSTAT retrieves volatile file system state information.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsFsStatResponse wrapped_getFsStat(NfsFsStatRequest request) throws IOException;
 
@@ -1217,7 +1107,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * (https://tools.ietf.org/html/rfc1813), using the root handle for the exported filesystem.
    *
    * @return the data
-   * @throws IOException
    */
   NfsFsInfo getNfsFsInfo() throws IOException;
 
@@ -1232,7 +1121,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    *     handle for a mount point for a file system, as originally obtained from the MOUNT service
    *     on the server.
    * @return the request
-   * @throws FileNotFoundException
    */
   NfsFsInfoRequest makeFsInfoRequest(byte[] fileHandle) throws FileNotFoundException;
 
@@ -1244,7 +1132,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * about the NFS version 3 protocol server implementation.
    *
    * @return the request
-   * @throws FileNotFoundException
    */
   NfsFsInfoRequest makeFsInfoRequest() throws FileNotFoundException;
 
@@ -1255,9 +1142,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * <p>Procedure FSINFO retrieves nonvolatile file system state information and general information
    * about the NFS version 3 protocol server implementation.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsFsInfoResponse getFsInfo(NfsFsInfoRequest request) throws IOException;
 
@@ -1268,9 +1153,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * <p>Procedure FSINFO retrieves nonvolatile file system state information and general information
    * about the NFS version 3 protocol server implementation.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsFsInfoResponse wrapped_getFsInfo(NfsFsInfoRequest request) throws IOException;
 
@@ -1285,7 +1168,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    *
    * @param fileHandle The file handle for the file system object.
    * @return the request
-   * @throws FileNotFoundException
    */
   NfsPathconfRequest makePathconfRequest(byte[] fileHandle) throws FileNotFoundException;
 
@@ -1298,9 +1180,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * same for all files and directories in the exported file system in which this file or directory
    * resides.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsPathconfResponse getPathconf(NfsPathconfRequest request) throws IOException;
 
@@ -1313,9 +1193,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * same for all files and directories in the exported file system in which this file or directory
    * resides.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsPathconfResponse wrapped_getPathconf(NfsPathconfRequest request) throws IOException;
 
@@ -1333,7 +1211,6 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * @param dataSizeToCommit The number of bytes of data to flush. If count is 0, a flush from
    *     offset to the end of file is done.
    * @return the request
-   * @throws FileNotFoundException
    */
   NfsCommitRequest makeCommitRequest(byte[] fileHandle, long offsetToCommit, int dataSizeToCommit)
       throws FileNotFoundException;
@@ -1345,9 +1222,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * <p>Procedure COMMIT forces or flushes data to stable storage that was previously written with a
    * WRITE procedure call with the stable field set to UNSTABLE.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsCommitResponse sendCommit(NfsCommitRequest request) throws IOException;
 
@@ -1358,9 +1233,7 @@ public interface Nfs<F extends NfsFile<?, ?>> {
    * <p>Procedure COMMIT forces or flushes data to stable storage that was previously written with a
    * WRITE procedure call with the stable field set to UNSTABLE.
    *
-   * @param request
    * @return the response
-   * @throws IOException
    */
   NfsCommitResponse wrapped_sendCommit(NfsCommitRequest request) throws IOException;
 }

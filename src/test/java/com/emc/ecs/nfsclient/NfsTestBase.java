@@ -24,6 +24,8 @@ import org.junit.Assume;
 /**
  * @author seibed
  */
+// Subclasses intentionally inherit JUnit assertions from this shared test fixture.
+@SuppressWarnings("ExtendingJUnitAssert")
 public class NfsTestBase extends Assert {
 
   /**
@@ -50,8 +52,6 @@ public class NfsTestBase extends Assert {
   /**
    * Protected to force subclassing. This will throw an exception if test properties have not been
    * properly configured.
-   *
-   * @throws IOException
    */
   protected NfsTestBase() throws IOException {
     _properties = loadProperties();
@@ -94,7 +94,6 @@ public class NfsTestBase extends Assert {
    * Loads the default properties, throws an exception if they cannot be loaded.
    *
    * @return The properties.
-   * @throws IOException
    */
   protected static Properties loadProperties() throws IOException {
     return loadProperties(DEFAULT_FILE_NAME);
@@ -106,7 +105,6 @@ public class NfsTestBase extends Assert {
    *
    * @param fileName The file name.
    * @return the contents of the properties file as a {@link java.util.Properties} object.
-   * @throws IOException
    */
   protected static Properties loadProperties(String fileName) throws IOException {
     String fullFileName = fileName + ".properties";

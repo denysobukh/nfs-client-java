@@ -37,7 +37,6 @@ public class Nfs3SymlinkRequest extends NfsSymlinkRequest {
    * @param name The name that is to be associated with the created symbolic link.
    * @param attributes The initial attributes for the symbolic link.
    * @param credential The credential used for RPC authentication.
-   * @throws FileNotFoundException
    */
   public Nfs3SymlinkRequest(
       String symbolicLinkData,

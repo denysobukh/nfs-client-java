@@ -34,18 +34,14 @@ public class NfsFsStatRequest extends NfsRequestBase {
    *     service on the server.
    * @param credential The credential used for RPC authentication.
    * @param nfsVersion The NFS version number
-   * @throws FileNotFoundException
    */
   public NfsFsStatRequest(byte[] fileHandle, Credential credential, int nfsVersion)
       throws FileNotFoundException {
     super(Nfs.RPC_PROGRAM, nfsVersion, Nfs.NFSPROC3_FSSTAT, credential, fileHandle);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#toString()
-   */
+  /** {@inheritDoc} */
+  @Override
   public String toString() {
     return startToString("NfsFsStatRequest").toString();
   }

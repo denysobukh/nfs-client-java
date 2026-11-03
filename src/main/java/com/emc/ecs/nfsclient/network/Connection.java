@@ -169,7 +169,6 @@ public class Connection {
    * @param timeout The timeout in seconds.
    * @param xdrRequest The generic RPC data and protocol-specific data.
    * @return The Xdr data for the response.
-   * @throws RpcException
    */
   public Xdr sendAndWait(int timeout, Xdr xdrRequest) throws RpcException {
     // no lock is required here.
@@ -256,11 +255,7 @@ public class Connection {
     return timeoutFuture.getNow();
   }
 
-  /**
-   * If there is no current connection, start a new tcp connection asynchronously.
-   *
-   * @throws RpcException
-   */
+  /** If there is no current connection, start a new tcp connection asynchronously. */
   protected void connect() throws RpcException {
     if (_state.equals(State.CONNECTED)) {
       return;
@@ -304,6 +299,8 @@ public class Connection {
   }
 
   /** This is called when the application is shutdown or the channel is closed. */
+  // Terminal cleanup is best-effort; channel failures are reported by the pipeline.
+  @SuppressWarnings("FutureReturnValueIgnored")
   protected void shutdown() {
     if (_channel != null) {
       _channel.close();
@@ -345,9 +342,6 @@ public class Connection {
   /**
    * Update the response map with the response and notify the thread waiting for the response. Do
    * nothing if the future has been removed.
-   *
-   * @param xid
-   * @param response
    */
   protected void notifySender(Integer xid, Xdr response) {
     Promise<Xdr> future = _futureMap.get(xid);
@@ -384,6 +378,8 @@ public class Connection {
    *
    * @throws RpcException If an exception occurs, or if no binding succeeds.
    */
+  // Closing an unsuccessful bind is best-effort cleanup; its original cause is reported below.
+  @SuppressWarnings("FutureReturnValueIgnored")
   private Channel bindToPrivilegedPort() throws RpcException {
     LOG.info(
         "Binding a privileged client source port (<1024): remote={}; local OS permission is required",

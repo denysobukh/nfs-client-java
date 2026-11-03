@@ -58,7 +58,6 @@ public abstract class RpcResponseHandler<T> {
    *
    * @param request This is used for error messages, to aid debugging, since the response will
    *     likely not have enough data to determine the request that caused it.
-   * @throws IOException
    */
   public abstract void checkResponse(RpcRequest request) throws IOException;
 }
