@@ -9,7 +9,7 @@ NFS Client for Java
 
 Maintained fork of the EMC NFS client with security fixes.
 
-Version **1.1.2** uses **Netty 4.2.16.Final** and requires **Java 17 or newer**
+Version **1.1.3** uses **Netty 4.2.16.Final** and requires **Java 17 or newer**
 at runtime.
 
 Description
@@ -28,12 +28,6 @@ The project also includes NFS equivalents to java.io.File and related
 functionality. The classes for this, both the generic and the
 NFS3-specific versions, are in the package com.emc.ecs.nfsclient.nfs.io.
 
-Security changes in 1.1.1
----
-
-Version 1.1.1 replaces the end-of-life Netty 3 dependency with
-`io.netty:netty-transport` and `io.netty:netty-codec-base`, both at **4.2.16.Final**.
-
 Installation
 ---
 
@@ -42,14 +36,14 @@ Maven coordinates for this fork (once published to Maven Central):
     <dependency>
         <groupId>io.github.denysobukh</groupId>
         <artifactId>nfs-client</artifactId>
-        <version>1.1.2</version>
+        <version>1.1.3</version>
     </dependency>
 
 You can also use it as a Gradle dependency:
 
-    implementation 'io.github.denysobukh:nfs-client:1.1.2'
+    implementation 'io.github.denysobukh:nfs-client:1.1.3'
 
-**Version 1.1.2 requires Java 17 or newer. Java 21 is a supported runtime choice.**
+**Version 1.1.3 requires Java 17 or newer. Java 21 is a supported runtime choice.**
 
 Docs
 ---
@@ -106,6 +100,7 @@ tests count toward client coverage.
 
 ```sh
 ./gradlew jacocoAggregateReport # Run tests and generate combined HTML and XML
+./gradlew jacocoAggregateCoverageVerification # Enforce the combined 80% line minimum
 ```
 
 Open `build/reports/jacoco/aggregate/html/index.html` for the combined report;
@@ -114,8 +109,19 @@ CI uploads these as the `jacoco-reports` artifact. The GitHub Pages workflow
 publishes the [combined report](https://denysobukh.github.io/nfs-client-java/coverage/)
 and updates the README badge with its measured line coverage on each master build.
 Tests requiring an external NFS server are skipped unless `test.properties` is
-configured; skipped tests do not contribute coverage. No coverage threshold or
-production-class exclusions are applied.
+configured; skipped tests do not contribute coverage. `check` and `build` enforce
+at least **80% combined line coverage** over all production classes in the client
+and both tool modules. CI and release builds therefore fail below this minimum.
+No production-class exclusions are applied.
+
+The protocol tests run without an external export. Independent byte fixtures in
+`Nfs3Wire` follow [RFC 1813 sections 2.5 and 3.3](https://www.rfc-editor.org/rfc/rfc1813.html)
+and [RFC 4506](https://www.rfc-editor.org/rfc/rfc4506.html), rather than round-tripping
+through the client's encoder. They check all NFSv3 procedure numbers and argument
+layouts, success/failure reply unions, optional attributes and handles, fixed-size
+verifiers, and XDR padding. Loopback RPC tests exercise the transport, file APIs,
+directory cookie continuation, short reads/writes, and COMMIT ranges. These are
+scripted protocol checks; the external-server tests remain available for interoperability testing.
 
 How to use the bare client
 ---
@@ -220,3 +226,93 @@ How to use the tools jar
 The tools jar currently contains only functionality for load testing NFS client IO functionality, as this is the
 most likely bottleneck. Working examples of how to exercise this code are available in the tools jar JUnit tests.
 [Test_LoadTest.java](tools/src/test/java/com/emc/ecs/nfsclient/nfs/io/Test_LoadTest.java).
+
+Changelog
+---
+
+This changelog covers the maintained fork from the original
+[EMCECS/nfs-client-java](https://github.com/EMCECS/nfs-client-java) baseline,
+commit [`8d157a6`](https://github.com/EMCECS/nfs-client-java/commit/8d157a6),
+after upstream version 1.1.0. Earlier upstream changes are outside this history.
+Thanks to the original EMC/Dell maintainers and contributors for the NFS client
+on which this fork is based.
+
+### 1.1.3 — Unreleased
+
+- Fix EXCLUSIVE CREATE encoding to send the RFC 1813 fixed eight-byte verifier
+  without a length prefix; reject verifiers of other lengths and keep retry
+  verifiers stable.
+- Finish short WRITE operations before flushing and committing buffered output;
+  reject zero-progress and invalid write counts instead of losing buffered data.
+- Add independent RFC 1813 and RFC 4506 wire fixtures and tests for all 21 NFSv3
+  procedures, including request layouts, success/failure reply unions, optional
+  attributes and handles, verifiers, stability modes, and XDR padding.
+- Add loopback TCP tests for bare and wrapped RPC calls, NFS errors, verifier
+  changes, file metadata and permissions, directory pagination and filtering,
+  streams, short reads/writes, and COMMIT ranges without an external NFS server.
+- Enforce at least 80% combined JaCoCo line coverage across the client and both
+  tool modules in `check`, `build`, CI, and release builds, without production
+  exclusions. Generate combined HTML/XML reports, publish coverage on GitHub
+  Pages, and display a measured coverage badge.
+- Add Spotless with Google Java Format across all Java sources, including the
+  tools, demo, and tests; check formatting in CI.
+- Add Error Prone during compilation and SpotBugs for every Java source set,
+  including tests and the demo, with CI badges and downloadable analysis reports.
+  Document narrowly scoped SpotBugs exclusions for intentional API/test patterns.
+- Fix RPC response completion races and pending-request cleanup; improve shared
+  state visibility and synchronize input-stream operations.
+- Protect file handles, device-number arrays, CREATE verifiers, and payload-list
+  ownership with defensive copies; compare root handles by content when deciding
+  whether to remount after `NFS3ERR_BADHANDLE`.
+- Make RPC, NFS, and MOUNT exception status objects serializable while preserving
+  canonical status identities; add serialization and request-isolation tests.
+- Improve resource cleanup in tests and tools, remove compiler/deprecation and
+  Javadoc warnings, and clarify API documentation without changing the Java 17
+  bytecode target.
+- Preserve the frozen compatibility interface as a `.java.txt` test resource so
+  Java source tooling does not treat it as a duplicate production interface.
+- Document server-defined directory listing order, continuation-cookie semantics,
+  and explicit client-side sorting.
+
+### 1.1.2 — 2026-11-03
+
+- Add configurable NFS and MOUNT destination ports, with independent portmapper
+  discovery when either port is zero. Keep existing constructors and automatic
+  discovery behavior; support a supplied root handle to skip MOUNT.
+- Add `Nfs.getMountPort()` with a default implementation for existing third-party
+  implementations, plus source/binary compatibility and custom-port tests.
+- Correct unsigned 32-bit XDR decoding, including values above `Integer.MAX_VALUE`,
+  with boundary tests.
+- Improve MOUNT, portmapper, RPC, transport, and file-operation diagnostics with
+  endpoint, procedure, retry, and failure context while retaining exception causes
+  and NFS status codes. Warn when output-stream close suppresses a flush failure.
+- Add transport, MOUNT, RPC, and stream diagnostic regression tests and
+  [logging configuration guidance](Logging.md).
+- Upgrade Apache Commons Lang from 3.12.0 to 3.18.0 in the client and reading tool.
+- Submit the resolved Gradle dependency graph to GitHub for Dependabot alerts;
+  add CycloneDX SBOM generation and scheduled Trivy checks that fail on HIGH or
+  CRITICAL vulnerabilities.
+- Add a Docker Compose NFSv3 smoke-test demo using NFS-Ganesha and the client
+  built from this checkout, with documented setup and cleanup.
+- Publish versioned and latest Javadocs for the client and tools through GitHub
+  Pages; redirect the site root to the latest client API documentation and update
+  fork repository links, installation instructions, and build guidance.
+
+### 1.1.1 — 2026-10-29
+
+- Replace end-of-life Netty 3.10.6.Final with `io.netty:netty-transport` and
+  `io.netty:netty-codec-base` 4.2.16.Final; migrate connection handling, event loops,
+  promises, channel handlers, and RPC record decoding/writing to Netty 4.2.
+- Raise the runtime minimum from Java 8 to Java 17, compile with a JDK 25
+  toolchain targeting Java 17 bytecode, and upgrade Gradle from 7.4.2 to 9.3.1.
+- Move both tool applications to the maintained Shadow plugin 9.3.2 and update
+  their Gradle application and archive configuration.
+- Publish the fork under `io.github.denysobukh:nfs-client`, using Maven Central
+  Portal publishing and GPG signing with updated POM, SCM, developer, and license
+  metadata; remove the legacy release and Cobertura plugins.
+- Add GitHub CI and tag-triggered draft release builds with version/tag validation,
+  client/source/Javadoc jars, distributions, POM files, and SHA-256 checksums.
+- Add a local Maven Central deployment script with preflight checks and deployment
+  tracking; keep credentials and generated deployment records outside version control.
+- Update the bundled Netty license and replace deprecated boxed-number
+  constructors in tests.

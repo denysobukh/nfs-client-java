@@ -249,11 +249,15 @@ public class NfsFileOutputStream extends OutputStream {
 
   /** Write the buffer contents to the file and reset the buffer afterwards. */
   private void writeBufferToFile() throws IOException {
-    if (_bufferOffset > 0) {
+    while (_bufferOffset > 0) {
       List<ByteBuffer> payload = new ArrayList<ByteBuffer>(1);
       payload.add(ByteBuffer.wrap(_buffer, 0, _bufferOffset));
       NfsWriteResponse response = _nfsFile.write(_currentOffset, payload, _syncType);
       int bytesWritten = response.getCount();
+      if (bytesWritten <= 0 || bytesWritten > _bufferOffset) {
+        throw new IOException(
+            "Invalid NFS WRITE count: " + bytesWritten + ", requested: " + _bufferOffset);
+      }
       _currentOffset += bytesWritten;
       _bufferOffset -= bytesWritten;
       if (0 != _bufferOffset) { // Everything was not written.

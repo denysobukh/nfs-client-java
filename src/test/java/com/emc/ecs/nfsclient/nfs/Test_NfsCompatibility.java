@@ -24,7 +24,7 @@ public class Test_NfsCompatibility {
     Path baseline = temporary.newFolder("baseline").toPath();
     Path oldInterface = baseline.resolve("Nfs.java");
     try (InputStream source =
-        Test_NfsCompatibility.class.getResourceAsStream("/compatibility/Nfs.java")) {
+        Test_NfsCompatibility.class.getResourceAsStream("/compatibility/Nfs.java.txt")) {
       assertNotNull(source);
       Files.copy(source, oldInterface);
     }

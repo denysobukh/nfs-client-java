@@ -95,6 +95,10 @@ public class NfsCreateRequest extends NfsRequestBase {
     _attributes = attributes;
     if (_createMode == NfsCreateMode.EXCLUSIVE) {
       if (verifier != null) {
+        if (verifier.length != NFS3_CREATEVERFSIZE) {
+          throw new IllegalArgumentException(
+              "Exclusive create verifier must contain exactly 8 bytes");
+        }
         _verifier = verifier.clone();
       } else {
         _verifier = new byte[NFS3_CREATEVERFSIZE];
@@ -114,7 +118,8 @@ public class NfsCreateRequest extends NfsRequestBase {
     if (_createMode != NfsCreateMode.EXCLUSIVE) {
       _attributes.marshalling(xdr);
     } else {
-      xdr.putByteArray(_verifier);
+      // RFC 1813 section 2.5: createverf3 is fixed opaque[8], without a length prefix.
+      xdr.putBytes(_verifier, 0, NFS3_CREATEVERFSIZE);
     }
   }
 
