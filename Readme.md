@@ -1,23 +1,14 @@
-[![Build & tests](https://img.shields.io/github/actions/workflow/status/denysobukh/nfs-client-java/ci.yml?branch=master&label=Build%20%26%20tests)](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml)
-[![Spotless](https://img.shields.io/github/actions/workflow/status/denysobukh/nfs-client-java/ci.yml?branch=master&label=Spotless)](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml)
-[![Error Prone](https://img.shields.io/github/actions/workflow/status/denysobukh/nfs-client-java/ci.yml?branch=master&label=Error%20Prone)](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml)
-[![SpotBugs](https://img.shields.io/github/actions/workflow/status/denysobukh/nfs-client-java/ci.yml?branch=master&label=SpotBugs)](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml)
-[![JaCoCo coverage gate](https://img.shields.io/github/actions/workflow/status/denysobukh/nfs-client-java/ci.yml?branch=master&label=JaCoCo%20coverage%20gate)](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml)
-[![JaCoCo line coverage](https://denysobukh.github.io/nfs-client-java/coverage.svg)](https://denysobukh.github.io/nfs-client-java/coverage/)
-
-[![Trivy: dependencies, secrets & config](https://img.shields.io/github/actions/workflow/status/denysobukh/nfs-client-java/security.yml?branch=master&label=Trivy%3A%20dependencies%2C%20secrets%20%26%20config)](https://github.com/denysobukh/nfs-client-java/actions/workflows/security.yml)
-[![CodeQL](https://github.com/denysobukh/nfs-client-java/actions/workflows/github-code-scanning/codeql/badge.svg?branch=master)](https://github.com/denysobukh/nfs-client-java/actions/workflows/github-code-scanning/codeql)
-[![Dependabot updates](https://github.com/denysobukh/nfs-client-java/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/denysobukh/nfs-client-java/actions/workflows/dependabot/dependabot-updates)
-[![Dependency submission](https://img.shields.io/github/actions/workflow/status/denysobukh/nfs-client-java/dependency-submission.yml?branch=master&label=Dependency%20submission)](https://github.com/denysobukh/nfs-client-java/actions/workflows/dependency-submission.yml)
-[![GitHub secret scanning: enabled](https://img.shields.io/badge/secret%20scanning-enabled-blue)](https://github.com/denysobukh/nfs-client-java/security/secret-scanning)
-[![GitHub push protection: enabled](https://img.shields.io/badge/push%20protection-enabled-blue)](https://github.com/denysobukh/nfs-client-java/security/secret-scanning)
-
-[![Javadocs & Pages](https://img.shields.io/github/actions/workflow/status/denysobukh/nfs-client-java/docs.yml?branch=master&label=Javadocs%20%26%20Pages)](https://github.com/denysobukh/nfs-client-java/actions/workflows/docs.yml)
-[![Release](https://img.shields.io/github/actions/workflow/status/denysobukh/nfs-client-java/release.yml?label=Release)](https://github.com/denysobukh/nfs-client-java/actions/workflows/release.yml)
-[![Code style: Google Java Format (Spotless)](https://img.shields.io/badge/code%20style-Google%20Java%20Format-blue)](#code-formatting)
-
 NFS Client for Java
 ===
+
+| Checks | Status |
+| --- | --- |
+| Build & analysis | [![Build & tests](https://img.shields.io/github/actions/workflow/status/denysobukh/nfs-client-java/ci.yml?branch=master&label=Build%20%26%20tests)](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml) [![Error Prone](https://img.shields.io/github/actions/workflow/status/denysobukh/nfs-client-java/ci.yml?branch=master&label=Error%20Prone)](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml) [![SpotBugs](https://img.shields.io/github/actions/workflow/status/denysobukh/nfs-client-java/ci.yml?branch=master&label=SpotBugs)](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml) |
+| Formatting | [![Spotless](https://img.shields.io/github/actions/workflow/status/denysobukh/nfs-client-java/ci.yml?branch=master&label=Spotless)](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml) [![Code style: Google Java Format (Spotless)](https://img.shields.io/badge/code%20style-Google%20Java%20Format-blue)](#code-formatting) |
+| Coverage | [![JaCoCo coverage gate](https://img.shields.io/github/actions/workflow/status/denysobukh/nfs-client-java/ci.yml?branch=master&label=JaCoCo%20coverage%20gate)](https://github.com/denysobukh/nfs-client-java/actions/workflows/ci.yml) [![JaCoCo line coverage](https://denysobukh.github.io/nfs-client-java/coverage.svg)](https://denysobukh.github.io/nfs-client-java/coverage/) |
+| Security | [![Trivy: dependencies, secrets & config](https://img.shields.io/github/actions/workflow/status/denysobukh/nfs-client-java/security.yml?branch=master&label=Trivy%3A%20dependencies%2C%20secrets%20%26%20config)](https://github.com/denysobukh/nfs-client-java/actions/workflows/security.yml) [![CodeQL](https://github.com/denysobukh/nfs-client-java/actions/workflows/github-code-scanning/codeql/badge.svg?branch=master)](https://github.com/denysobukh/nfs-client-java/actions/workflows/github-code-scanning/codeql) [![GitHub secret scanning: enabled](https://img.shields.io/badge/secret%20scanning-enabled-blue)](https://github.com/denysobukh/nfs-client-java/security/secret-scanning) [![GitHub push protection: enabled](https://img.shields.io/badge/push%20protection-enabled-blue)](https://github.com/denysobukh/nfs-client-java/security/secret-scanning) |
+| Dependencies | [![Dependabot updates](https://github.com/denysobukh/nfs-client-java/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/denysobukh/nfs-client-java/actions/workflows/dependabot/dependabot-updates) [![Dependency submission](https://img.shields.io/github/actions/workflow/status/denysobukh/nfs-client-java/dependency-submission.yml?branch=master&label=Dependency%20submission)](https://github.com/denysobukh/nfs-client-java/actions/workflows/dependency-submission.yml) |
+| Docs & releases | [![Javadocs & Pages](https://img.shields.io/github/actions/workflow/status/denysobukh/nfs-client-java/docs.yml?branch=master&label=Javadocs%20%26%20Pages)](https://github.com/denysobukh/nfs-client-java/actions/workflows/docs.yml) [![Release](https://img.shields.io/github/actions/workflow/status/denysobukh/nfs-client-java/release.yml?label=Release)](https://github.com/denysobukh/nfs-client-java/actions/workflows/release.yml) |
 
 Maintained fork of the EMC NFS client with security fixes.
 
