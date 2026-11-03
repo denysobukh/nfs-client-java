@@ -1,196 +1,188 @@
 /**
  * Copyright 2016-2018 Dell Inc. or its subsidiaries. All rights reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
+ * <p>Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file
+ * except in compliance with the License. A copy of the License is located at
  *
- * http://www.apache.org/licenses/LICENSE-2.0.txt
+ * <p>http://www.apache.org/licenses/LICENSE-2.0.txt
  *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * <p>or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
  */
 package com.emc.ecs.nfsclient.network;
 
 import com.emc.ecs.nfsclient.rpc.Xdr;
-
-import org.apache.commons.lang3.NotImplementedException;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import org.apache.commons.lang3.NotImplementedException;
 
 /**
- * RFC1831: RECORD MARKING STANDARD When RPC messages are passed on top of a
- * byte stream transport protocol (like TCP), it is necessary to delimit one
- * message from another in order to detect and possibly recover from protocol
- * errors. This is called record marking (RM).
- * 
+ * RFC1831: RECORD MARKING STANDARD When RPC messages are passed on top of a byte stream transport
+ * protocol (like TCP), it is necessary to delimit one message from another in order to detect and
+ * possibly recover from protocol errors. This is called record marking (RM).
+ *
  * @author seibed
  */
 public class RecordMarkingUtil {
 
-    /**
-     * Special constant used for the last fragment size. This is a number bigger
-     * than the largest unsigned int, so it cannot be a real fragment size..
-     */
-    private static final int LAST_FRAG = 0x80000000;
+  /**
+   * Special constant used for the last fragment size. This is a number bigger than the largest
+   * unsigned int, so it cannot be a real fragment size..
+   */
+  private static final int LAST_FRAG = 0x80000000;
 
-    /**
-     * The size mask is applied to the long fragment size to get the real
-     * unsigned int size. When this mask is applied to <code>LAST_FRAG</code>,
-     * the resulting real fragment size is 0. For all real fragment sizes, this
-     * mask has no effect.
-     */
-    private static final int SIZE_MASK = 0x7fffffff;
+  /**
+   * The size mask is applied to the long fragment size to get the real unsigned int size. When this
+   * mask is applied to <code>LAST_FRAG</code>, the resulting real fragment size is 0. For all real
+   * fragment sizes, this mask has no effect.
+   */
+  private static final int SIZE_MASK = 0x7fffffff;
 
-    /**
-     * RFC suggest setting the record size to MTU (Ethernet: MTU=1500 - 40(ip
-     * and tcp header). But, When we send multiple fragments continuously, some
-     * NFS server kill the connection and the report the error below:
-     * "RPC: multiple fragments per record not supported" To bypass this
-     * limitation, set a big MTU_SIZE number now.
-     */
-    private static final int MTU_SIZE = 1024 * 1024;
+  /**
+   * RFC suggest setting the record size to MTU (Ethernet: MTU=1500 - 40(ip and tcp header). But,
+   * When we send multiple fragments continuously, some NFS server kill the connection and the
+   * report the error below: "RPC: multiple fragments per record not supported" To bypass this
+   * limitation, set a big MTU_SIZE number now.
+   */
+  private static final int MTU_SIZE = 1024 * 1024;
 
-    /**
-     * Insert record marking into rpcRequest and then send to tcp stream.
-     * 
-     * @param channel The Channel to use for sending.
-     * @param rpcRequest The request to send.
-     */
-    static void putRecordMarkingAndSend(Channel channel, Xdr rpcRequest) {
-        // XDR header buffer
-        List<ByteBuffer> buffers = new LinkedList<>();
-        buffers.add(ByteBuffer.wrap(rpcRequest.getBuffer(), 0, rpcRequest.getOffset()));
+  /**
+   * Insert record marking into rpcRequest and then send to tcp stream.
+   *
+   * @param channel The Channel to use for sending.
+   * @param rpcRequest The request to send.
+   */
+  static void putRecordMarkingAndSend(Channel channel, Xdr rpcRequest) {
+    // XDR header buffer
+    List<ByteBuffer> buffers = new LinkedList<>();
+    buffers.add(ByteBuffer.wrap(rpcRequest.getBuffer(), 0, rpcRequest.getOffset()));
 
-        // payload buffer
-        if (rpcRequest.getPayloads() != null) {
-            buffers.addAll(rpcRequest.getPayloads());
-        }
-
-        List<ByteBuffer> outBuffers = new ArrayList<>();
-
-        int bytesToWrite = 0;
-        int remainingBuffers = buffers.size();
-        boolean isLast = false;
-
-        for (ByteBuffer buffer : buffers) {
-
-            if (bytesToWrite + buffer.remaining() > MTU_SIZE) {
-                if (outBuffers.isEmpty()) {
-                    throw new IllegalArgumentException(
-                            String.format("RPC payload buffer exceeds fragment limit: remote=%s, bytes=%d, limit=%d",
-                                    channel.remoteAddress(), buffer.remaining(), MTU_SIZE));
-                } else {
-
-                    sendBuffers(channel, bytesToWrite, outBuffers, isLast);
-
-                    bytesToWrite = 0;
-                    outBuffers.clear();
-                }
-            }
-
-            outBuffers.add(buffer);
-            bytesToWrite += buffer.remaining();
-            remainingBuffers -= 1;
-            isLast = (remainingBuffers == 0);
-        }
-
-        // send out remaining buffers
-        if (!outBuffers.isEmpty()) {
-            sendBuffers(channel, bytesToWrite, outBuffers, true);
-        }
+    // payload buffer
+    if (rpcRequest.getPayloads() != null) {
+      buffers.addAll(rpcRequest.getPayloads());
     }
 
-    /**
-     * Remove record marking from the byte array and convert to an Xdr.
-     * 
-     * @param bytes The byte array.
-     * @return The Xdr.
-     */
-    static Xdr removeRecordMarking(byte[] bytes) {
-        Xdr toReturn = new Xdr(bytes.length);
-        Xdr input = new Xdr(bytes);
+    List<ByteBuffer> outBuffers = new ArrayList<>();
 
-        long fragSize;
-        boolean lastFragment = false;
+    int bytesToWrite = 0;
+    int remainingBuffers = buffers.size();
+    boolean isLast = false;
 
-        input.setOffset(0);
+    for (ByteBuffer buffer : buffers) {
 
-        while (!lastFragment) {
-
-            fragSize = input.getUnsignedInt();
-            lastFragment = isLastFragment(fragSize);
-            fragSize = maskFragmentSize(fragSize);
-
-            toReturn.putBytes(input.getBuffer(), input.getOffset(), (int) fragSize);
-            input.setOffset(input.getOffset() + (int) fragSize);
-        }
-
-        // get xid
-        int off = toReturn.getOffset();
-        toReturn.setOffset(0);
-        int xid = toReturn.getInt();
-        toReturn.setXid(xid);
-        toReturn.setOffset(off);
-
-        return toReturn;
-    }
-
-    /**
-     * @param channel
-     * @param bytesToWrite
-     * @param outBuffers
-     * @param isLast
-     */
-    private static void sendBuffers(Channel channel, int bytesToWrite, List<ByteBuffer> outBuffers, boolean isLast) {
-        ByteBuffer recSizeBuf = ByteBuffer.allocate(4);
-
-        if (isLast) {
-            recSizeBuf.putInt(LAST_FRAG | bytesToWrite);
+      if (bytesToWrite + buffer.remaining() > MTU_SIZE) {
+        if (outBuffers.isEmpty()) {
+          throw new IllegalArgumentException(
+              String.format(
+                  "RPC payload buffer exceeds fragment limit: remote=%s, bytes=%d, limit=%d",
+                  channel.remoteAddress(), buffer.remaining(), MTU_SIZE));
         } else {
-            recSizeBuf.putInt(bytesToWrite);
+
+          sendBuffers(channel, bytesToWrite, outBuffers, isLast);
+
+          bytesToWrite = 0;
+          outBuffers.clear();
         }
-        recSizeBuf.rewind();
-        outBuffers.add(0, recSizeBuf);
+      }
 
-        ByteBuffer[] outArray = outBuffers.toArray(new ByteBuffer[outBuffers.size()]);
-        ByteBuf channelBuffer = Unpooled.wrappedBuffer(outArray);
-        channel.writeAndFlush(channelBuffer).addListener(io.netty.channel.ChannelFutureListener.CLOSE_ON_FAILURE);
+      outBuffers.add(buffer);
+      bytesToWrite += buffer.remaining();
+      remainingBuffers -= 1;
+      isLast = (remainingBuffers == 0);
     }
 
-    /**
-     * @param fragmentSize
-     *            A long that contains either the int number of bytes in the
-     *            fragment, or a special value if this is the last fragment.
-     * @return <code>true</code> if it is, <code>false</code> if it is not.
-     */
-    static boolean isLastFragment(long fragmentSize) {
-        return ((fragmentSize & LAST_FRAG) != 0);
+    // send out remaining buffers
+    if (!outBuffers.isEmpty()) {
+      sendBuffers(channel, bytesToWrite, outBuffers, true);
+    }
+  }
+
+  /**
+   * Remove record marking from the byte array and convert to an Xdr.
+   *
+   * @param bytes The byte array.
+   * @return The Xdr.
+   */
+  static Xdr removeRecordMarking(byte[] bytes) {
+    Xdr toReturn = new Xdr(bytes.length);
+    Xdr input = new Xdr(bytes);
+
+    long fragSize;
+    boolean lastFragment = false;
+
+    input.setOffset(0);
+
+    while (!lastFragment) {
+
+      fragSize = input.getUnsignedInt();
+      lastFragment = isLastFragment(fragSize);
+      fragSize = maskFragmentSize(fragSize);
+
+      toReturn.putBytes(input.getBuffer(), input.getOffset(), (int) fragSize);
+      input.setOffset(input.getOffset() + (int) fragSize);
     }
 
-    /**
-     * @param fragmentSize
-     *            A long that contains either the int number of bytes in the
-     *            fragment, or a special value if this is the last fragment.
-     * @return The masked fragment size, which is the real size of the fragment.
-     */
-    static long maskFragmentSize(long fragmentSize) {
-        return fragmentSize & SIZE_MASK;
-    }
+    // get xid
+    int off = toReturn.getOffset();
+    toReturn.setOffset(0);
+    int xid = toReturn.getInt();
+    toReturn.setXid(xid);
+    toReturn.setOffset(off);
 
-    /**
-     * Should never be used.
-     */
-    private RecordMarkingUtil() {
-        throw new NotImplementedException("No class instances should be needed.");
-    }
+    return toReturn;
+  }
 
+  /**
+   * @param channel
+   * @param bytesToWrite
+   * @param outBuffers
+   * @param isLast
+   */
+  private static void sendBuffers(
+      Channel channel, int bytesToWrite, List<ByteBuffer> outBuffers, boolean isLast) {
+    ByteBuffer recSizeBuf = ByteBuffer.allocate(4);
+
+    if (isLast) {
+      recSizeBuf.putInt(LAST_FRAG | bytesToWrite);
+    } else {
+      recSizeBuf.putInt(bytesToWrite);
+    }
+    recSizeBuf.rewind();
+    outBuffers.add(0, recSizeBuf);
+
+    ByteBuffer[] outArray = outBuffers.toArray(new ByteBuffer[outBuffers.size()]);
+    ByteBuf channelBuffer = Unpooled.wrappedBuffer(outArray);
+    channel
+        .writeAndFlush(channelBuffer)
+        .addListener(io.netty.channel.ChannelFutureListener.CLOSE_ON_FAILURE);
+  }
+
+  /**
+   * @param fragmentSize A long that contains either the int number of bytes in the fragment, or a
+   *     special value if this is the last fragment.
+   * @return <code>true</code> if it is, <code>false</code> if it is not.
+   */
+  static boolean isLastFragment(long fragmentSize) {
+    return ((fragmentSize & LAST_FRAG) != 0);
+  }
+
+  /**
+   * @param fragmentSize A long that contains either the int number of bytes in the fragment, or a
+   *     special value if this is the last fragment.
+   * @return The masked fragment size, which is the real size of the fragment.
+   */
+  static long maskFragmentSize(long fragmentSize) {
+    return fragmentSize & SIZE_MASK;
+  }
+
+  /** Should never be used. */
+  private RecordMarkingUtil() {
+    throw new NotImplementedException("No class instances should be needed.");
+  }
 }

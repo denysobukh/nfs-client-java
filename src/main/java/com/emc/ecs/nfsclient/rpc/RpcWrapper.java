@@ -1,355 +1,357 @@
 /**
  * Copyright 2016-2018 Dell Inc. or its subsidiaries. All rights reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
+ * <p>Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file
+ * except in compliance with the License. A copy of the License is located at
  *
- * http://www.apache.org/licenses/LICENSE-2.0.txt
+ * <p>http://www.apache.org/licenses/LICENSE-2.0.txt
  *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * <p>or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
  */
 package com.emc.ecs.nfsclient.rpc;
 
+import com.emc.ecs.nfsclient.network.NetMgr;
+import com.emc.ecs.nfsclient.nfs.NfsException;
+import com.emc.ecs.nfsclient.nfs.NfsRequestBase;
+import com.emc.ecs.nfsclient.nfs.NfsResponseBase;
+import com.emc.ecs.nfsclient.nfs.NfsStatus;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.emc.ecs.nfsclient.nfs.NfsStatus;
-import com.emc.ecs.nfsclient.network.NetMgr;
-import com.emc.ecs.nfsclient.nfs.NfsException;
-import com.emc.ecs.nfsclient.nfs.NfsRequestBase;
-import com.emc.ecs.nfsclient.nfs.NfsResponseBase;
-
 /**
- * Wrapper for NFS Server RPC calls, to handle unmarshalling, retries, and
- * status checking.
- * 
+ * Wrapper for NFS Server RPC calls, to handle unmarshalling, retries, and status checking.
+ *
  * @author seibed
  */
 public class RpcWrapper<S extends NfsRequestBase, T extends NfsResponseBase> {
 
-    /**
-     * The usual logger.
-     */
-    private static final Logger LOG = LoggerFactory.getLogger(RpcWrapper.class);
+  /** The usual logger. */
+  private static final Logger LOG = LoggerFactory.getLogger(RpcWrapper.class);
 
-    /**
-     * The remote server being called.
-     */
-    private final String _server;
+  /** The remote server being called. */
+  private final String _server;
 
-    /**
-     * The port on the remote server being used for this communication.
-     */
-    private int _port;
+  /** The port on the remote server being used for this communication. */
+  private int _port;
 
-    /**
-     * The wait in milliseconds.
-     */
-    private final int _retryWait;
+  /** The wait in milliseconds. */
+  private final int _retryWait;
 
-    /**
-     * The maximum number of retries.
-     */
-    private final int _maximumRetries;
+  /** The maximum number of retries. */
+  private final int _maximumRetries;
 
-    /**
-     * The maximum request size in bytes.
-     */
-    private final int _maximumRequestSize;
+  /** The maximum request size in bytes. */
+  private final int _maximumRequestSize;
 
-    /**
-     * The timeout in seconds.
-     */
-    private final int _rpcTimeout;
+  /** The timeout in seconds. */
+  private final int _rpcTimeout;
 
-    /**
-     * Discovered IP addresses for the remote server.
-     */
-    private String[] _ips;
+  /** Discovered IP addresses for the remote server. */
+  private String[] _ips;
 
-    /**
-     * @param server
-     *            The remote server being called.
-     * @param port
-     *            The port on the remote server being used for this
-     *            communication.
-     * @param retryWait
-     *            The wait in milliseconds.
-     * @param maximumRetries
-     *            The maximum number of retries.
-     * @param maximumRequestSize
-     *            The maximum request size in bytes.
-     * @param rpcTimeout
-     *            The timeout in seconds.
-     */
-    public RpcWrapper(String server, int port, int retryWait, int maximumRetries,
-            int maximumRequestSize, int rpcTimeout) {
-        _server = server;
-        _port = port;
-        _retryWait = retryWait;
-        _maximumRetries = maximumRetries;
-        _maximumRequestSize = maximumRequestSize;
-        _rpcTimeout = rpcTimeout;
+  /**
+   * @param server The remote server being called.
+   * @param port The port on the remote server being used for this communication.
+   * @param retryWait The wait in milliseconds.
+   * @param maximumRetries The maximum number of retries.
+   * @param maximumRequestSize The maximum request size in bytes.
+   * @param rpcTimeout The timeout in seconds.
+   */
+  public RpcWrapper(
+      String server,
+      int port,
+      int retryWait,
+      int maximumRetries,
+      int maximumRequestSize,
+      int rpcTimeout) {
+    _server = server;
+    _port = port;
+    _retryWait = retryWait;
+    _maximumRetries = maximumRetries;
+    _maximumRequestSize = maximumRequestSize;
+    _rpcTimeout = rpcTimeout;
+  }
+
+  /**
+   * Reset the port as necessary - used if the port changes.
+   *
+   * @param port The port on the remote server being used for this communication.
+   */
+  public void setPort(int port) {
+    _port = port;
+    _ips = probeIps();
+  }
+
+  /**
+   * Make the wrapped call and unmarshall the returned Xdr to a response, getting the IP key from
+   * the request. If an RPC Exception is being thrown, and retries remain, then log the exception
+   * and retry.
+   *
+   * @param request The request to send.
+   * @param responseHandler A response handler.
+   * @throws IOException
+   */
+  public void callRpcWrapped(S request, RpcResponseHandler<? extends T> responseHandler)
+      throws IOException {
+    for (int i = 0; i < _maximumRetries; ++i) {
+      try {
+        callRpcChecked(request, responseHandler);
+        return;
+      } catch (RpcException e) {
+        handleRpcException(e, i, request);
+      }
+    }
+  }
+
+  /**
+   * Make the wrapped call and unmarshall the returned Xdr to a response, using the given <code>ip
+   * </code>. If an RPC Exception is being thrown, and retries remain, then log the exception and
+   * retry.
+   *
+   * @param request The request to send.
+   * @param responseHandler A response handler.
+   * @param ip The IP address to use for communication.
+   * @throws IOException
+   */
+  public void callRpcWrapped(S request, RpcResponseHandler<? extends T> responseHandler, String ip)
+      throws IOException {
+    for (int i = 0; i < _maximumRetries; ++i) {
+      try {
+        callRpcChecked(request, responseHandler, ip);
+        return;
+      } catch (RpcException e) {
+        handleRpcException(e, i, request);
+      }
+    }
+  }
+
+  /**
+   * Convenience wrapper for NFS RPC calls where the IP is determined by a byte[] key. This method
+   * just determines the IP address and calls the basic method.
+   *
+   * @param request The request to send.
+   * @param responseHandler A response handler.
+   * @throws IOException
+   */
+  public void callRpcChecked(S request, RpcResponseHandler<? extends T> responseHandler)
+      throws IOException {
+    callRpcChecked(request, responseHandler, chooseIP(request.getIpKey()));
+  }
+
+  /**
+   * Make the call using the Request ip key to determine the IP address for communication.
+   *
+   * @param request The request to send.
+   * @param response A response to hold the returned data.
+   * @throws IOException
+   */
+  public void callRpcNaked(S request, T response) throws IOException {
+    callRpcNaked(request, response, chooseIP(request.getIpKey()));
+  }
+
+  /**
+   * Make the call to a specified IP address.
+   *
+   * @param request The request to send.
+   * @param response A response to hold the returned data.
+   * @param ipAddress The IP address to use for communication.
+   * @throws RpcException
+   */
+  public void callRpcNaked(S request, T response, String ipAddress) throws RpcException {
+    Xdr xdr = new Xdr(_maximumRequestSize);
+    request.marshalling(xdr);
+    try {
+      response.unmarshalling(callRpc(ipAddress, xdr, request.isUsePrivilegedPort()));
+    } catch (RpcException e) {
+      throw new RpcException(
+          e.getStatus(),
+          String.format(
+              "RPC failed: server=%s, remote=%s:%d, request=%s," + " status=%s: %s",
+              _server, ipAddress, _port, request, e.getStatus(), e.getMessage()),
+          e);
+    }
+  }
+
+  /**
+   * Basic RPC call functionality only.
+   *
+   * @param serverIP The endpoint of the server being called.
+   * @param xdrRequest The Xdr data for the request.
+   * @param usePrivilegedPort
+   *     <ul>
+   *       <li>If <code>true</code>, use a privileged local port (below 1024) for RPC communication.
+   *       <li>If <code>false</code>, use any non-privileged local port for RPC communication.
+   *     </ul>
+   *
+   * @return The Xdr data for the response.
+   * @throws RpcException
+   */
+  public Xdr callRpc(String serverIP, Xdr xdrRequest, boolean usePrivilegedPort)
+      throws RpcException {
+    return NetMgr.getInstance()
+        .sendAndWait(serverIP, _port, usePrivilegedPort, xdrRequest, _rpcTimeout);
+  }
+
+  /**
+   * Select an IP address to use for communication, based on the <code>key</code> and <code>policy
+   * </code>.
+   *
+   * @param key The key to use when selecting an IP address.
+   * @return The IP address to use for communication.
+   * @throws IOException
+   */
+  public String chooseIP(byte[] key) throws IOException {
+    if (_ips == null || _ips.length == 0) {
+      if (_server != null) {
+        LOG.debug(
+            "No discovered IP addresses; using configured server: server={}, port={}",
+            _server,
+            _port);
+        return _server;
+      }
+      throw new IOException(
+          "Cannot select RPC endpoint: no server or discovered IP addresses, port=" + _port);
     }
 
-    /**
-     * Reset the port as necessary - used if the port changes.
-     * 
-     * @param port
-     *            The port on the remote server being used for this
-     *            communication.
-     */
-    public void setPort(int port) {
-        _port = port;
-        _ips = probeIps();
+    return _ips[Math.abs(Arrays.hashCode(key)) % _ips.length];
+  }
+
+  /**
+   * The base functionality used by all NFS calls, which does basic return code checking and throws
+   * an exception if this does not pass. Verbose logging is also handled here. This method is not
+   * used by Portmap, Mount, and Unmount calls.
+   *
+   * @param request The request to send.
+   * @param responseHandler A response handler.
+   * @param ipAddress The IP address to use for communication.
+   * @throws IOException
+   */
+  private void callRpcChecked(
+      S request, RpcResponseHandler<? extends T> responseHandler, String ipAddress)
+      throws IOException {
+    LOG.debug(
+        "Sending NFS request: server={}, remote={}:{}, request={}",
+        _server,
+        ipAddress,
+        _port,
+        request);
+
+    callRpcNaked(request, responseHandler.getNewResponse(), ipAddress);
+
+    if (LOG.isDebugEnabled()) {
+      LOG.debug(
+          "Received NFS response: server={}, remote={}:{}, request={}, response={}",
+          _server,
+          ipAddress,
+          _port,
+          request,
+          responseHandler.getResponse());
     }
 
-    /**
-     * Make the wrapped call and unmarshall the returned Xdr to a response,
-     * getting the IP key from the request. If an RPC Exception is being thrown,
-     * and retries remain, then log the exception and retry.
-     * 
-     * @param request
-     *            The request to send.
-     * @param responseHandler
-     *            A response handler.
-     * @throws IOException
-     */
-    public void callRpcWrapped(S request, RpcResponseHandler<? extends T> responseHandler) throws IOException {
-        for (int i = 0; i < _maximumRetries; ++i) {
-            try {
-                callRpcChecked(request, responseHandler);
-                return;
-            } catch (RpcException e) {
-                handleRpcException(e, i, request);
-            }
-        }
+    try {
+      responseHandler.checkResponse(request);
+    } catch (NfsException e) {
+      throw new NfsException(
+          e.getStatus(),
+          String.format(
+              "NFS operation failed: server=%s, remote=%s:%d: %s",
+              _server, ipAddress, _port, e.getMessage()),
+          e);
+    } catch (java.io.FileNotFoundException e) {
+      java.io.FileNotFoundException failure =
+          new java.io.FileNotFoundException(
+              String.format(
+                  "NFS file not found: server=%s, remote=%s:%d: %s",
+                  _server, ipAddress, _port, e.getMessage()));
+      failure.initCause(e);
+      throw failure;
     }
+  }
 
-    /**
-     * Make the wrapped call and unmarshall the returned Xdr to a response,
-     * using the given <code>ip</code>. If an RPC Exception is being thrown, and
-     * retries remain, then log the exception and retry.
-     * 
-     * @param request
-     *            The request to send.
-     * @param responseHandler
-     *            A response handler.
-     * @param ip
-     *            The IP address to use for communication.
-     * @throws IOException
-     */
-    public void callRpcWrapped(S request, RpcResponseHandler<? extends T> responseHandler, String ip)
-            throws IOException {
-        for (int i = 0; i < _maximumRetries; ++i) {
-            try {
-                callRpcChecked(request, responseHandler, ip);
-                return;
-            } catch (RpcException e) {
-                handleRpcException(e, i, request);
-            }
-        }
-    }
+  /**
+   * Decide whether to retry or throw an exception.
+   *
+   * @param e The exception.
+   * @param attemptNumber The number of attempts so far.
+   * @throws IOException
+   */
+  private void handleRpcException(RpcException e, int attemptNumber, S request) throws IOException {
+    String messageStart;
 
-    /**
-     * Convenience wrapper for NFS RPC calls where the IP is determined by a
-     * byte[] key. This method just determines the IP address and calls the
-     * basic method.
-     * 
-     * @param request
-     *            The request to send.
-     * @param responseHandler
-     *            A response handler.
-     * @throws IOException
-     */
-    public void callRpcChecked(S request, RpcResponseHandler<? extends T> responseHandler) throws IOException {
-        callRpcChecked(request, responseHandler, chooseIP(request.getIpKey()));
-    }
-
-    /**
-     * Make the call using the Request ip key to determine the IP address for
-     * communication.
-     * 
-     * @param request
-     *            The request to send.
-     * @param response
-     *            A response to hold the returned data.
-     * @throws IOException
-     */
-    public void callRpcNaked(S request, T response) throws IOException {
-        callRpcNaked(request, response, chooseIP(request.getIpKey()));
-    }
-
-    /**
-     * Make the call to a specified IP address.
-     * 
-     * @param request
-     *            The request to send.
-     * @param response
-     *            A response to hold the returned data.
-     * @param ipAddress
-     *            The IP address to use for communication.
-     * @throws RpcException
-     */
-    public void callRpcNaked(S request, T response, String ipAddress) throws RpcException {
-        Xdr xdr = new Xdr(_maximumRequestSize);
-        request.marshalling(xdr);
+    if (!(e.getStatus().equals(RpcStatus.NETWORK_ERROR))) {
+      messageStart = "rpc";
+    } else {
+      // check whether to retry
+      if (attemptNumber + 1 < _maximumRetries) {
+        int waitTime = _retryWait * (attemptNumber + 1);
+        LOG.warn(
+            "NFS RPC failed; retrying after {} ms: server={}, port={}, attempt={}/{}, request={},"
+                + " status={}: {}",
+            waitTime,
+            _server,
+            _port,
+            attemptNumber + 1,
+            _maximumRetries,
+            request,
+            e.getStatus(),
+            e.getMessage(),
+            e);
         try {
-            response.unmarshalling(callRpc(ipAddress, xdr, request.isUsePrivilegedPort()));
-        } catch (RpcException e) {
-            throw new RpcException(e.getStatus(), String.format("RPC failed: server=%s, remote=%s:%d, request=%s,"
-                    + " status=%s: %s", _server, ipAddress, _port, request, e.getStatus(), e.getMessage()), e);
+          Thread.sleep(waitTime);
+        } catch (InterruptedException ie) {
+          // restore the interrupt status
+          Thread.currentThread().interrupt();
         }
+        return;
+      }
+
+      messageStart = "network";
     }
 
-    /**
-     * Basic RPC call functionality only.
-     * 
-     * @param serverIP
-     *            The endpoint of the server being called.
-     * @param xdrRequest
-     *            The Xdr data for the request.
-     * @param usePrivilegedPort
-     *            <ul>
-     *            <li>If <code>true</code>, use a privileged local port (below
-     *            1024) for RPC communication.</li>
-     *            <li>If <code>false</code>, use any non-privileged local port
-     *            for RPC communication.</li>
-     *            </ul>
-     * @return The Xdr data for the response.
-     * @throws RpcException
-     */
-    public Xdr callRpc(String serverIP, Xdr xdrRequest, boolean usePrivilegedPort) throws RpcException {
-        return NetMgr.getInstance().sendAndWait(serverIP, _port, usePrivilegedPort, xdrRequest, _rpcTimeout);
+    throw new NfsException(
+        NfsStatus.NFS3ERR_IO,
+        String.format(
+            "NFS %s failure: server=%s, port=%d, attempt=%d/%d, request=%s, status=%s: %s",
+            messageStart,
+            _server,
+            _port,
+            attemptNumber + 1,
+            _maximumRetries,
+            request,
+            e.getStatus(),
+            e.getMessage()),
+        e);
+  }
+
+  /**
+   * Find possible IP addresses for communicating with the server.
+   *
+   * @return The array of addresses.
+   */
+  private String[] probeIps() {
+    Set<String> ips = new TreeSet<String>();
+    for (int i = 0; i < 32; ++i) {
+      InetSocketAddress sa = new InetSocketAddress(_server, _port);
+      if (sa.isUnresolved()) {
+        throw new IllegalArgumentException(
+            "Cannot resolve RPC server hostname: server="
+                + _server
+                + ", port="
+                + _port
+                + "; check DNS and the configured server name");
+      }
+      ips.add(sa.getAddress().getHostAddress());
     }
 
-    /**
-     * Select an IP address to use for communication, based on the
-     * <code>key</code> and <code>policy</code>.
-     * 
-     * @param key
-     *            The key to use when selecting an IP address.
-     * @return The IP address to use for communication.
-     * @throws IOException
-     */
-    public String chooseIP(byte[] key) throws IOException {
-        if (_ips == null || _ips.length == 0) {
-            if (_server != null) {
-                LOG.debug("No discovered IP addresses; using configured server: server={}, port={}", _server, _port);
-                return _server;
-            }
-            throw new IOException("Cannot select RPC endpoint: no server or discovered IP addresses, port=" + _port);
-        }
+    LOG.debug("Discovered RPC addresses: server={}, port={}, addresses={}", _server, _port, ips);
 
-        return _ips[Math.abs(Arrays.hashCode(key)) % _ips.length];
-    }
-
-    /**
-     * The base functionality used by all NFS calls, which does basic return
-     * code checking and throws an exception if this does not pass. Verbose
-     * logging is also handled here. This method is not used by Portmap, Mount,
-     * and Unmount calls.
-     * 
-     * @param request
-     *            The request to send.
-     * @param responseHandler
-     *            A response handler.
-     * @param ipAddress
-     *            The IP address to use for communication.
-     * @throws IOException
-     */
-    private void callRpcChecked(S request, RpcResponseHandler<? extends T> responseHandler, String ipAddress)
-            throws IOException {
-        LOG.debug("Sending NFS request: server={}, remote={}:{}, request={}", _server, ipAddress, _port, request);
-
-        callRpcNaked(request, responseHandler.getNewResponse(), ipAddress);
-
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Received NFS response: server={}, remote={}:{}, request={}, response={}",
-                    _server, ipAddress, _port, request, responseHandler.getResponse());
-        }
-
-        try {
-            responseHandler.checkResponse(request);
-        } catch (NfsException e) {
-            throw new NfsException(e.getStatus(), String.format("NFS operation failed: server=%s, remote=%s:%d: %s",
-                    _server, ipAddress, _port, e.getMessage()), e);
-        } catch (java.io.FileNotFoundException e) {
-            java.io.FileNotFoundException failure = new java.io.FileNotFoundException(
-                    String.format("NFS file not found: server=%s, remote=%s:%d: %s", _server, ipAddress, _port, e.getMessage()));
-            failure.initCause(e);
-            throw failure;
-        }
-    }
-
-    /**
-     * Decide whether to retry or throw an exception.
-     * 
-     * @param e
-     *            The exception.
-     * @param attemptNumber
-     *            The number of attempts so far.
-     * @throws IOException
-     */
-    private void handleRpcException(RpcException e, int attemptNumber, S request) throws IOException {
-        String messageStart;
-
-        if (!(e.getStatus().equals(RpcStatus.NETWORK_ERROR))) {
-            messageStart = "rpc";
-        } else {
-            // check whether to retry
-            if (attemptNumber + 1 < _maximumRetries) {
-                int waitTime = _retryWait * (attemptNumber + 1);
-                LOG.warn("NFS RPC failed; retrying after {} ms: server={}, port={}, attempt={}/{}, request={},"
-                                + " status={}: {}", waitTime, _server, _port, attemptNumber + 1,
-                        _maximumRetries, request, e.getStatus(), e.getMessage(), e);
-                try {
-                    Thread.sleep(waitTime);
-                } catch (InterruptedException ie) {
-                    // restore the interrupt status
-                    Thread.currentThread().interrupt();
-                }
-                return;
-            }
-
-            messageStart = "network";
-        }
-
-        throw new NfsException(NfsStatus.NFS3ERR_IO,
-                String.format("NFS %s failure: server=%s, port=%d, attempt=%d/%d, request=%s, status=%s: %s",
-                        messageStart, _server, _port, attemptNumber + 1, _maximumRetries, request,
-                        e.getStatus(), e.getMessage()), e);
-    }
-
-    /**
-     * Find possible IP addresses for communicating with the server.
-     * 
-     * @return The array of addresses.
-     */
-    private String[] probeIps() {
-        Set<String> ips = new TreeSet<String>();
-        for (int i = 0; i < 32; ++i) {
-            InetSocketAddress sa = new InetSocketAddress(_server, _port);
-            if (sa.isUnresolved()) {
-                throw new IllegalArgumentException("Cannot resolve RPC server hostname: server=" + _server
-                        + ", port=" + _port + "; check DNS and the configured server name");
-            }
-            ips.add(sa.getAddress().getHostAddress());
-        }
-
-        LOG.debug("Discovered RPC addresses: server={}, port={}, addresses={}", _server, _port, ips);
-
-        return (String[]) ips.toArray(new String[0]);
-    }
-
+    return (String[]) ips.toArray(new String[0]);
+  }
 }

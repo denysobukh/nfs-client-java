@@ -1,23 +1,20 @@
 /**
  * Copyright 2016-2018 Dell Inc. or its subsidiaries. All rights reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
+ * <p>Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file
+ * except in compliance with the License. A copy of the License is located at
  *
- * http://www.apache.org/licenses/LICENSE-2.0.txt
+ * <p>http://www.apache.org/licenses/LICENSE-2.0.txt
  *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
+ * <p>or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
  */
 package com.emc.ecs.nfsclient.network;
 
 import com.emc.ecs.nfsclient.rpc.RpcException;
 import com.emc.ecs.nfsclient.rpc.RpcStatus;
 import com.emc.ecs.nfsclient.rpc.Xdr;
-
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -25,399 +22,426 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.util.concurrent.Promise;
 import io.netty.util.concurrent.DefaultPromise;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import io.netty.util.concurrent.Promise;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Each Connection instance manages a tcp connection. The class is used to send
- * data and track the status of a connection.
- * 
+ * Each Connection instance manages a tcp connection. The class is used to send data and track the
+ * status of a connection.
+ *
  * @author seibed
  */
 public class Connection {
 
-    /**
-     * The usual logger.
-     */
-    private static final Logger LOG = LoggerFactory.getLogger(Connection.class);
+  /** The usual logger. */
+  private static final Logger LOG = LoggerFactory.getLogger(Connection.class);
 
-    /**
-     * The value in milliseconds.
-     */
-    private static final int CONNECT_TIMEOUT = 10000; // 10 seconds
+  /** The value in milliseconds. */
+  private static final int CONNECT_TIMEOUT = 10000; // 10 seconds
 
-    /**
-     * internal sending queue (not tcp sending buffer) the rename/lookup/readdir
-     * has size between 256-516bytes, 5M can hold 10000 pending requests for
-     * data writing, each request is 512K and maximum 40 pending requests are
-     * allowed. (512k is the preferred size in a single request. For object >
-     * 512K, it should be split to 512K-size chunks.) the queue size need be
-     * 20M.
-     */
-    private static final int MAX_SENDING_QUEUE_SIZE = 1 * 1024 * 1024 * 1024;// bytes - total
-                                                                // 1G
+  /**
+   * internal sending queue (not tcp sending buffer) the rename/lookup/readdir has size between
+   * 256-516bytes, 5M can hold 10000 pending requests for data writing, each request is 512K and
+   * maximum 40 pending requests are allowed. (512k is the preferred size in a single request. For
+   * object > 512K, it should be split to 512K-size chunks.) the queue size need be 20M.
+   */
+  private static final int MAX_SENDING_QUEUE_SIZE = 1 * 1024 * 1024 * 1024; // bytes - total
 
-    /**
-     * Netty helper instance.
-     */
-    private final Bootstrap _clientBootstrap;
+  // 1G
 
-    /**
-     * Netty channel representing a tcp connection.
-     */
-    private Channel _channel;
+  /** Netty helper instance. */
+  private final Bootstrap _clientBootstrap;
 
-    /**
-     * Netty helper instance.
-     */
-    volatile Promise<Void> _channelFuture = new DefaultPromise<>(NetMgr.getInstance().getFactory().next());
+  /** Netty channel representing a tcp connection. */
+  private Channel _channel;
 
-    /**
-     * The remote server address, in any form.
-     */
-    private final String _remoteHost;
+  /** Netty helper instance. */
+  volatile Promise<Void> _channelFuture =
+      new DefaultPromise<>(NetMgr.getInstance().getFactory().next());
 
-    /**
-     * The remote server port being used.
-     */
-    private final int _port;
+  /** The remote server address, in any form. */
+  private final String _remoteHost;
 
-    /**
-     * <ul><li>
-     * If <code>true</code>, use a privileged local port (below 1024) for RPC communication.
-     * </li><li>
-     * If <code>false</code>, use any non-privileged local port for RPC communication.
-     * </li></ul>
-     */
-    private final boolean _usePrivilegedPort;
+  /** The remote server port being used. */
+  private final int _port;
 
-    /**
-     * Store the response promises while they are in progress. The map is final, but the content will change.
-     */
-    private final ConcurrentHashMap<Integer, Promise<Void>> _futureMap = new ConcurrentHashMap<Integer, Promise<Void>>();
+  /**
+   * <ul>
+   *   <li>If <code>true</code>, use a privileged local port (below 1024) for RPC communication.
+   *   <li>If <code>false</code>, use any non-privileged local port for RPC communication.
+   * </ul>
+   */
+  private final boolean _usePrivilegedPort;
 
-    /**
-     * Store the Xdr response instances while they are in progress. The map is final, but the content will change.
-     */
-    private final ConcurrentHashMap<Integer, Xdr> _responseMap = new ConcurrentHashMap<Integer, Xdr>();
+  /**
+   * Store the response promises while they are in progress. The map is final, but the content will
+   * change.
+   */
+  private final ConcurrentHashMap<Integer, Promise<Void>> _futureMap =
+      new ConcurrentHashMap<Integer, Promise<Void>>();
 
-    /**
-     * Simple enums for communicating connection states.
-     * 
-     * @author seibed
-     */
-    public enum State {
-        DISCONNECTED, CONNECTING, CONNECTED;
-    }
+  /**
+   * Store the Xdr response instances while they are in progress. The map is final, but the content
+   * will change.
+   */
+  private final ConcurrentHashMap<Integer, Xdr> _responseMap =
+      new ConcurrentHashMap<Integer, Xdr>();
 
-    /**
-     * The current state.
-     */
-    private volatile State _state = State.DISCONNECTED;
+  /**
+   * Simple enums for communicating connection states.
+   *
+   * @author seibed
+   */
+  public enum State {
+    DISCONNECTED,
+    CONNECTING,
+    CONNECTED;
+  }
 
-    private volatile Throwable _failureCause;
+  /** The current state. */
+  private volatile State _state = State.DISCONNECTED;
 
-    /**
-     * @param remoteHost A unique name for the host to which the connection is being made.
-     * @param port The remote host port being used for the connection.
-     * @param usePrivilegedPort
-     *            <ul>
-     *            <li>If <code>true</code>, use a privileged port (below 1024)
-     *            for RPC communication.</li>
-     *            <li>If <code>false</code>, use any non-privileged port for RPC
-     *            communication.</li>
-     *            </ul>
-     */
-    public Connection(String remoteHost, int port, boolean usePrivilegedPort) {
-        _remoteHost = remoteHost;
-        _port = port;
-        _usePrivilegedPort = usePrivilegedPort;
-        _clientBootstrap = new Bootstrap()
-                .group(NetMgr.getInstance().getFactory())
-                .channel(NioSocketChannel.class)
-                .remoteAddress(new InetSocketAddress(_remoteHost, _port))
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, CONNECT_TIMEOUT)
-                .option(ChannelOption.TCP_NODELAY, true)
-                .option(ChannelOption.SO_KEEPALIVE, true)
-                .option(ChannelOption.WRITE_BUFFER_WATER_MARK,
-                        new io.netty.channel.WriteBufferWaterMark(32768, MAX_SENDING_QUEUE_SIZE))
-                .handler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    protected void initChannel(SocketChannel channel) {
-                        channel.pipeline().addLast(new RPCRecordDecoder(), new ClientIOHandler(Connection.this));
-                    }
+  private volatile Throwable _failureCause;
+
+  /**
+   * @param remoteHost A unique name for the host to which the connection is being made.
+   * @param port The remote host port being used for the connection.
+   * @param usePrivilegedPort
+   *     <ul>
+   *       <li>If <code>true</code>, use a privileged port (below 1024) for RPC communication.
+   *       <li>If <code>false</code>, use any non-privileged port for RPC communication.
+   *     </ul>
+   */
+  public Connection(String remoteHost, int port, boolean usePrivilegedPort) {
+    _remoteHost = remoteHost;
+    _port = port;
+    _usePrivilegedPort = usePrivilegedPort;
+    _clientBootstrap =
+        new Bootstrap()
+            .group(NetMgr.getInstance().getFactory())
+            .channel(NioSocketChannel.class)
+            .remoteAddress(new InetSocketAddress(_remoteHost, _port))
+            .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, CONNECT_TIMEOUT)
+            .option(ChannelOption.TCP_NODELAY, true)
+            .option(ChannelOption.SO_KEEPALIVE, true)
+            .option(
+                ChannelOption.WRITE_BUFFER_WATER_MARK,
+                new io.netty.channel.WriteBufferWaterMark(32768, MAX_SENDING_QUEUE_SIZE))
+            .handler(
+                new ChannelInitializer<SocketChannel>() {
+                  @Override
+                  protected void initChannel(SocketChannel channel) {
+                    channel
+                        .pipeline()
+                        .addLast(new RPCRecordDecoder(), new ClientIOHandler(Connection.this));
+                  }
                 });
+  }
+
+  /**
+   * Convenience getter method.
+   *
+   * @return The remote server internet address.
+   */
+  public InetSocketAddress getRemoteAddress() {
+    return (InetSocketAddress) _clientBootstrap.config().remoteAddress();
+  }
+
+  /**
+   * Convenience getter method.
+   *
+   * @return The state.
+   */
+  public State getConnectionState() {
+    return _state;
+  }
+
+  /**
+   * Send a RPC request and wait until a response is received or timeout. The function will not
+   * retry. It is the responsibility of the application to do retry. The behaviours: a. If the tcp
+   * connection is not established yet: (1). sendAndWait will wait until the connection is
+   * established or timeout or network error occurs. (2). Once the connection is established,
+   * sendAndWait can send data. b. If the tcp connection is established: (1). the request is put in
+   * the internal queue of netty. Netty will send it asap. If there are already lots of pending
+   * requests in the queue, sendAndWait return error. (2). sendAndWait will wait until it gets a
+   * response from NFS server or timeout. (3). If the tcp connection is broken, the function return
+   * error with network error. c. If the tcp connection is broken suddenly: (1) the old sendAndWait
+   * will get the network error or timeout (2) The new sendAndWait will follow (a).
+   *
+   * @param timeout The timeout in seconds.
+   * @param xdrRequest The generic RPC data and protocol-specific data.
+   * @return The Xdr data for the response.
+   * @throws RpcException
+   */
+  public Xdr sendAndWait(int timeout, Xdr xdrRequest) throws RpcException {
+    // no lock is required here.
+    // The status may be changed after the checking,
+    // or there exists a small window that the status is not consistent to
+    // the actual tcp connection state.
+    // Both above cases will not cause any issues.
+    if (_state.equals(State.CONNECTED) == false) {
+      _channelFuture.awaitUninterruptibly();
+      if (_channelFuture.isSuccess() == false) {
+
+        Throwable cause = _failureCause != null ? _failureCause : _channelFuture.cause();
+        String msg =
+            String.format(
+                "TCP connection failed: remote=%s, xid=%d, connectTimeoutMs=%d,"
+                    + " privilegedPort=%s: %s",
+                getRemoteAddress(),
+                xdrRequest.getXid(),
+                CONNECT_TIMEOUT,
+                _usePrivilegedPort,
+                cause);
+        throw new RpcException(RpcStatus.NETWORK_ERROR, msg, cause);
+      }
     }
 
-    /**
-     * Convenience getter method.
-     * 
-     * @return The remote server internet address.
-     */
-    public InetSocketAddress getRemoteAddress() {
-        return (InetSocketAddress) _clientBootstrap.config().remoteAddress();
+    // check whether the internal queue of netty has enough spaces to hold
+    // the request
+    // False means that the too many pending requests are in the queue or
+    // the connection is closed.
+    if (_channel.isWritable() == false) {
+      String msg;
+      if (_channel.isActive()) {
+        msg =
+            String.format(
+                "RPC send queue is full: remote=%s, local=%s, xid=%d, pendingRequests=%d",
+                getRemoteAddress(),
+                _channel.localAddress(),
+                xdrRequest.getXid(),
+                _futureMap.size());
+      } else {
+        msg =
+            String.format(
+                "Cannot send RPC on a closed connection: remote=%s, xid=%d",
+                getRemoteAddress(), xdrRequest.getXid());
+      }
+
+      // too many pending request are in the queue, return error
+      throw new RpcException(RpcStatus.NETWORK_ERROR, msg, _failureCause);
     }
 
-    /**
-     * Convenience getter method.
-     * 
-     * @return The state.
-     */
-    public State getConnectionState() {
-        return _state;
+    // put the request into a map for timeout management
+    Promise<Void> timeoutFuture = _channel.newPromise();
+    Integer xid = Integer.valueOf(xdrRequest.getXid());
+    _futureMap.put(xid, timeoutFuture);
+
+    // put the request into the queue of the netty, netty will send data
+    // asynchronously
+    RecordMarkingUtil.putRecordMarkingAndSend(_channel, xdrRequest);
+
+    timeoutFuture.awaitUninterruptibly(timeout, TimeUnit.SECONDS);
+
+    // remove the response from timeout maps
+    Xdr response = _responseMap.remove(xid);
+    _futureMap.remove(xid);
+
+    if (timeoutFuture.isSuccess() == false) {
+
+      if (timeoutFuture.isDone()) {
+        String msg =
+            String.format(
+                "TCP I/O failed while waiting for RPC response: remote=%s, local=%s,"
+                    + " xid=%d: %s",
+                getRemoteAddress(), _channel.localAddress(), xid, timeoutFuture.cause());
+        throw new RpcException(RpcStatus.NETWORK_ERROR, msg, timeoutFuture.cause());
+      } else {
+        String msg =
+            String.format(
+                "RPC response timeout: remote=%s, local=%s, xid=%d, timeoutSeconds=%d,"
+                    + " pendingRequests=%d",
+                getRemoteAddress(), _channel.localAddress(), xid, timeout, _futureMap.size());
+        throw new RpcException(RpcStatus.NETWORK_ERROR, msg);
+      }
     }
 
-    /**
-     * Send a RPC request and wait until a response is received or timeout. The
-     * function will not retry. It is the responsibility of the application to
-     * do retry. The behaviours: a. If the tcp connection is not established
-     * yet: (1). sendAndWait will wait until the connection is established or
-     * timeout or network error occurs. (2). Once the connection is established,
-     * sendAndWait can send data. b. If the tcp connection is established: (1).
-     * the request is put in the internal queue of netty. Netty will send it
-     * asap. If there are already lots of pending requests in the queue,
-     * sendAndWait return error. (2). sendAndWait will wait until it gets a
-     * response from NFS server or timeout. (3). If the tcp connection is
-     * broken, the function return error with network error. c. If the tcp
-     * connection is broken suddenly: (1) the old sendAndWait will get the
-     * network error or timeout (2) The new sendAndWait will follow (a).
-     * 
-     * @param timeout
-     *            The timeout in seconds.
-     * @param xdrRequest
-     *            The generic RPC data and protocol-specific data.
-     * @return The Xdr data for the response.
-     * @throws RpcException
-     */
-    public Xdr sendAndWait(int timeout, Xdr xdrRequest) throws RpcException {
-        // no lock is required here.
-        // The status may be changed after the checking,
-        // or there exists a small window that the status is not consistent to
-        // the actual tcp connection state.
-        // Both above cases will not cause any issues.
-        if (_state.equals(State.CONNECTED) == false) {
-            _channelFuture.awaitUninterruptibly();
-            if (_channelFuture.isSuccess() == false) {
+    return response;
+  }
 
-                Throwable cause = _failureCause != null ? _failureCause : _channelFuture.cause();
-                String msg = String.format("TCP connection failed: remote=%s, xid=%d, connectTimeoutMs=%d,"
-                                + " privilegedPort=%s: %s", getRemoteAddress(), xdrRequest.getXid(),
-                        CONNECT_TIMEOUT, _usePrivilegedPort, cause);
-                throw new RpcException(RpcStatus.NETWORK_ERROR, msg, cause);
-            }
-        }
-
-        // check whether the internal queue of netty has enough spaces to hold
-        // the request
-        // False means that the too many pending requests are in the queue or
-        // the connection is closed.
-        if (_channel.isWritable() == false) {
-            String msg;
-            if (_channel.isActive()) {
-                msg = String.format("RPC send queue is full: remote=%s, local=%s, xid=%d, pendingRequests=%d",
-                        getRemoteAddress(), _channel.localAddress(), xdrRequest.getXid(), _futureMap.size());
-            } else {
-                msg = String.format("Cannot send RPC on a closed connection: remote=%s, xid=%d",
-                        getRemoteAddress(), xdrRequest.getXid());
-            }
-
-            // too many pending request are in the queue, return error
-            throw new RpcException(RpcStatus.NETWORK_ERROR, msg, _failureCause);
-        }
-
-        // put the request into a map for timeout management
-        Promise<Void> timeoutFuture = _channel.newPromise();
-        Integer xid = Integer.valueOf(xdrRequest.getXid());
-        _futureMap.put(xid, timeoutFuture);
-
-        // put the request into the queue of the netty, netty will send data
-        // asynchronously
-        RecordMarkingUtil.putRecordMarkingAndSend(_channel, xdrRequest);
-
-        timeoutFuture.awaitUninterruptibly(timeout, TimeUnit.SECONDS);
-
-        // remove the response from timeout maps
-        Xdr response = _responseMap.remove(xid);
-        _futureMap.remove(xid);
-
-        if (timeoutFuture.isSuccess() == false) {
-
-            if (timeoutFuture.isDone()) {
-                String msg = String.format("TCP I/O failed while waiting for RPC response: remote=%s, local=%s,"
-                                + " xid=%d: %s", getRemoteAddress(), _channel.localAddress(), xid, timeoutFuture.cause());
-                throw new RpcException(RpcStatus.NETWORK_ERROR, msg, timeoutFuture.cause());
-            } else {
-                String msg = String.format("RPC response timeout: remote=%s, local=%s, xid=%d, timeoutSeconds=%d,"
-                                + " pendingRequests=%d", getRemoteAddress(), _channel.localAddress(), xid,
-                        timeout, _futureMap.size());
-                throw new RpcException(RpcStatus.NETWORK_ERROR, msg);
-            }
-        }
-
-        return response;
+  /**
+   * If there is no current connection, start a new tcp connection asynchronously.
+   *
+   * @throws RpcException
+   */
+  protected void connect() throws RpcException {
+    if (_state.equals(State.CONNECTED)) {
+      return;
     }
 
-    /**
-     * If there is no current connection, start a new tcp connection asynchronously.
-     * 
-     * @throws RpcException
-     */
-    protected void connect() throws RpcException {
-        if (_state.equals(State.CONNECTED)) {
-            return;
-        }
-
-        _state = State.CONNECTING;
-        LOG.debug("Connecting TCP: remote={}, connectTimeoutMs={}, privilegedPort={}",
-                getRemoteAddress(), CONNECT_TIMEOUT, _usePrivilegedPort);
-        try {
-            final ChannelFuture connected;
-            if (_usePrivilegedPort) {
-                _channel = bindToPrivilegedPort();
-                connected = _channel.connect(getRemoteAddress());
-            } else {
-                connected = _clientBootstrap.connect();
-                _channel = connected.channel();
-            }
-            connected.addListener((ChannelFuture future) -> {
-                if (future.isSuccess()) {
-                    _state = State.CONNECTED;
-                    LOG.debug("TCP connected: remote={}, local={}", getRemoteAddress(), future.channel().localAddress());
-                    _channelFuture.trySuccess(null);
-                } else {
-                    _state = State.DISCONNECTED;
-                    _channelFuture.tryFailure(future.cause());
-                    close(future.cause());
-                }
-            });
-        } catch (RpcException | RuntimeException e) {
-            _state = State.DISCONNECTED;
-            _channelFuture.tryFailure(e);
-            close(e);
-            throw e;
-        }
-
-    }
-
-    /**
-     * This is called when the application is shutdown or the channel is closed.
-     */
-    protected void shutdown() {
-        if (_channel != null) {
-            _channel.close();
-        }
-    }
-
-    /**
-     * This is called when the connection should be closed.
-     */
-    protected void close() {
-        close(null);
-    }
-
-    protected void close(Throwable cause) {
-        if (cause != null) {
-            _failureCause = cause;
-        }
-        Throwable failure = _failureCause != null ? _failureCause
-                : new java.io.IOException("TCP connection closed: remote=" + getRemoteAddress());
-        LOG.debug("Closing TCP connection: remote={}, pendingRequests={}, cause={}",
-                getRemoteAddress(), _futureMap.size(), failure.toString());
-        _state = State.DISCONNECTED;
-        _channelFuture.tryFailure(failure);
-
-        shutdown();
-
-        // remove the connection from map
-        NetMgr.getInstance().dropConnection(InetSocketAddress.createUnresolved(_remoteHost, _port));
-
-        // notify all the pending requests in the timeout map
-        for (Promise<Void> future : _futureMap.values()) {
-            future.tryFailure(failure);
-        }
-    }
-
-    /**
-     * Update the response map with the response and notify the thread waiting for the
-     * response. Do nothing if the future has been removed.
-     * 
-     * @param xid
-     * @param response
-     */
-    protected void notifySender(Integer xid, Xdr response) {
-        Promise<Void> future = _futureMap.get(xid);
-        if (future != null) {
-            _responseMap.put(xid, response);
-            future.trySuccess(null);
+    _state = State.CONNECTING;
+    LOG.debug(
+        "Connecting TCP: remote={}, connectTimeoutMs={}, privilegedPort={}",
+        getRemoteAddress(),
+        CONNECT_TIMEOUT,
+        _usePrivilegedPort);
+    try {
+      final ChannelFuture connected;
+      if (_usePrivilegedPort) {
+        _channel = bindToPrivilegedPort();
+        connected = _channel.connect(getRemoteAddress());
+      } else {
+        connected = _clientBootstrap.connect();
+        _channel = connected.channel();
+      }
+      connected.addListener((ChannelFuture future) -> {
+        if (future.isSuccess()) {
+          _state = State.CONNECTED;
+          LOG.debug(
+              "TCP connected: remote={}, local={}",
+              getRemoteAddress(),
+              future.channel().localAddress());
+          _channelFuture.trySuccess(null);
         } else {
-            LOG.debug("Ignoring RPC response without a pending request (possibly timed out): remote={}, xid={}",
-                    getRemoteAddress(), xid);
+          _state = State.DISCONNECTED;
+          _channelFuture.tryFailure(future.cause());
+          close(future.cause());
         }
+      });
+    } catch (RpcException | RuntimeException e) {
+      _state = State.DISCONNECTED;
+      _channelFuture.tryFailure(e);
+      close(e);
+      throw e;
+    }
+  }
+
+  /** This is called when the application is shutdown or the channel is closed. */
+  protected void shutdown() {
+    if (_channel != null) {
+      _channel.close();
+    }
+  }
+
+  /** This is called when the connection should be closed. */
+  protected void close() {
+    close(null);
+  }
+
+  protected void close(Throwable cause) {
+    if (cause != null) {
+      _failureCause = cause;
+    }
+    Throwable failure =
+        _failureCause != null
+            ? _failureCause
+            : new java.io.IOException("TCP connection closed: remote=" + getRemoteAddress());
+    LOG.debug(
+        "Closing TCP connection: remote={}, pendingRequests={}, cause={}",
+        getRemoteAddress(),
+        _futureMap.size(),
+        failure.toString());
+    _state = State.DISCONNECTED;
+    _channelFuture.tryFailure(failure);
+
+    shutdown();
+
+    // remove the connection from map
+    NetMgr.getInstance().dropConnection(InetSocketAddress.createUnresolved(_remoteHost, _port));
+
+    // notify all the pending requests in the timeout map
+    for (Promise<Void> future : _futureMap.values()) {
+      future.tryFailure(failure);
+    }
+  }
+
+  /**
+   * Update the response map with the response and notify the thread waiting for the response. Do
+   * nothing if the future has been removed.
+   *
+   * @param xid
+   * @param response
+   */
+  protected void notifySender(Integer xid, Xdr response) {
+    Promise<Void> future = _futureMap.get(xid);
+    if (future != null) {
+      _responseMap.put(xid, response);
+      future.trySuccess(null);
+    } else {
+      LOG.debug(
+          "Ignoring RPC response without a pending request (possibly timed out): remote={}, xid={}",
+          getRemoteAddress(),
+          xid);
+    }
+  }
+
+  /** Notify all the senders of all pending requests */
+  protected void notifyAllPendingSenders(String message) {
+    for (Promise<Void> future : _futureMap.values()) {
+      future.tryFailure(new java.io.IOException(message));
+    }
+  }
+
+  /**
+   * This attempts to bind to privileged ports, starting with 1023 and working downwards, and
+   * returns when the first binding succeeds.
+   *
+   * <p>Some NFS servers apparently may require that some requests originate on an Internet port
+   * below IPPORT_RESERVED (1024). This is generally not used, though, as the client then has to run
+   * as a user authorized for privileged, which is dangerous. It is also not generally needed.
+   *
+   * @return
+   *     <ul>
+   *       <li><code>true</code> if the binding succeeds,
+   *       <li><code>false</code> otherwise.
+   *     </ul>
+   *
+   * @throws RpcException If an exception occurs, or if no binding succeeds.
+   */
+  private Channel bindToPrivilegedPort() throws RpcException {
+    LOG.info(
+        "Binding a privileged client source port (<1024): remote={}; local OS permission is required",
+        getRemoteAddress());
+    Throwable lastFailure = null;
+    for (int port = 1023; port > 0; --port) {
+      try {
+        ChannelFuture bindFuture =
+            _clientBootstrap.bind(new InetSocketAddress(port)).awaitUninterruptibly();
+        if (bindFuture.isSuccess()) {
+          LOG.debug(
+              "Bound privileged client source port: remote={}, local={}",
+              getRemoteAddress(),
+              bindFuture.channel().localAddress());
+          return bindFuture.channel();
+        }
+        lastFailure = bindFuture.cause();
+        bindFuture.channel().close();
+        if (!(bindFuture.cause() instanceof java.net.BindException)) {
+          throw new RpcException(
+              RpcStatus.LOCAL_BINDING_ERROR,
+              "Cannot bind privileged client source port "
+                  + port
+                  + " for remote="
+                  + getRemoteAddress()
+                  + "; check local OS permission to bind ports below 1024: "
+                  + lastFailure,
+              lastFailure);
+        }
+      } catch (RuntimeException e) {
+        throw new RpcException(
+            RpcStatus.LOCAL_BINDING_ERROR,
+            "Privileged client source port binding failed: remote="
+                + getRemoteAddress()
+                + ", localPort="
+                + port
+                + ": "
+                + e,
+            e);
+      }
     }
 
-    /**
-     * Notify all the senders of all pending requests
-     */
-    protected void notifyAllPendingSenders(String message) {
-        for (Promise<Void> future : _futureMap.values()) {
-            future.tryFailure(new java.io.IOException(message));
-        }
-    }
-
-    /**
-     * This attempts to bind to privileged ports, starting with 1023 and working downwards, and returns when the first binding succeeds.
-     * 
-     * <p>
-     * Some NFS servers apparently may require that some requests originate on
-     * an Internet port below IPPORT_RESERVED (1024). This is generally not
-     * used, though, as the client then has to run as a user authorized for
-     * privileged, which is dangerous. It is also not generally needed.
-     * </p>
-     * 
-     * @return
-     *         <ul>
-     *         <li><code>true</code> if the binding succeeds,</li>
-     *         <li><code>false</code> otherwise.</li>
-     *         </ul>
-     * @throws RpcException If an exception occurs, or if no binding succeeds.
-     */
-    private Channel bindToPrivilegedPort() throws RpcException {
-        LOG.info("Binding a privileged client source port (<1024): remote={}; local OS permission is required",
-                getRemoteAddress());
-        Throwable lastFailure = null;
-        for (int port = 1023; port > 0; --port) {
-            try {
-                ChannelFuture bindFuture = _clientBootstrap.bind(new InetSocketAddress(port)).awaitUninterruptibly();
-                if (bindFuture.isSuccess()) {
-                    LOG.debug("Bound privileged client source port: remote={}, local={}",
-                            getRemoteAddress(), bindFuture.channel().localAddress());
-                    return bindFuture.channel();
-                }
-                lastFailure = bindFuture.cause();
-                bindFuture.channel().close();
-                if (!(bindFuture.cause() instanceof java.net.BindException)) {
-                    throw new RpcException(RpcStatus.LOCAL_BINDING_ERROR,
-                            "Cannot bind privileged client source port " + port + " for remote=" + getRemoteAddress()
-                                    + "; check local OS permission to bind ports below 1024: " + lastFailure, lastFailure);
-                }
-            } catch (RuntimeException e) {
-                throw new RpcException(RpcStatus.LOCAL_BINDING_ERROR,
-                        "Privileged client source port binding failed: remote=" + getRemoteAddress()
-                                + ", localPort=" + port + ": " + e, e);
-            }
-        }
-
-        throw new RpcException(RpcStatus.LOCAL_BINDING_ERROR,
-                "Cannot bind any privileged client source port (1-1023): remote=" + getRemoteAddress()
-                        + "; check local OS permission and whether ports are already in use."
-                        + " AUTH_SYS UID 0 does not grant local port-binding permission: " + lastFailure, lastFailure);
-    }
-
+    throw new RpcException(
+        RpcStatus.LOCAL_BINDING_ERROR,
+        "Cannot bind any privileged client source port (1-1023): remote="
+            + getRemoteAddress()
+            + "; check local OS permission and whether ports are already in use."
+            + " AUTH_SYS UID 0 does not grant local port-binding permission: "
+            + lastFailure,
+        lastFailure);
+  }
 }

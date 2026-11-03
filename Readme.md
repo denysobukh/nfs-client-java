@@ -1,4 +1,5 @@
 [![Dependency Security](https://github.com/denysobukh/nfs-client-java/actions/workflows/security.yml/badge.svg?branch=master)](https://github.com/denysobukh/nfs-client-java/actions/workflows/security.yml)
+[![Code style: Google Java Format (Spotless)](https://img.shields.io/badge/code_style-Google_Java_Format_(Spotless)-blue)](#code-formatting)
 
 NFS Client for Java
 ===
@@ -51,6 +52,21 @@ Docs
 ---
 
 Browse the [Javadocs](https://denysobukh.github.io/nfs-client-java/latest/javadoc/).
+
+Code formatting
+---
+
+Java sources in all modules, including tests and the NFS demo, use
+[Google Java Format](https://github.com/google/google-java-format) through
+[Spotless](https://github.com/diffplug/spotless). Run Gradle with JDK 25,
+as required by this project's build toolchain.
+
+```sh
+./gradlew spotlessApply  # Format Java sources
+./gradlew spotlessCheck # Check formatting without changing files
+```
+
+Formatting is also checked by `./gradlew check` and the existing CI build.
 
 How to use the bare client
 ---
