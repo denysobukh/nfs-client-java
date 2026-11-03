@@ -418,6 +418,12 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
 
     /**
      * Lists all files in this directory.
+     *
+     * <p>Preserves the server's entry order across READDIR responses, excluding
+     * {@code .} and {@code ..}. The client does not request sorting or sort the
+     * results. NFSv3 does not guarantee alphabetical order or the same order
+     * across listings or servers. Sort the complete returned list if a specific
+     * order is required. A listing is not a snapshot of a changing directory.</p>
      * 
      * @return the names of all files in the directory
      * @throws IOException
@@ -426,6 +432,9 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
 
     /**
      * Lists all files matching the filter in this directory.
+     *
+     * <p>Preserves the relative server order of accepted entries. The ordering
+     * and consistency considerations described in {@link #list()} apply.</p>
      * 
      * @param filter
      * @return the names of all files matching the filter in the directory
@@ -435,6 +444,10 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
 
     /**
      * Lists all files in this directory.
+     *
+     * <p>Returns file objects in the order produced by {@link #list()}, without
+     * sorting. The ordering and consistency considerations described there
+     * apply.</p>
      * 
      * @return NfsFile objects for all files in the directory
      * @throws IOException
@@ -443,6 +456,9 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
 
     /**
      * Lists all files matching the filter in this directory.
+     *
+     * <p>Preserves the relative server order of accepted entries. The ordering
+     * and consistency considerations described in {@link #list()} apply.</p>
      * 
      * @param filter
      * @return NfsFile objects for all files matching the filter in the
@@ -453,6 +469,9 @@ public interface NfsFile<N extends Nfs<?>, F extends NfsFile<N, F>> extends Comp
 
     /**
      * Lists all files matching the filter in this directory.
+     *
+     * <p>Preserves the relative server order of accepted entries. The ordering
+     * and consistency considerations described in {@link #list()} apply.</p>
      * 
      * @param filter
      * @return NfsFile objects for all files matching the filter in the

@@ -109,6 +109,37 @@ data to minimize the number of remote calls. Working examples for how to instant
 how to exercise most NfsFile functionality are available in the JUnit tests.
 [Test_Nfs3File.java](src/test/java/com/emc/ecs/nfsclient/nfs/io/Test_Nfs3File.java).
 
+### Directory listing order
+
+`list()` and `listFiles()`, including their filtered overloads, preserve the
+server's directory entry order. The client appends entries from successive
+`READDIR` responses, omits `.` and `..`, and does not sort or reorder the remaining
+entries. Filtering preserves the relative order of accepted entries.
+
+NFSv3 `READDIR` and `READDIRPLUS` have no sorting parameter and do not guarantee
+lexicographical order. The same filenames and `/etc/exports` settings on two
+servers do not guarantee the same listing order: server implementations and
+underlying directory organization can differ. Alphabetical results from one
+environment should not be treated as a guarantee. See
+[RFC 1813, section 3.3.16](https://www.rfc-editor.org/rfc/rfc1813.html#section-3.3.16)
+and [upstream issue #38](https://github.com/EMCECS/nfs-client-java/issues/38).
+
+Each listing starts a new traversal. Continuation cookies and their verifiers
+allow pagination; they do not provide a snapshot of a directory being modified.
+If repeated listings of an unchanged directory differ, compare the filenames in
+the server's `READDIR` replies with the returned list to locate the variation.
+
+For predictable alphabetical output, sort the complete returned list, rather
+than individual response pages:
+
+```java
+List<Nfs3File> files = directory.listFiles();
+files.sort(Comparator.comparing(Nfs3File::getName));
+```
+
+Here `directory` is an `Nfs3File`; `List` and `Comparator` are from `java.util`.
+This uses Java's case-sensitive string ordering.
+
 How to use the NfsFileInputStream and NfsFileOutputStream instances
 ---
 
