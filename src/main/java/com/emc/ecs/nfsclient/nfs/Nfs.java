@@ -245,9 +245,22 @@ public interface Nfs<F extends NfsFile<?, ?>> {
     byte[] getRootFileHandle();
 
     /**
-     * @return The port being used for the NFS server
+     * @return The TCP destination port being used for the NFS server, whether
+     *         explicitly configured or discovered through portmapper
      */
     int getPort();
+
+    /**
+     * Return the configured MOUNT TCP destination port, or the last discovered MOUNT port.
+     * This method performs no network calls. A return value of 0 means unknown, for
+     * example when a supplied root handle has avoided MOUNT service discovery.
+     * The default preserves compatibility with existing Nfs implementations.
+     *
+     * @return the MOUNT port, or 0 if unknown
+     */
+    default int getMountPort() {
+        return 0;
+    }
 
     /**
      * @return The address of the machine hosting the NFS server.

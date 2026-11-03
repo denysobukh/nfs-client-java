@@ -117,9 +117,13 @@ public class Nfs3 implements Nfs<Nfs3File> {
     private final String _server;
 
     /**
-     * The remote NFS server port, obtained dynamically from Portmap.
+     * The remote NFS server port, configured explicitly or obtained from Portmap.
      */
     private int _port = 0;
+
+    private final int _configuredNfsPort;
+    private final int _configuredMountPort;
+    private int _mountPort;
 
     /**
      * The exported path handled by this client.
@@ -240,8 +244,48 @@ public class Nfs3 implements Nfs<Nfs3File> {
      * @throws IOException
      */
     public Nfs3(String server, String exportedPath, byte[] rootFileHandle, Credential credential, int maximumRetries) throws IOException {
+        this(server, exportedPath, rootFileHandle, credential, maximumRetries, 0, 0);
+    }
+
+    /**
+     * Create a client with independently configurable NFS and MOUNT TCP destination ports.
+     *
+     * @param server the NFS server name or IP address (without a port)
+     * @param exportedPath the exported path
+     * @param credential RPC credential, or null for the default UNIX credential
+     * @param maximumRetries positive maximum number of NFS call attempts
+     * @param nfsPort NFS port (1-65535), or 0 to discover through portmapper
+     * @param mountPort MOUNT port (1-65535), or 0 to discover through portmapper
+     * @throws IOException if service discovery or mounting fails
+     * @throws IllegalArgumentException if a port is outside 0-65535
+     */
+    public Nfs3(String server, String exportedPath, Credential credential, int maximumRetries,
+                int nfsPort, int mountPort) throws IOException {
+        this(server, exportedPath, null, credential, maximumRetries, nfsPort, mountPort);
+    }
+
+    /**
+     * Full constructor with optional explicit TCP destination ports. A nonzero port bypasses
+     * portmapper for that service, including when the root handle is refreshed. Supplying
+     * a root handle skips MOUNT; with an explicit NFS port it also skips all portmapper discovery.
+     * Existing constructors are equivalent to specifying 0 for both ports.
+     *
+     * @param server the NFS server name or IP address (without a port)
+     * @param exportedPath the exported path
+     * @param rootFileHandle root file handle, or null to obtain it using MOUNT
+     * @param credential RPC credential, or null for the default UNIX credential
+     * @param maximumRetries positive maximum number of NFS call attempts
+     * @param nfsPort NFS port (1-65535), or 0 to discover through portmapper
+     * @param mountPort MOUNT port (1-65535), or 0 to discover through portmapper
+     * @throws IOException if service discovery or mounting fails
+     * @throws IllegalArgumentException if a port is outside 0-65535
+     */
+    public Nfs3(String server, String exportedPath, byte[] rootFileHandle, Credential credential,
+                int maximumRetries, int nfsPort, int mountPort) throws IOException {
         checkForBlank(server, "server");
         checkForBlank(exportedPath, "exportedPath");
+        checkPort(nfsPort, "nfsPort");
+        checkPort(mountPort, "mountPort");
         if (maximumRetries <= 0) {
             throw new IllegalArgumentException("maxRetry must be positive.");
         }
@@ -249,6 +293,9 @@ public class Nfs3 implements Nfs<Nfs3File> {
         _server = server;
         _exportedPath = exportedPath;
         _maximumRetries = maximumRetries;
+        _configuredNfsPort = nfsPort;
+        _configuredMountPort = mountPort;
+        _mountPort = mountPort;
 
         if (credential != null) {
             _credential = credential;
@@ -259,9 +306,19 @@ public class Nfs3 implements Nfs<Nfs3File> {
             prepareRootFhAndNfsPort();
         } else {
             _rootFileHandle = rootFileHandle.clone();
-            _port = getNfsPortFromServer();
+            _port = resolveNfsPort();
             _rpcWrapper.setPort(_port);
         }
+    }
+
+    private static void checkPort(int port, String name) {
+        if (port < 0 || port > 65535) {
+            throw new IllegalArgumentException(name + " must be between 0 and 65535 (0 means automatic discovery).");
+        }
+    }
+
+    private int resolveNfsPort() throws IOException {
+        return _configuredNfsPort == 0 ? getNfsPortFromServer() : _configuredNfsPort;
     }
 
     /**
@@ -308,7 +365,7 @@ public class Nfs3 implements Nfs<Nfs3File> {
 
         try {
             LOG.debug("Discovering NFSv{} services: server={}, export={}", VERSION, _server, _exportedPath);
-            _port = getNfsPortFromServer();
+            _port = resolveNfsPort();
             _rpcWrapper.setPort(_port);
             _rootFileHandle = lookupRootHandle();
         } finally {
@@ -322,7 +379,8 @@ public class Nfs3 implements Nfs<Nfs3File> {
      */
     byte[] lookupRootHandle()
             throws IOException {
-        int portOfMountService = getMountPortFromServer();
+        int portOfMountService = _configuredMountPort == 0 ? getMountPortFromServer() : _configuredMountPort;
+        _mountPort = portOfMountService;
 
         MountResponse response = null;
         MountRequest request = new MountRequest(VERSION, _exportedPath, _credential);
@@ -483,6 +541,11 @@ public class Nfs3 implements Nfs<Nfs3File> {
      */
     public int getPort() {
         return _port;
+    }
+
+    @Override
+    public int getMountPort() {
+        return _mountPort;
     }
 
     /* (non-Javadoc)

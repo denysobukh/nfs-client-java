@@ -64,6 +64,43 @@ Working examples for how to instantiate an Nfs3 client and how to exercise most
 NFS functionality are available in the JUnit tests.
 [Test_Nfs3.java](src/test/java/com/emc/ecs/nfsclient/nfs/nfs3/Test_Nfs3.java)
 
+### Custom server ports
+
+Existing constructors continue to discover NFS and MOUNT ports through the server's
+portmapper on TCP port 111. To connect to fixed or forwarded service ports, supply
+the NFS and MOUNT TCP destination ports explicitly:
+
+```java
+Credential credential = new CredentialUnix(1000, 1000, null);
+Nfs<Nfs3File> client = new Nfs3("nfs.example.com", "/export", credential, 3,
+                                12049, 20048);
+```
+
+These types are in `com.emc.ecs.nfsclient.rpc` (`Credential`, `CredentialUnix`),
+`com.emc.ecs.nfsclient.nfs` (`Nfs`), `com.emc.ecs.nfsclient.nfs.nfs3` (`Nfs3`),
+and `com.emc.ecs.nfsclient.nfs.io` (`Nfs3File`).
+
+Each port accepts `1` through `65535`; `0` independently enables portmapper discovery
+for that service. For example, pass `12049, 0` to fix only the NFS port. Specifying
+both ports avoids portmapper entirely. The server must expose NFSv3 and MOUNT v3
+over TCP. Pass the hostname or IP address separately from the ports; existing
+`server:/export` constructor syntax is unchanged.
+
+If you already have a root file handle, use the full constructor to skip MOUNT:
+
+```java
+Nfs3 client = new Nfs3("nfs.example.com", "/export", rootFileHandle,
+                       credential, 3, 12049, 0);
+```
+
+With an explicit NFS port and a supplied handle, construction requires no RPC
+calls (hostname resolution still applies). Explicit ports remain in effect if the client refreshes the root handle.
+`Nfs.getPort()` returns the active NFS destination port. `Nfs.getMountPort()` returns
+the configured or last discovered MOUNT port, or `0` if unknown; neither getter
+performs discovery. The new MOUNT getter defaults to `0` for existing third-party
+`Nfs` implementations, which need no changes. These are server destination ports;
+privileged client source-port handling is unchanged.
+
 How to use the NfsFile instances
 ---
 
